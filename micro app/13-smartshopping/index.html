@@ -132,13 +132,7 @@
             generico: { titolo: "🛒 Altri Reparti", colore: "border-slate-600/40 bg-slate-900/40 text-slate-300" }
         };
 
-        let listaSpesa = [
-            { id: 1, nome: "Mele fuji", reparto: "ortofrutta", spuntato: false },
-            { id: 2, nome: "Petto di pollo", reparto: "macelleria", spuntato: false },
-            { id: 3, nome: "Latte parzialmente scremato", reparto: "frigo", spuntato: false },
-            { id: 4, nome: "Pasta integrale", reparto: "dispensa", spuntato: false },
-            { id: 5, nome: "Detersivo piatti", reparto: "igiene", spuntato: true }
-        ];
+        let listaSpesa = [];
 
         const container = document.getElementById('departments-container');
         const formItem = document.getElementById('form-item');
@@ -284,6 +278,9 @@
         const datiSalvati = localStorage.getItem('smartshopping_lista');
         if (datiSalvati) {
             listaSpesa = JSON.parse(datiSalvati);
+            // Rimuove gli elementi di default se presenti
+            const defaultNomi = ["Mele fuji", "Petto di pollo", "Latte parzialmente scremato", "Pasta integrale", "Detersivo piatti"];
+            listaSpesa = listaSpesa.filter(item => !defaultNomi.includes(item.nome));
         }
 
         renderizzaSpesa();

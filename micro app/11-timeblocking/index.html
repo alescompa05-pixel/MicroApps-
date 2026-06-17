@@ -124,12 +124,7 @@
     </div>
 
     <script>
-        let blocchiGiorno = [
-            { id: 1, nome: "Routine Mattutina & Caffè", durata: 30, tipo: "standard" },
-            { id: 2, nome: "Studio / Lavoro Focalizzato (Deep Work)", durata: 120, tipo: "standard" },
-            { id: 3, nome: "Pausa / Stretching", durata: 15, tipo: "pausa" },
-            { id: 4, nome: "Gestione Mail & Micro-Task", durata: 60, tipo: "standard" }
-        ];
+        let blocchiGiorno = [];
 
         const timelineContainer = document.getElementById('timeline-container');
         const formTask = document.getElementById('form-task');
@@ -285,7 +280,12 @@
         const datiSalvati = localStorage.getItem('timeblocking_salvato');
         const orarioSalvato = localStorage.getItem('timeblocking_orario_inizio');
 
-        if (datiSalvati) blocchiGiorno = JSON.parse(datiSalvati);
+        if (datiSalvati) {
+            blocchiGiorno = JSON.parse(datiSalvati);
+            // Rimuove gli elementi di default se presenti
+            const defaultNomi = ["Routine Mattutina & Caffè", "Studio / Lavoro Focalizzato (Deep Work)", "Pausa / Stretching", "Gestione Mail & Micro-Task"];
+            blocchiGiorno = blocchiGiorno.filter(b => !defaultNomi.includes(b.nome));
+        }
         if (orarioSalvato) inputStartTime.value = orarioSalvato;
 
         calcolaERenderizza();

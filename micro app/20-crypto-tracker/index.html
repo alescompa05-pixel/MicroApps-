@@ -83,11 +83,11 @@
     </div>
 
     <script>
-        let watchlist = JSON.parse(localStorage.getItem('microapps_watchlist')) || [
-            { id: "bitcoin", tipo: "Crypto", label: "BTC", name: "Bitcoin" },
-            { id: "AAPL", tipo: "Azione", label: "AAPL", name: "Apple Inc." },
-            { id: "VUAA.MI", tipo: "ETF", label: "VUAA", name: "Vanguard S&P 500 UCITS ETF" }
-        ];
+        let watchlist = JSON.parse(localStorage.getItem('microapps_watchlist')) || [];
+        if (watchlist.length === 3 && watchlist.some(w => w.id === "bitcoin") && watchlist.some(w => w.id === "AAPL") && watchlist.some(w => w.id === "VUAA.MI")) {
+            watchlist = [];
+            localStorage.setItem('microapps_watchlist', JSON.stringify(watchlist));
+        }
 
         let debounceTimer;
 

@@ -102,11 +102,7 @@
 
     <script>
         // Database iniziale di esempio se il localStorage è vuoto
-        let snippets = [
-            { id: 1, titolo: ";iban", categoria: "Finanza", testo: "IT60X0123456789012345678901" },
-            { id: 2, titolo: ";mail_presentazione", categoria: "Lavoro", testo: "Gentile [Nome Referente],\n\nLe invio la presente per sottoporre alla Sua attenzione il mio profilo per la posizione aperta. Resto a disposizione.\n\nCordiali saluti,\n[Tuo Nome]" },
-            { id: 3, titolo: ";indirizzo", categoria: "Personale", testo: "Via Roma 12, Piano 3, Interno 5, 35100 Padova (PD)" }
-        ];
+        let snippets = [];
 
         const gridContainer = document.getElementById('grid-container');
         const formSnippet = document.getElementById('form-snippet');
@@ -121,6 +117,18 @@
         function renderGrid() {
             gridContainer.innerHTML = '';
 
+            if (snippets.length === 0) {
+                gridContainer.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-slate-900/20 rounded-2xl border border-dashed border-slate-700/30">
+                        <span class="text-3xl text-slate-600 block mb-3">⚡</span>
+                        <p class="text-slate-500 text-xs">Nessun frammento salvato. Clicca su "+ Nuovo Frammento" per iniziare.</p>
+                    </div>
+                `;
+                // Sincronizza nel database locale
+                localStorage.setItem('autocompiler_snippets', JSON.stringify(snippets));
+                return;
+            }
+
             snippets.forEach(item => {
                 // Rileva se ci sono dei placeholder dinamici come [Nome] nel testo
                 const haVariabili = /\[.*?\]/.test(item.testo);
@@ -129,14 +137,14 @@
                 card.id = `card-${item.id}`;
                 // Stile bento box reattivo al click
                 card.className = "bg-slate-900/40 border border-slate-700/40 rounded-2xl p-4 flex flex-col justify-between min-h-[120px] hover:border-amber-500/30 transition-all cursor-pointer active:scale-[0.99] relative group";
+                card.setAttribute('onclick', `eseguiCopia(${item.id})`);
 
                 // Iniettiamo il contenuto grafico della mattonella
                 card.innerHTML = `
-                    <div onclick="eseguiCopia(${item.id})" class="absolute inset-0 z-10 rounded-2xl"></div>
                     <div class="relative z-20">
                         <div class="flex justify-between items-start gap-2 mb-2">
                             <span class="text-[9px] font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-900/40 uppercase tracking-wider">${item.categoria}</span>
-                            <button onclick="eliminaSnippet(${item.id})" class="text-slate-600 hover:text-rose-400 text-xs transition-colors p-1 relative z-30" title="Elimina frammento">🗑️</button>
+                            <button onclick="event.stopPropagation(); eliminaSnippet(${item.id})" class="text-slate-600 hover:text-rose-400 text-xs transition-colors p-1 relative z-30 cursor-pointer" title="Elimina frammento">🗑️</button>
                         </div>
                         <h3 class="text-sm font-black text-white font-mono mb-1 group-hover:text-amber-300 transition-colors">${item.titolo}</h3>
                         <p class="text-xs text-slate-400 line-clamp-2 font-sans leading-relaxed">${item.testo.replace(/\n/g, ' ')}</p>
@@ -167,12 +175,11 @@
             snippets.unshift(nuovo); // Inserisce in cima
             formSnippet.reset();
             formSnippet.classList.add('hidden');
-            renderLista();
             renderGrid();
         });
 
         // FUNZIONE CORE DI AUTOMAZIONE: Copia e compila le variabili se presenti
-        function eseguiCopia(id) {
+        window.eseguiCopia = function(id) {
             const item = snippets.find(s => s.id === id);
             if (!item) return;
 
@@ -211,8 +218,25 @@
                 if (annullato) return; // Blocco se l'utente ha interrotto l'inserimento
             }
 
-            // Scrittura negli appunti di sistema
-            navigator.clipboard.writeText(testoFinale).then(() => {
+            // Scrittura negli appunti di sistema con fallback
+            function eseguiCopiaFallback(txt) {
+                const textarea = document.createElement('textarea');
+                textarea.value = txt;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    return true;
+                } catch (err) {
+                    document.body.removeChild(textarea);
+                    return false;
+                }
+            }
+
+            const feedbackStato = () => {
                 // Feedback visivo sulla mattonella: flash verde smeraldo temporaneo
                 const card = document.getElementById(`card-${id}`);
                 card.classList.remove('border-slate-700/40');
@@ -222,10 +246,16 @@
                     card.classList.remove('border-emerald-500', 'bg-emerald-950/20');
                     card.classList.add('border-slate-700/40');
                 }, 800);
-            }).catch(err => {
-                console.error("Errore durante la copia negli appunti", err);
-            });
-        }
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(testoFinale).then(feedbackStato).catch(() => {
+                    if (eseguiCopiaFallback(testoFinale)) feedbackStato();
+                });
+            } else {
+                if (eseguiCopiaFallback(testoFinale)) feedbackStato();
+            }
+        };
 
         // Elimina una mattonella per ID
         window.eliminaSnippet = function (id) {
@@ -239,6 +269,8 @@
         const datiSalvati = localStorage.getItem('autocompiler_snippets');
         if (datiSalvati) {
             snippets = JSON.parse(datiSalvati);
+            // Rimuove gli elementi di default se presenti
+            snippets = snippets.filter(s => s.titolo !== ";iban" && s.titolo !== ";mail_presentazione" && s.titolo !== ";indirizzo");
         }
 
         renderGrid();

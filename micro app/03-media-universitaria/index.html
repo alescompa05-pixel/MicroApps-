@@ -140,13 +140,8 @@
     </div>
 
     <script>
-        // Array in cui salviamo gli esami caricati.
-        // All'inizio inseriamo 3 esami di esempio per non mostrare l'app vuota
-        let esami = [
-            { id: 1, nome: "Economia Aziendale", cfu: 9, voto: 28 },
-            { id: 2, nome: "Diritto Privato", cfu: 12, voto: 24 },
-            { id: 3, nome: "Lingua Inglese", cfu: 6, voto: 30 }
-        ];
+        // Carica esami salvati o inizializza array vuoto
+        let esami = JSON.parse(localStorage.getItem('libretto_esami')) || [];
 
         const formEsame = document.getElementById('form-esame');
         const listaEsamiContainer = document.getElementById('lista-esami');
@@ -165,6 +160,9 @@
         // Funzione per stampare la tabella degli esami a schermo
         function renderTabella() {
             listaEsamiContainer.innerHTML = '';
+            
+            // Salva nel database locale ad ogni modifica
+            localStorage.setItem('libretto_esami', JSON.stringify(esami));
 
             esami.forEach(esame => {
                 const tr = document.createElement('tr');

@@ -63,20 +63,20 @@
                 <div>
                     <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Cosa vuoi
                         comprare / raggiungere?</label>
-                    <input type="text" id="target-name" value="Viaggio in Giappone"
+                    <input type="text" id="target-name" placeholder="Es. Viaggio in Giappone"
                         class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold focus:outline-none focus:border-emerald-400">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Costo
                             Totale (€)</label>
-                        <input type="number" id="target-cost" value="2500" min="1"
+                        <input type="number" id="target-cost" placeholder="Es. 2500" min="1"
                             class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-black focus:outline-none focus:border-emerald-400">
                     </div>
                     <div>
                         <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Risparmio
                             Mensile Base (€)</label>
-                        <input type="number" id="base-save" value="1500" min="1"
+                        <input type="number" id="base-save" placeholder="Es. 300" min="1"
                             class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-black focus:outline-none focus:border-emerald-400">
                     </div>
                 </div>
@@ -156,12 +156,7 @@
     <!-- LOGICA MATEMATICA REATTIVA -->
     <script>
         // Data set di partenza modificabile dall'utente
-        let strategie = [
-            { id: 1, nome: "Meno colazioni / caffè al bar", valore: 40, attivo: false },
-            { id: 2, nome: "Disdetta abbonamenti inutilizzati", valore: 15, attivo: false },
-            { id: 3, nome: "Cene fuori ridotte (-1 a mese)", valore: 60, attivo: false },
-            { id: 4, nome: "Pranzo da casa a lavoro (No schifezze)", valore: 80, attivo: false }
-        ];
+        let strategie = [];
 
         const container = document.getElementById('strategies-container');
         const formStrategy = document.getElementById('form-strategy');
@@ -312,10 +307,26 @@
         const baseSalvato = localStorage.getItem('timetosave_base');
         const nomeSalvato = localStorage.getItem('timetosave_nome');
 
-        if (storicizzato) strategie = JSON.parse(storicizzato);
-        if (costSalvato) inputCost.value = costSalvato;
-        if (baseSalvato) inputBaseSave.value = baseSalvato;
-        if (nomeSalvato) inputTargetName.value = nomeSalvato;
+        if (storicizzato) {
+            strategie = JSON.parse(storicizzato);
+            // Rimuove gli elementi di default se presenti
+            const defaultNomi = ["Meno colazioni / caffè al bar", "Disdetta abbonamenti inutilizzati", "Cene fuori ridotte (-1 a mese)", "Pranzo da casa a lavoro (No schifezze)"];
+            strategie = strategie.filter(s => !defaultNomi.includes(s.nome));
+        }
+
+        // Se c'è il viaggio di default, lo ripuliamo
+        if (nomeSalvato === "Viaggio in Giappone") {
+            inputCost.value = "";
+            inputBaseSave.value = "";
+            inputTargetName.value = "";
+            localStorage.removeItem('timetosave_nome');
+            localStorage.removeItem('timetosave_costo');
+            localStorage.removeItem('timetosave_base');
+        } else {
+            if (costSalvato) inputCost.value = costSalvato;
+            if (baseSalvato) inputBaseSave.value = baseSalvato;
+            if (nomeSalvato) inputTargetName.value = nomeSalvato;
+        }
 
         renderStrategie();
     </script>

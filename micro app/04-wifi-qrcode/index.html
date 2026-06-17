@@ -187,6 +187,11 @@
             const password = wifiPass.value;
             const protezione = wifiType.value;
 
+            // Salva nel localStorage per renderlo accessibile all'Hub
+            localStorage.setItem('wifi_name_saved', ssid);
+            localStorage.setItem('wifi_pass_saved', password);
+            localStorage.setItem('wifi_type_saved', protezione);
+
             // Se il nome della rete è vuoto, puliamo tutto e disattiviamo la stampa
             if (ssid === '') {
                 qrcodeContainer.innerHTML = '';
@@ -231,6 +236,15 @@
                 window.print();
             }
         });
+
+        // Carica dati salvati in precedenza all'avvio
+        const ssidSalvato = localStorage.getItem('wifi_name_saved');
+        const passSalvato = localStorage.getItem('wifi_pass_saved');
+        const typeSalvato = localStorage.getItem('wifi_type_saved');
+        if (ssidSalvato) wifiName.value = ssidSalvato;
+        if (passSalvato) wifiPass.value = passSalvato;
+        if (typeSalvato) wifiType.value = typeSalvato;
+        if (ssidSalvato) aggiornaQrCode();
     </script>
 
     <!-- Registrazione Service Worker -->

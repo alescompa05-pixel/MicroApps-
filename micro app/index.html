@@ -22,6 +22,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
+    <!-- QRCodeJS per widget WiFi interattivo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         /* Ottimizzazioni Mobile: disabilita tap-highlight e zoom accidentali */
@@ -161,6 +163,18 @@
                     <!-- Generato Dinamicamente da JS -->
                 </div>
             </div>
+        </section>
+
+        <!-- Sezione Widget Attivi (Dinamica) -->
+        <section id="active-widgets-section" class="mb-10 hidden">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="text-violet-500 text-sm"><i class="fa-solid fa-gauge-high"></i></span>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Widget Attivi & Monitoraggio</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="active-widgets-grid">
+                <!-- Widget Attivi Iniettati Qui -->
+            </div>
+            <div class="h-px bg-slate-800/60 my-10"></div>
         </section>
 
         <!-- Sezione Preferiti Appuntati (Dinamica) -->
@@ -472,15 +486,15 @@
             const stellaTitolo = isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti';
 
             return `
-                <div data-app-title="${app.titolo}" class="glass-card border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between h-full relative group hover:border-slate-700/60 transition-all duration-300">
+                <div data-app-title="${app.titolo}" onclick="navigaVerso(event, '${app.url}')" class="glass-card border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between h-full relative group hover:border-slate-700/60 transition-all duration-300 cursor-pointer">
                     
                     <!-- Bottone Preferiti (Star Icon) -->
-                    <button onclick="togglePreferito(event, '${app.titolo}')" class="absolute top-6 right-6 p-1.5 bg-slate-950/60 border border-slate-800/80 rounded-xl cursor-pointer hover:scale-105 transition-all z-20" title="${stellaTitolo}">
+                    <button onclick="event.stopPropagation(); togglePreferito(event, '${app.titolo}')" class="absolute top-6 right-6 p-1.5 bg-slate-950/60 border border-slate-800/80 rounded-xl cursor-pointer hover:scale-105 transition-all z-20" title="${stellaTitolo}">
                         <i class="${stellaClasse} fa-star text-sm"></i>
                     </button>
 
-                    <!-- Link Intero alla Card per la navigazione -->
-                    <a href="${app.url}" class="block relative h-full flex flex-col">
+                    <!-- Contenuto principale della Card -->
+                    <div class="block relative h-full flex flex-col">
                         <div class="flex justify-between items-start mb-4">
                             <div class="text-3xl bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 group-hover:scale-105 transition-transform duration-300">
                                 ${app.icona}
@@ -498,18 +512,28 @@
                             <h3 class="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                                 ${app.titolo}
                             </h3>
-                            <p class="text-slate-400 text-xs leading-relaxed mb-6">
+                            <p class="text-slate-400 text-xs leading-relaxed mb-4">
                                 ${app.descrizione}
                             </p>
+                            <!-- Contenitore Widget Interattivo -->
+                            <div class="widget-interactive-container mt-2 border-t border-slate-800/60 pt-3 hidden" onclick="event.stopPropagation()"></div>
                         </div>
 
-                        <div class="text-[11px] font-bold text-slate-500 group-hover:text-blue-400 flex items-center gap-1 transition-colors mt-auto">
+                        <div class="text-[11px] font-bold text-slate-500 group-hover:text-blue-400 flex items-center gap-1 transition-colors mt-auto pt-4">
                             Apri applicazione <span class="transform group-hover:translate-x-1 transition-transform duration-300">&rarr;</span>
                         </div>
-                    </a>
+                    </div>
                 </div>
             `;
         }
+
+        // Navigazione sicura per evitare attivazione dell'app quando si premono pulsanti dei widget
+        window.navigaVerso = function (event, url) {
+            if (event.target.closest('button') || event.target.closest('input') || event.target.closest('.widget-interactive-container')) {
+                return;
+            }
+            window.location.href = url;
+        };
 
         // Toggle della preferenza con salvataggio automatico localmente
         window.togglePreferito = function (event, titoloApp) {
@@ -577,17 +601,159 @@
             renderizzaTutto();
         });
 
-        // Funzione per scorrere i timer attivi ed aggiornare i relativi badge nell'Hub
-        function aggiornaTimerAttivi() {
-            // 1. Pomodoro State
+        // Helper per Time-Blocking: trasforma stringa "HH:MM" in minuti
+        function stringaInMinuti(str) {
+            if (!str) return 0;
+            const [h, m] = str.split(':').map(Number);
+            return (h * 60) + m;
+        }
+
+        // Helper per Time-Blocking: trasforma minuti in stringa "HH:MM"
+        function minutiInStringa(tot) {
+            const norm = tot % 1440;
+            const h = Math.floor(norm / 60);
+            const m = norm % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+
+        window.copiaSnippetDaHub = function(event, id) {
+            event.stopPropagation();
+            const snippets = JSON.parse(localStorage.getItem('autocompiler_snippets') || '[]');
+            const item = snippets.find(s => s.id === id);
+            if (!item) return;
+
+            let testoFinale = item.testo;
+            const regexVariabili = /\[(.*?)\]/g;
+            let match;
+            let variabiliDaCompilare = [];
+
+            while ((match = regexVariabili.exec(item.testo)) !== null) {
+                if (!variabiliDaCompilare.includes(match[1])) {
+                    variabiliDaCompilare.push(match[1]);
+                }
+            }
+
+            if (variabiliDaCompilare.length > 0) {
+                let annullato = false;
+                for (let campo of variabiliDaCompilare) {
+                    const valoreUtente = prompt(`Compila il campo dinamico:\n👉 ${campo}`);
+                    if (valoreUtente === null) {
+                        annullato = true;
+                        break;
+                    }
+                    const escapedCampo = campo.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    testoFinale = testoFinale.replace(new RegExp('\\[' + escapedCampo + '\\]', 'g'), valoreUtente);
+                }
+                if (annullato) return;
+            }
+
+            copiaRobustaClip(testoFinale, event.currentTarget);
+        };
+
+        function copiaRobustaClip(testo, bottoneElemento) {
+            function eseguiCopiaFallback(txt) {
+                const textarea = document.createElement('textarea');
+                textarea.value = txt;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    return true;
+                } catch (err) {
+                    document.body.removeChild(textarea);
+                    return false;
+                }
+            }
+
+            const feedbackStato = () => {
+                if (bottoneElemento) {
+                    const testoOriginale = bottoneElemento.innerHTML;
+                    bottoneElemento.innerHTML = `<span class="text-emerald-400 font-bold">Copiato! ✅</span>`;
+                    setTimeout(() => {
+                        bottoneElemento.innerHTML = testoOriginale;
+                    }, 1200);
+                }
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(testo).then(feedbackStato).catch(() => {
+                    if (eseguiCopiaFallback(testo)) feedbackStato();
+                });
+            } else {
+                if (eseguiCopiaFallback(testo)) feedbackStato();
+            }
+        }
+
+        // Azione del Widget: Aggiungi Acqua
+        window.aggiungiAcquaWidget = function(ml) {
+            const dataOggi = new Date().toISOString().split('T')[0];
+            const dataSalvata = localStorage.getItem('idratazione_custom_giorno');
+            let acqua = 0;
+            if (dataSalvata === dataOggi) {
+                acqua = parseInt(localStorage.getItem('idratazione_custom_quantita') || 0);
+            }
+            acqua += ml;
+            localStorage.setItem('idratazione_custom_quantita', acqua);
+            localStorage.setItem('idratazione_custom_giorno', dataOggi);
+            aggiornaWidgetInterattivi();
+        };
+
+        // Azione del Widget: Spunta Prodotto Spesa
+        window.spuntaProdottoWidget = function(id) {
+            const list = JSON.parse(localStorage.getItem('smartshopping_lista') || '[]');
+            const idx = list.findIndex(item => item.id === id);
+            if (idx !== -1) {
+                list[idx].spuntato = true;
+                localStorage.setItem('smartshopping_lista', JSON.stringify(list));
+                aggiornaWidgetInterattivi();
+            }
+        };
+
+        // Gestione del Modal QR Code Wi-Fi Ospiti
+        window.mostraWifiQRModal = function(ssid, pass, type) {
+            document.getElementById('wifi-qr-ssid').innerText = `Rete: ${ssid}`;
+            const qrContainer = document.getElementById('wifi-qr-code-target');
+            qrContainer.innerHTML = '';
+            
+            // WIFI:S:NomeRete;T:WPA;P:PasswordRete;;
+            let stringa = `WIFI:S:${ssid};`;
+            if (type !== 'nopass') {
+                stringa += `T:${type};P:${pass};`;
+            } else {
+                stringa += `T:nopass;P:;`;
+            }
+            stringa += ';';
+            
+            new QRCode(qrContainer, {
+                text: stringa,
+                width: 150,
+                height: 150,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+            
+            document.getElementById('wifi-qr-modal').classList.remove('hidden');
+        };
+
+        window.closeWifiQRModal = function() {
+            document.getElementById('wifi-qr-modal').classList.add('hidden');
+        };
+
+        // Funzione per scorrere i timer attivi ed i widget interattivi dell'Hub
+        function aggiornaWidgetInterattivi() {
+            // ----------------------------------------------------
+            // 1. GESTIONE STATO TIMER (Pomodoro, Gym, Matrix)
+            // ----------------------------------------------------
+            
+            // Pomodoro State
             const statePomodoro = JSON.parse(localStorage.getItem('pomodoro_timer_state'));
             let pomodoroStatus = null;
-            if (statePomodoro) {
-                const isPaused = statePomodoro.isPaused;
-                let secMancanti = statePomodoro.tempoRimanente;
-                if (!isPaused) {
-                    secMancanti = Math.ceil((statePomodoro.scadenzaTimestamp - Date.now()) / 1000);
-                }
+            if (statePomodoro && !statePomodoro.isPaused) {
+                let secMancanti = Math.ceil((statePomodoro.scadenzaTimestamp - Date.now()) / 1000);
                 if (secMancanti > 0) {
                     const min = Math.floor(secMancanti / 60);
                     const sec = secMancanti % 60;
@@ -598,7 +764,7 @@
                 }
             }
 
-            // 2. Gym Timer State
+            // Gym Timer State
             const stateGym = JSON.parse(localStorage.getItem('gym_timer_state'));
             let gymStatus = null;
             if (stateGym) {
@@ -617,7 +783,7 @@
                 }
             }
 
-            // 3. Matrix del Tempo State
+            // Matrix del Tempo State
             const stateMatrix = JSON.parse(localStorage.getItem('matrix_timer_state'));
             let matrixStatus = null;
             if (stateMatrix) {
@@ -636,31 +802,661 @@
                 }
             }
 
-            // Aggiorna i badge nel DOM per tutte le card caricate
+            // ----------------------------------------------------
+            // 2. GESTIONE STATO APPLICAZIONI WIDGET
+            // ----------------------------------------------------
+
+            // Acqua (Idratatore Custom)
+            const configAcqua = JSON.parse(localStorage.getItem('idratazione_custom_config') || '{"c1":250,"c2":500,"obiettivo":2000}');
+            const giornoAcqua = localStorage.getItem('idratazione_custom_giorno');
+            let quantitaAcqua = parseInt(localStorage.getItem('idratazione_custom_quantita') || 0);
+            const dataOggi = new Date().toISOString().split('T')[0];
+            if (giornoAcqua !== dataOggi) {
+                quantitaAcqua = 0;
+            }
+            const pctAcqua = Math.min(100, Math.round((quantitaAcqua / configAcqua.obiettivo) * 100));
+            const acquaStatus = { quantita: quantitaAcqua, obiettivo: configAcqua.obiettivo, pct: pctAcqua, c1: configAcqua.c1 || 250, c2: configAcqua.c2 || 500 };
+
+            // Wi-Fi
+            const ssidWifi = localStorage.getItem('wifi_name_saved');
+            const passWifi = localStorage.getItem('wifi_pass_saved');
+            const typeWifi = localStorage.getItem('wifi_type_saved') || 'WPA';
+            let wifiStatus = null;
+            if (ssidWifi) {
+                wifiStatus = { ssid: ssidWifi, pass: passWifi, type: typeWifi };
+            }
+
+            // Time Blocking
+            const stateTime = JSON.parse(localStorage.getItem('timeblocking_salvato') || '[]');
+            const oraInizio = localStorage.getItem('timeblocking_orario_inizio') || '08:00';
+            let timeStatus = null;
+            if (stateTime.length > 0) {
+                const now = new Date();
+                const currentMin = now.getHours() * 60 + now.getMinutes();
+                let blockMin = stringaInMinuti(oraInizio);
+                
+                const tasksConOrario = stateTime.map(b => {
+                    const start = blockMin;
+                    const end = blockMin + b.durata;
+                    blockMin = end;
+                    const isActive = (currentMin >= start && currentMin < end);
+                    return {
+                        nome: b.nome,
+                        start: start,
+                        end: end,
+                        durata: b.durata,
+                        tipo: b.tipo,
+                        isActive: isActive,
+                        labelOrario: `${minutiInStringa(start)} - ${minutiInStringa(end)}`
+                    };
+                });
+                
+                timeStatus = {
+                    tasks: tasksConOrario,
+                    totale: stateTime.length
+                };
+            }
+
+            // SmartShopping (Shopping)
+            const stateShopping = JSON.parse(localStorage.getItem('smartshopping_lista') || '[]');
+            let shoppingStatus = null;
+            if (stateShopping.length > 0) {
+                const rimasti = stateShopping.filter(item => !item.spuntato);
+                shoppingStatus = { list: rimasti.slice(0, 3), count: rimasti.length, total: stateShopping.length };
+            }
+
+            // AutoCompiler
+            const stateAutocompiler = JSON.parse(localStorage.getItem('autocompiler_snippets') || '[]');
+            let autocompilerStatus = null;
+            if (stateAutocompiler.length > 0) {
+                autocompilerStatus = { list: stateAutocompiler.slice(0, 2) };
+            }
+
+            // Radar Scadenze
+            const stateRadar = JSON.parse(localStorage.getItem('microapps_radar') || '[]');
+            let radarStatus = null;
+            if (stateRadar.length > 0) {
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                const list = stateRadar.map(s => {
+                    const d = new Date(s.data);
+                    d.setHours(0,0,0,0);
+                    return { ...s, giorni: Math.ceil((d - today)/(1000*60*60*24)) };
+                }).sort((a,b) => a.giorni - b.giorni);
+                const urgent = list[0];
+                let classColor = "border-slate-800 text-slate-400 bg-slate-950/20";
+                let sign = `${urgent.giorni} gg`;
+                if (urgent.giorni < 0) {
+                    classColor = "border-slate-800 text-slate-500 bg-slate-900/40";
+                    sign = `Scaduto (${Math.abs(urgent.giorni)} gg)`;
+                } else if (urgent.giorni <= 2) {
+                    classColor = "border-rose-500/20 text-rose-400 bg-rose-500/5 animate-pulse";
+                    sign = `🚨 ${urgent.giorni} gg`;
+                } else if (urgent.giorni <= urgent.cuscinetto) {
+                    classColor = "border-amber-500/20 text-amber-400 bg-amber-500/5";
+                    sign = `⚠️ ${urgent.giorni} gg`;
+                } else {
+                    classColor = "border-emerald-500/20 text-emerald-400 bg-emerald-500/5";
+                    sign = `✅ ${urgent.giorni} gg`;
+                }
+                radarStatus = { titolo: urgent.titolo, sign, classColor };
+            }
+
+            // EquiSplit
+            const stateEqui = JSON.parse(localStorage.getItem('microapps_equisplit_data'));
+            let equiStatus = null;
+            if (stateEqui && stateEqui.expenses && stateEqui.expenses.length > 0) {
+                const netBalances = {};
+                stateEqui.members.forEach(m => netBalances[m] = 0);
+                stateEqui.expenses.forEach(exp => {
+                    if (netBalances[exp.paidBy] !== undefined) netBalances[exp.paidBy] += exp.amount;
+                    const costPerPerson = exp.amount / exp.participants.length;
+                    exp.participants.forEach(p => {
+                        if (netBalances[p] !== undefined) netBalances[p] -= costPerPerson;
+                    });
+                });
+                const debtors = [];
+                const creditors = [];
+                for (const name in netBalances) {
+                    const val = netBalances[name];
+                    if (val > 0.005) creditors.push({ name, amount: val });
+                    else if (val < -0.005) debtors.push({ name, amount: Math.abs(val) });
+                }
+                debtors.sort((a,b)=>b.amount-a.amount);
+                creditors.sort((a,b)=>b.amount-a.amount);
+                let transfers = [];
+                let d = 0, c = 0;
+                while (d < debtors.length && c < creditors.length) {
+                    const deb = debtors[d];
+                    const cred = creditors[c];
+                    const amt = Math.min(deb.amount, cred.amount);
+                    if (amt > 0.005) transfers.push({ from: deb.name, to: cred.name, amount: amt });
+                    deb.amount -= amt;
+                    cred.amount -= amt;
+                    if (deb.amount < 0.005) d++;
+                    if (cred.amount < 0.005) c++;
+                }
+                const somma = stateEqui.expenses.reduce((acc, exp) => acc + exp.amount, 0);
+                let text = "Conti in pari! ✨";
+                if (transfers.length > 0) {
+                    const t = transfers[0];
+                    text = `💸 ${t.from} deve ${t.amount.toFixed(2)}€ a ${t.to}`;
+                }
+                equiStatus = { text, count: stateEqui.expenses.length, sum: somma };
+            }
+
+            // ----------------------------------------------------
+            // 2.5 RACCOLTA WIDGET ATTIVI PER SEZIONE DI TESTA
+            // ----------------------------------------------------
+            const activeWidgetsData = [];
+
+            // 1. Idratatore Custom
+            if (acquaStatus && acquaStatus.quantita > 0) {
+                activeWidgetsData.push({
+                    titolo: "Idratatore Custom",
+                    icona: "💧",
+                    url: "./05-idratatore/index.html",
+                    html: `
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-[10px]">
+                                <span class="font-bold text-slate-300">💧 Idratazione</span>
+                                <span class="font-mono font-bold text-blue-400">${acquaStatus.quantita} / ${acquaStatus.obiettivo} ml (${acquaStatus.pct}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-900 rounded-full h-1 border border-slate-800 overflow-hidden">
+                                <div class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: ${acquaStatus.pct}%"></div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c1})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer">🥛 +${acquaStatus.c1}ml</button>
+                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c2})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer">☕ +${acquaStatus.c2}ml</button>
+                            </div>
+                        </div>
+                    `
+                });
+            }
+
+            // 2. Wi-Fi QR Code
+            if (wifiStatus) {
+                activeWidgetsData.push({
+                    titolo: "Wi-Fi QR Code",
+                    icona: "🔑",
+                    url: "./04-wifi-qrcode/index.html",
+                    html: `
+                        <div class="space-y-1.5">
+                            <div class="text-[10px] font-bold text-slate-400 truncate">Rete: <span class="text-emerald-400 font-mono">${wifiStatus.ssid}</span></div>
+                            <button onclick="mostraWifiQRModal('${wifiStatus.ssid.replace(/'/g, "\\'")}', '${wifiStatus.pass.replace(/'/g, "\\'")}', '${wifiStatus.type}')" class="w-full bg-emerald-600/10 hover:bg-emerald-600/20 active:scale-95 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer flex items-center justify-center gap-1">
+                                🔑 Mostra QR Ospiti
+                            </button>
+                        </div>
+                    `
+                });
+            }
+
+            // 3. Time-Blocking
+            if (timeStatus && timeStatus.totale > 0) {
+                const now = new Date();
+                const currentMin = now.getHours() * 60 + now.getMinutes();
+                const tasksConOrario = timeStatus.tasks;
+                let tasksToShow = [];
+                const activeIndex = tasksConOrario.findIndex(t => t.isActive);
+                let isGiornataFinita = false;
+
+                if (activeIndex !== -1) {
+                    tasksToShow.push(tasksConOrario[activeIndex]);
+                    if (activeIndex + 1 < tasksConOrario.length) {
+                        tasksToShow.push(tasksConOrario[activeIndex + 1]);
+                    }
+                } else {
+                    const nextIndex = tasksConOrario.findIndex(t => currentMin < t.start);
+                    if (nextIndex !== -1) {
+                        tasksToShow.push(tasksConOrario[nextIndex]);
+                        if (nextIndex + 1 < tasksConOrario.length) {
+                            tasksToShow.push(tasksConOrario[nextIndex + 1]);
+                        }
+                    } else {
+                        isGiornataFinita = true;
+                        if (tasksConOrario.length > 0) {
+                            tasksToShow.push(tasksConOrario[tasksConOrario.length - 1]);
+                        }
+                    }
+                }
+
+                activeWidgetsData.push({
+                    titolo: "Time-Blocking",
+                    icona: "📅",
+                    url: "./11-timeblocking/index.html",
+                    html: `
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">
+                                <span>Pianificatore:</span>
+                                ${isGiornataFinita ? '<span class="text-emerald-500 font-bold">Giornata conclusa 🎉</span>' : ''}
+                            </div>
+                            <div class="space-y-1">
+                                ${tasksToShow.map(task => {
+                                    const isPast = currentMin >= task.end;
+                                    let bgBlock = 'bg-slate-900 border-slate-800/80 text-slate-400';
+                                    let badgeBlock = 'bg-slate-950 text-slate-500 border-slate-800';
+                                    let dotHtml = '';
+
+                                    if (task.isActive) {
+                                        bgBlock = 'bg-violet-950/20 border-violet-500/35 text-violet-200 ring-1 ring-violet-500/10';
+                                        badgeBlock = 'bg-violet-500/15 text-violet-300 border-violet-500/20';
+                                        dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping mr-1.5 shrink-0"></span>';
+                                    } else if (isPast) {
+                                        bgBlock = 'bg-slate-900/40 border-slate-950 text-slate-500/80 line-through';
+                                        badgeBlock = 'bg-slate-950/20 text-slate-600 border-slate-950';
+                                    }
+
+                                    return `
+                                        <div class="border p-1.5 rounded-xl flex items-center justify-between text-[11px] gap-2 ${bgBlock}">
+                                            <div class="flex items-center min-w-0 flex-1">
+                                                ${dotHtml}
+                                                <span class="truncate font-semibold">${task.nome}</span>
+                                            </div>
+                                            <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border shrink-0 ${badgeBlock}">${task.labelOrario}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `
+                });
+            }
+
+            // 4. SmartShopping
+            if (shoppingStatus && shoppingStatus.total > 0) {
+                let shopInnerHtml = '';
+                if (shoppingStatus.count > 0) {
+                    shopInnerHtml = `
+                        <div class="space-y-1.5">
+                            <div class="text-[9px] font-bold text-slate-400">🛒 Da acquistare (${shoppingStatus.count}):</div>
+                            <ul class="space-y-1 text-[11px]">
+                                ${shoppingStatus.list.map(item => `
+                                    <li class="flex items-center gap-1.5">
+                                        <input type="checkbox" onchange="spuntaProdottoWidget(${item.id})" class="w-3.5 h-3.5 rounded border-slate-800 accent-lime-500 cursor-pointer">
+                                        <span class="truncate text-slate-300 font-semibold">${item.nome}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    shopInnerHtml = `
+                        <div class="text-[10px] text-lime-400 font-bold flex items-center gap-1 py-1">
+                            <span>✅</span> Spesa completata!
+                        </div>
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "SmartShopping",
+                    icona: "🛒",
+                    url: "./13-smartshopping/index.html",
+                    html: shopInnerHtml
+                });
+            }
+
+            // 5. Radar Scadenze
+            if (radarStatus) {
+                activeWidgetsData.push({
+                    titolo: "Radar Scadenze",
+                    icona: "📅",
+                    url: "./16-radar-scadenze/index.html",
+                    html: `
+                        <div class="space-y-1">
+                            <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Imminente:</div>
+                            <div class="border p-2 rounded-xl flex items-center justify-between text-[11px] ${radarStatus.classColor}">
+                                <span class="truncate font-semibold flex-1 mr-2">${radarStatus.titolo}</span>
+                                <span class="font-mono font-bold text-[9px] shrink-0">${radarStatus.sign}</span>
+                            </div>
+                        </div>
+                    `
+                });
+            }
+
+            // 6. EquiSplit
+            if (equiStatus) {
+                activeWidgetsData.push({
+                    titolo: "EquiSplit",
+                    icona: "💸",
+                    url: "./22-divisore-spese/index.html",
+                    html: `
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 font-bold">
+                                <span>Spese: <strong class="text-white">${equiStatus.count}</strong></span>
+                                <span>Totale: <strong class="text-emerald-400 font-mono">${equiStatus.sum.toFixed(2)} €</strong></span>
+                            </div>
+                            <div class="bg-slate-950 border border-slate-800/80 p-1.5 rounded-xl text-[10px] text-slate-300 font-semibold truncate">
+                                ${equiStatus.text}
+                            </div>
+                        </div>
+                    `
+                });
+            }
+
+            // 7. AutoCompiler
+            if (autocompilerStatus && autocompilerStatus.list.length > 0) {
+                activeWidgetsData.push({
+                    titolo: "AutoCompiler",
+                    icona: "⚡",
+                    url: "./10-autocompiler/index.html",
+                    html: `
+                        <div class="space-y-1.5">
+                            <div class="text-[9px] font-bold text-slate-400">⚡ Copia rapida:</div>
+                            <div class="flex flex-col gap-1.5">
+                                ${autocompilerStatus.list.map(item => `
+                                    <button onclick="copiaSnippetDaHub(event, ${item.id})" class="w-full bg-amber-600/10 hover:bg-amber-600/20 active:scale-95 border border-amber-500/20 text-amber-400 text-[10px] font-bold py-1.5 px-2.5 rounded-xl transition-all cursor-pointer flex justify-between items-center">
+                                        <span class="font-mono truncate mr-2">${item.titolo}</span>
+                                        <span class="text-[9px] text-slate-500 shrink-0 font-sans">Copia 📋</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `
+                });
+            }
+
+            // 8. Pomodoro Timer
+            if (pomodoroStatus) {
+                activeWidgetsData.push({
+                    titolo: "Timer Pomodoro",
+                    icona: "⏱️",
+                    url: "./06-pomodoro/index.html",
+                    html: `
+                        <div class="flex items-center justify-between">
+                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${pomodoroStatus.classe} shadow-sm animate-pulse">
+                                <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
+                                <span>${pomodoroStatus.icona}</span>
+                                <span>${pomodoroStatus.label}</span>
+                            </span>
+                            <span class="font-mono font-black text-sm text-white">${pomodoroStatus.tempo}</span>
+                        </div>
+                    `
+                });
+            }
+
+            // 9. Bento Gym Timer
+            if (gymStatus) {
+                activeWidgetsData.push({
+                    titolo: "Bento Gym Timer",
+                    icona: "🏋️‍♂️",
+                    url: "./08-gym-timer/index.html",
+                    html: `
+                        <div class="flex items-center justify-between">
+                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${gymStatus.classe} shadow-sm animate-pulse">
+                                <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
+                                <span>${gymStatus.icona}</span>
+                                <span>${gymStatus.label}</span>
+                            </span>
+                            <span class="font-mono font-black text-sm text-white">${gymStatus.tempo}</span>
+                        </div>
+                    `
+                });
+            }
+
+            // 10. Matrix del Tempo Adaptive Timer
+            if (matrixStatus) {
+                activeWidgetsData.push({
+                    titolo: "Matrix del Tempo",
+                    icona: "⚡",
+                    url: "./18-matrix-tempo/index.html",
+                    html: `
+                        <div class="flex items-center justify-between">
+                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${matrixStatus.classe} shadow-sm animate-pulse">
+                                <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
+                                <span>${matrixStatus.icona}</span>
+                                <span>${matrixStatus.label}</span>
+                            </span>
+                            <span class="font-mono font-black text-sm text-white">${matrixStatus.tempo}</span>
+                        </div>
+                    `
+                });
+            }
+
+            // Aggiorna il DOM per la sezione Widget Attivi all'inizio dell'Hub
+            const activeWidgetsGrid = document.getElementById('active-widgets-grid');
+            const activeWidgetsSection = document.getElementById('active-widgets-section');
+            if (activeWidgetsGrid && activeWidgetsSection) {
+                if (activeWidgetsData.length > 0) {
+                    activeWidgetsGrid.innerHTML = activeWidgetsData.map(w => `
+                        <div onclick="navigaVerso(event, '${w.url}')" class="group relative overflow-hidden rounded-3xl border border-slate-800/80 bg-gradient-to-br from-slate-900/60 to-slate-950/80 p-5 hover:border-slate-700/60 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl">
+                            <!-- Overlay Glow Effect -->
+                            <div class="absolute -inset-px bg-gradient-to-r from-blue-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+
+                            <div class="relative z-10 flex flex-col justify-between h-full space-y-4">
+                                <!-- Header -->
+                                <div class="flex justify-between items-start">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-xl">${w.icona}</span>
+                                        <div>
+                                            <h4 class="text-xs font-black text-white tracking-wide uppercase font-mono-custom">${w.titolo}</h4>
+                                        </div>
+                                    </div>
+                                    <span onclick="navigaVerso(event, '${w.url}')" class="text-[9px] font-extrabold px-2 py-0.5 rounded-lg border border-blue-500/30 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-all cursor-pointer">Apri ↗</span>
+                                </div>
+
+                                <!-- Interactive Widget Area -->
+                                <div onclick="event.stopPropagation()" class="widget-interactive-container bg-slate-950/40 border border-slate-800/40 p-3 rounded-2xl">
+                                    ${w.html}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    activeWidgetsSection.classList.remove('hidden');
+                } else {
+                    activeWidgetsSection.classList.add('hidden');
+                    activeWidgetsGrid.innerHTML = '';
+                }
+            }
+
+            // ----------------------------------------------------
+            // 3. APPLICAZIONE DEI BADGE E DEI WIDGET NEL DOM
+            // ----------------------------------------------------
             const cards = document.querySelectorAll('[data-app-title]');
             cards.forEach(card => {
                 const titolo = card.getAttribute('data-app-title');
                 const badgeContainer = card.querySelector('.timer-badge-container');
-                if (!badgeContainer) return;
+                const widgetContainer = card.querySelector('.widget-interactive-container');
 
-                let status = null;
-                if (titolo === "Timer Pomodoro") status = pomodoroStatus;
-                if (titolo === "Bento Gym Timer") status = gymStatus;
-                if (titolo === "Matrix del Tempo Adaptive Timer" || titolo === "Matrix del Tempo") status = matrixStatus;
+                // Gestione dei timer attivi
+                let timer = null;
+                if (titolo === "Timer Pomodoro") timer = pomodoroStatus;
+                if (titolo === "Bento Gym Timer") timer = gymStatus;
+                if (titolo === "Matrix del Tempo Adaptive Timer" || titolo === "Matrix del Tempo") timer = matrixStatus;
 
-                if (status) {
-                    badgeContainer.innerHTML = `
-                        <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${status.classe} shadow-sm">
-                            <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
-                            <span>${status.icona}</span>
-                            <span>${status.label}</span>
-                            <span class="font-mono border-l pl-1 border-slate-700/60 ml-0.5">${status.tempo}</span>
-                        </span>
-                    `;
-                    badgeContainer.classList.remove('hidden');
-                } else {
-                    badgeContainer.classList.add('hidden');
-                    badgeContainer.innerHTML = '';
+                if (badgeContainer) {
+                    if (timer) {
+                        badgeContainer.innerHTML = `
+                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${timer.classe} shadow-sm">
+                                <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
+                                <span>${timer.icona}</span>
+                                <span>${timer.label}</span>
+                                <span class="font-mono border-l pl-1 border-slate-700/60 ml-0.5">${timer.tempo}</span>
+                            </span>
+                        `;
+                        badgeContainer.classList.remove('hidden');
+                    } else {
+                        badgeContainer.classList.add('hidden');
+                        badgeContainer.innerHTML = '';
+                    }
+                }
+
+                // Gestione dei widget interattivi
+                if (widgetContainer) {
+                    let htmlWidget = '';
+                    let showWidget = false;
+
+                    if (titolo === "Idratatore Custom") {
+                        showWidget = true;
+                        htmlWidget = `
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="font-bold text-slate-300">💧 Idratazione</span>
+                                    <span class="font-mono font-bold text-blue-400">${acquaStatus.quantita} / ${acquaStatus.obiettivo} ml (${acquaStatus.pct}%)</span>
+                                </div>
+                                <div class="w-full bg-slate-900 rounded-full h-1 border border-slate-800 overflow-hidden">
+                                    <div class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: ${acquaStatus.pct}%"></div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="aggiungiAcquaWidget(${acquaStatus.c1})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer">🥛 +${acquaStatus.c1}ml</button>
+                                    <button onclick="aggiungiAcquaWidget(${acquaStatus.c2})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer">☕ +${acquaStatus.c2}ml</button>
+                                </div>
+                            </div>
+                        `;
+                    } else if (titolo === "Wi-Fi QR Code" && wifiStatus) {
+                        showWidget = true;
+                        htmlWidget = `
+                            <div class="space-y-1.5">
+                                <div class="text-[10px] font-bold text-slate-400 truncate">Rete: <span class="text-emerald-400 font-mono">${wifiStatus.ssid}</span></div>
+                                <button onclick="mostraWifiQRModal('${wifiStatus.ssid.replace(/'/g, "\\'")}', '${wifiStatus.pass.replace(/'/g, "\\'")}', '${wifiStatus.type}')" class="w-full bg-emerald-600/10 hover:bg-emerald-600/20 active:scale-95 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer flex items-center justify-center gap-1">
+                                    🔑 Mostra QR Ospiti
+                                </button>
+                            </div>
+                        `;
+                    } else if (titolo === "Time-Blocking" && timeStatus) {
+                        showWidget = true;
+                        const now = new Date();
+                        const currentMin = now.getHours() * 60 + now.getMinutes();
+                        
+                        const tasksConOrario = timeStatus.tasks;
+                        let tasksToShow = [];
+                        const activeIndex = tasksConOrario.findIndex(t => t.isActive);
+                        let isGiornataFinita = false;
+
+                        if (activeIndex !== -1) {
+                            tasksToShow.push(tasksConOrario[activeIndex]);
+                            if (activeIndex + 1 < tasksConOrario.length) {
+                                tasksToShow.push(tasksConOrario[activeIndex + 1]);
+                            }
+                        } else {
+                            const nextIndex = tasksConOrario.findIndex(t => currentMin < t.start);
+                            if (nextIndex !== -1) {
+                                tasksToShow.push(tasksConOrario[nextIndex]);
+                                if (nextIndex + 1 < tasksConOrario.length) {
+                                    tasksToShow.push(tasksConOrario[nextIndex + 1]);
+                                }
+                            } else {
+                                isGiornataFinita = true;
+                                if (tasksConOrario.length > 0) {
+                                    tasksToShow.push(tasksConOrario[tasksConOrario.length - 1]);
+                                }
+                            }
+                        }
+
+                        htmlWidget = `
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">
+                                    <span>Pianificatore:</span>
+                                    ${isGiornataFinita ? '<span class="text-emerald-500 font-bold">Giornata conclusa 🎉</span>' : ''}
+                                </div>
+                                <div class="space-y-1">
+                                    ${tasksToShow.map(task => {
+                                        const isPast = currentMin >= task.end;
+                                        let bgBlock = 'bg-slate-900 border-slate-800/80 text-slate-400';
+                                        let badgeBlock = 'bg-slate-950 text-slate-500 border-slate-800';
+                                        let dotHtml = '';
+
+                                        if (task.isActive) {
+                                            bgBlock = 'bg-violet-950/20 border-violet-500/35 text-violet-200 ring-1 ring-violet-500/10';
+                                            badgeBlock = 'bg-violet-500/15 text-violet-300 border-violet-500/20';
+                                            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping mr-1.5 shrink-0"></span>';
+                                        } else if (isPast) {
+                                            bgBlock = 'bg-slate-900/40 border-slate-950 text-slate-500/80 line-through';
+                                            badgeBlock = 'bg-slate-950/20 text-slate-600 border-slate-950';
+                                        }
+
+                                        return `
+                                            <div class="border p-1.5 rounded-xl flex items-center justify-between text-[11px] gap-2 ${bgBlock}">
+                                                <div class="flex items-center min-w-0 flex-1">
+                                                    ${dotHtml}
+                                                    <span class="truncate font-semibold">${task.nome}</span>
+                                                </div>
+                                                <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border shrink-0 ${badgeBlock}">${task.labelOrario}</span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else if (titolo === "SmartShopping" && shoppingStatus) {
+                        showWidget = true;
+                        if (shoppingStatus.count > 0) {
+                            htmlWidget = `
+                                <div class="space-y-1.5">
+                                    <div class="text-[9px] font-bold text-slate-400">🛒 Da acquistare (${shoppingStatus.count}):</div>
+                                    <ul class="space-y-1 text-[11px]">
+                                        ${shoppingStatus.list.map(item => `
+                                            <li class="flex items-center gap-1.5">
+                                                <input type="checkbox" onchange="spuntaProdottoWidget(${item.id})" class="w-3.5 h-3.5 rounded border-slate-800 accent-lime-500 cursor-pointer">
+                                                <span class="truncate text-slate-300 font-semibold">${item.nome}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            `;
+                        } else if (shoppingStatus.total > 0) {
+                            htmlWidget = `
+                                <div class="text-[10px] text-lime-400 font-bold flex items-center gap-1 py-1">
+                                    <span>✅</span> Spesa completata!
+                                </div>
+                            `;
+                        } else {
+                            htmlWidget = `
+                                <div class="text-[9px] text-slate-500 italic py-1">Lista vuota. Clicca per pianificare.</div>
+                            `;
+                        }
+                    } else if ((titolo === "Radar Scadenze Logistico" || titolo === "Radar Scadenze") && radarStatus) {
+                        showWidget = true;
+                        htmlWidget = `
+                            <div class="space-y-1">
+                                <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Imminente:</div>
+                                <div class="border p-2 rounded-xl flex items-center justify-between text-[11px] ${radarStatus.classColor}">
+                                    <span class="truncate font-semibold flex-1 mr-2">${radarStatus.titolo}</span>
+                                    <span class="font-mono font-bold text-[9px] shrink-0">${radarStatus.sign}</span>
+                                </div>
+                            </div>
+                        `;
+                    } else if ((titolo === "EquiSplit - Divisore Spese" || titolo === "EquiSplit") && equiStatus) {
+                        showWidget = true;
+                        htmlWidget = `
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center text-[9px] text-slate-400 font-bold">
+                                    <span>Spese: <strong class="text-white">${equiStatus.count}</strong></span>
+                                    <span>Totale: <strong class="text-emerald-400 font-mono">${equiStatus.sum.toFixed(2)} €</strong></span>
+                                </div>
+                                <div class="bg-slate-950 border border-slate-800/80 p-1.5 rounded-xl text-[10px] text-slate-300 font-semibold truncate">
+                                    ${equiStatus.text}
+                                </div>
+                            </div>
+                        `;
+                    } else if (titolo === "AutoCompiler") {
+                        showWidget = true;
+                        if (autocompilerStatus && autocompilerStatus.list.length > 0) {
+                            htmlWidget = `
+                                <div class="space-y-1.5">
+                                    <div class="text-[9px] font-bold text-slate-400">⚡ Copia rapida:</div>
+                                    <div class="flex flex-col gap-1.5">
+                                        ${autocompilerStatus.list.map(item => `
+                                            <button onclick="copiaSnippetDaHub(event, ${item.id})" class="w-full bg-amber-600/10 hover:bg-amber-600/20 active:scale-95 border border-amber-500/20 text-amber-400 text-[10px] font-bold py-1.5 px-2.5 rounded-xl transition-all cursor-pointer flex justify-between items-center">
+                                                <span class="font-mono truncate mr-2">${item.titolo}</span>
+                                                <span class="text-[9px] text-slate-500 shrink-0 font-sans">Copia 📋</span>
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            htmlWidget = `
+                                <div class="text-[9px] text-slate-500 italic py-1">Nessun testo rapido. Clicca per aggiungerne.</div>
+                            `;
+                        }
+                    }
+
+                    if (showWidget) {
+                        widgetContainer.innerHTML = htmlWidget;
+                        widgetContainer.classList.remove('hidden');
+                    } else {
+                        widgetContainer.classList.add('hidden');
+                        widgetContainer.innerHTML = '';
+                    }
                 }
             });
         }
@@ -669,9 +1465,9 @@
         renderizzaFiltri();
         renderizzaTutto();
 
-        // Avvio timer live refresh
-        setInterval(aggiornaTimerAttivi, 1000);
-        aggiornaTimerAttivi();
+        // Avvio timer live refresh per Hub
+        setInterval(aggiornaWidgetInterattivi, 1000);
+        aggiornaWidgetInterattivi();
 
         // Registrazione del Service Worker per la PWA
         if ('serviceWorker' in navigator) {
@@ -682,6 +1478,22 @@
             });
         }
     </script>
+
+    <!-- Modal overlay per WiFi QR Code -->
+    <div id="wifi-qr-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closeWifiQRModal()">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-xs w-full text-center relative space-y-4 shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="closeWifiQRModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+            <div class="flex items-center justify-center gap-1.5 text-emerald-400">
+                <span class="text-lg">📶</span>
+                <span class="text-xs font-black uppercase tracking-widest">Wi-Fi Ospiti</span>
+            </div>
+            <h3 id="wifi-qr-ssid" class="text-sm font-bold text-white truncate w-full">Nome Rete</h3>
+            <div class="bg-white p-3 rounded-xl flex items-center justify-center mx-auto border border-slate-800 shadow-inner" style="width: 174px; height: 174px;">
+                <div id="wifi-qr-code-target"></div>
+            </div>
+            <p class="text-[9px] text-slate-400 leading-tight">Inquadra il QR Code con la fotocamera per connetterti automaticamente.</p>
+        </div>
+    </div>
 </body>
 
 </html>

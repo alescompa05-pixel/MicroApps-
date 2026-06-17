@@ -259,15 +259,18 @@
     <script>
         // Stato dell'applicazione con valori dimostrativi di default se vuoto
         let defaultData = {
-            members: ["Alice", "Bob", "Charlie", "Diana"],
-            expenses: [
-                { id: "e1", desc: "Cena di benvenuto", amount: 64.00, paidBy: "Alice", participants: ["Alice", "Bob", "Charlie", "Diana"] },
-                { id: "e2", desc: "Benzina per auto", amount: 35.00, paidBy: "Bob", participants: ["Alice", "Bob", "Charlie"] },
-                { id: "e3", desc: "Biglietti museo", amount: 20.00, paidBy: "Charlie", participants: ["Charlie", "Diana"] }
-            ]
+            members: [],
+            expenses: []
         };
 
         let dbData = JSON.parse(localStorage.getItem('microapps_equisplit_data')) || defaultData;
+        
+        // Rimuove i membri ed esami di default se presenti
+        if (dbData.members && dbData.members.length === 4 && dbData.members.includes("Alice") && dbData.members.includes("Bob") && dbData.members.includes("Charlie") && dbData.members.includes("Diana")) {
+            dbData.members = [];
+            dbData.expenses = [];
+            localStorage.setItem('microapps_equisplit_data', JSON.stringify(dbData));
+        }
 
         // Salva nel localStorage
         function salvaDB() {
