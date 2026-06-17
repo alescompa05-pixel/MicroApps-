@@ -36,6 +36,12 @@
             accent-color: #3b82f6;
         }
     </style>
+    <link rel="stylesheet" href="../mobile.css">
+    <style>
+        @supports (padding: max(0px)) {
+            body { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+        }
+    </style>
 </head>
 
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex items-center justify-center p-4">
@@ -201,6 +207,12 @@
 
             // Aggiorna o crea il grafico
             aggiornaGrafico(datiAnni, datiVersato, datiTotale);
+
+            // Salva nel localStorage
+            localStorage.setItem('ic_capitale_iniziale', inputIniziale.value);
+            localStorage.setItem('ic_deposito_mensile', inputMensile.value);
+            localStorage.setItem('ic_tasso_annuo', inputTasso.value);
+            localStorage.setItem('ic_anni', inputAnni.value);
         }
 
         // Funzione per gestire la visualizzazione del grafico con Chart.js
@@ -276,6 +288,17 @@
         inputMensile.addEventListener('input', calcolaInteresseComposto);
         inputTasso.addEventListener('input', calcolaInteresseComposto);
         inputAnni.addEventListener('input', calcolaInteresseComposto);
+
+        // Carica i dati salvati
+        const savedIniziale = localStorage.getItem('ic_capitale_iniziale');
+        const savedMensile = localStorage.getItem('ic_deposito_mensile');
+        const savedTasso = localStorage.getItem('ic_tasso_annuo');
+        const savedAnni = localStorage.getItem('ic_anni');
+
+        if (savedIniziale !== null) inputIniziale.value = savedIniziale;
+        if (savedMensile !== null) inputMensile.value = savedMensile;
+        if (savedTasso !== null) inputTasso.value = savedTasso;
+        if (savedAnni !== null) inputAnni.value = savedAnni;
 
         // Primo avvio automatico dell'app
         calcolaInteresseComposto();

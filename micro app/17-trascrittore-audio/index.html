@@ -30,6 +30,12 @@
             font-size: 16px !important;
         }
 </style>
+    <link rel="stylesheet" href="../mobile.css">
+    <style>
+        @supports (padding: max(0px)) {
+            body { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+        }
+    </style>
 </head>
 
 <body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
@@ -224,6 +230,10 @@
             }
         });
 
+        selectLang.addEventListener('change', () => {
+            localStorage.setItem('trascrittore_lang', selectLang.value);
+        });
+
         // Sincronizza modifiche manuali nella textarea
         outputText.addEventListener('input', () => {
             trascrizioneAccumulata = outputText.value;
@@ -234,6 +244,20 @@
             const txt = outputText.value.trim();
             statChars.innerText = txt.length;
             statWords.innerText = txt === "" ? 0 : txt.split(/\s+/).length;
+            localStorage.setItem('trascrittore_testo', outputText.value);
+        }
+
+        // Carica i dati salvati all'avvio
+        const savedText = localStorage.getItem('trascrittore_testo');
+        const savedLang = localStorage.getItem('trascrittore_lang');
+
+        if (savedText !== null) {
+            outputText.value = savedText;
+            trascrizioneAccumulata = savedText;
+            aggiornaConteggi();
+        }
+        if (savedLang !== null) {
+            selectLang.value = savedLang;
         }
 
         btnClear.addEventListener('click', () => {

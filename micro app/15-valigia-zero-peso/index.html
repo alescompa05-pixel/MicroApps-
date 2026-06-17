@@ -4,336 +4,647 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🧳 Algoritmo Valigia Zero Peso | MicroApps Suite</title>
+    <title>🧳 Valigia Zero Peso | MicroApps Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-<style>
-        /* Ottimizzazioni Mobile: disabilita tap-highlight, zoom automatici su input e zoom da doppio tocco */
-        * {
-            -webkit-tap-highlight-color: transparent;
+    <style>
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; font-family: 'Inter', sans-serif; background: #0b1120; color: #e2e8f0; min-height: 100vh; }
+        button, a, input, select, textarea { touch-action: manipulation; }
+        button, a { user-select: none; -webkit-user-select: none; }
+        input, select, textarea { font-size: 16px !important; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 99px; }
+
+        /* Inputs */
+        .field {
+            background: rgba(15,23,42,0.8);
+            border: 1px solid rgba(51,65,85,0.8);
+            border-radius: 12px;
+            color: #e2e8f0;
+            width: 100%;
+            padding: 12px 14px;
+            outline: none;
+            transition: border-color 0.2s;
         }
-        
-        html, body {
-            touch-action: manipulation;
-            -webkit-text-size-adjust: 100%;
+        .field:focus { border-color: #10b981; }
+
+        /* Section card */
+        .section-card {
+            background: rgba(15,23,42,0.7);
+            border: 1px solid rgba(51,65,85,0.5);
+            border-radius: 16px;
+            padding: 16px;
+            break-inside: avoid;
         }
-        
-        button, a, input, select, textarea {
-            touch-action: manipulation;
+
+        /* Item row — 44px min touch target */
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 44px;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(51,65,85,0.2);
+            transition: opacity 0.15s;
         }
-        
-        button, a {
-            user-select: none;
-            -webkit-user-select: none;
+        .item-row:last-child { border-bottom: none; }
+        .item-row.deleted { display: none; }
+
+        .item-cb {
+            width: 20px; height: 20px;
+            accent-color: #10b981;
+            cursor: pointer;
+            flex-shrink: 0;
         }
-        
-        input, select, textarea {
-            font-size: 16px !important;
+        .item-text {
+            flex: 1;
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.4;
+            min-width: 0;
         }
-</style>
+        .item-text.checked {
+            text-decoration: line-through;
+            color: #475569;
+        }
+
+        /* Delete button — always visible on mobile, hover on desktop */
+        .btn-item-del {
+            color: #475569;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 36px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            flex-shrink: 0;
+            border: none;
+            background: transparent;
+            transition: color 0.15s, background 0.15s;
+        }
+        .btn-item-del:active { color: #f87171; background: rgba(239,68,68,0.12); }
+
+        @media (hover: hover) {
+            .btn-item-del { opacity: 0; }
+            .item-row:hover .btn-item-del { opacity: 1; }
+            .btn-item-del:hover { color: #f87171; }
+        }
+
+        /* Pill params */
+        .pill {
+            display: inline-flex; align-items: center; gap: 3px;
+            background: rgba(51,65,85,0.5); border: 1px solid rgba(71,85,105,0.5);
+            border-radius: 99px; padding: 2px 9px;
+            font-size: 11px; font-weight: 600; color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        /* Color variants for sections */
+        .sec-abbigliamento  { border-color: rgba(56,189,248,0.25);  background: rgba(8,47,73,0.3); }
+        .sec-attivita       { border-color: rgba(167,139,250,0.25); background: rgba(46,16,101,0.3); }
+        .sec-beauty         { border-color: rgba(244,114,182,0.25); background: rgba(80,7,36,0.3); }
+        .sec-tech           { border-color: rgba(251,191,36,0.25);  background: rgba(69,26,3,0.3); }
+    </style>
+    <link rel="stylesheet" href="../mobile.css">
+    <style>
+        @supports (padding: max(0px)) {
+            body { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+        }
+    </style>
 </head>
 
-<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
-    <!-- Torna all'Hub Floating Button -->
+<body>
+    <!-- Back button -->
     <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         <span>Torna all'Hub</span>
     </a>
 
-
-    <div class="fixed inset-0 -z-10 overflow-hidden">
-        <div class="absolute top-10 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-10 right-10 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl"></div>
+    <!-- Glow -->
+    <div class="fixed inset-0 -z-10 pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-600/8 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-600/8 rounded-full blur-[120px]"></div>
     </div>
 
-    <div
-        class="max-w-6xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="max-w-6xl mx-auto px-4 py-16 pb-24 space-y-6">
 
-        <!-- PANNELLO CONFIGURAZIONE (SINISTRA) -->
-        <div
-            class="lg:col-span-5 space-y-6 border-b lg:border-b-0 lg:border-r border-slate-700/40 pb-6 lg:pb-0 lg:pr-6">
-            <div>
-                <div class="flex items-center gap-1.5 mb-1">
-                    <span class="text-xl">🧳</span>
-                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Smart Travel Optimizer
-                    </h1>
-                </div>
-                <h2 class="text-2xl font-black text-white">Valigia Zero Peso</h2>
-                <p class="text-slate-400 text-xs mt-1">Elimina l'ansia da pre-partenza e il peso morto. Inserisci i dati
-                    reali del tuo viaggio e lascia che l'algoritmo calcoli il bagaglio minimo perfetto.</p>
+        <!-- HEADER -->
+        <div class="text-center space-y-2 pt-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest">
+                🧳 Smart Travel Optimizer
             </div>
+            <h1 class="text-3xl md:text-4xl font-black text-white">Valigia Zero Peso</h1>
+            <p class="text-slate-400 text-sm max-w-xl mx-auto">Parametri → lista minima ottimale. Elimina gli oggetti che non ti servono, aggiungi quelli mancanti nella sezione giusta.</p>
+        </div>
 
-            <!-- INPUT CONFIGURAZIONE -->
-            <div class="space-y-4">
-                <!-- SESSO & GIORNI -->
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="space-y-1.5">
-                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">👤 Sesso /
-                            Esigenze</label>
-                        <select id="travel-gender"
-                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold focus:outline-none focus:border-emerald-400 cursor-pointer">
-                            <option value="M">Maschile</option>
-                            <option value="F">Femminile</option>
-                            <option value="U">Unisex / Essenziale</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📅 Durata
-                            (Giorni)</label>
-                        <input type="number" id="travel-days" min="1" max="30" value="3"
-                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-emerald-400">
-                    </div>
-                </div>
+        <!-- CONFIGURAZIONE -->
+        <div class="bg-slate-800/60 border border-slate-700/40 rounded-2xl p-5 md:p-6 backdrop-blur-sm">
+            <h2 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-4">⚙️ Parametri Viaggio</h2>
 
-                <!-- METEO & META -->
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="space-y-1.5">
-                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">🌤️ Meteo
-                            Previsto</label>
-                        <select id="travel-weather"
-                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400 cursor-pointer">
-                            <option value="caldo">☀️ Caldo / Estate</option>
-                            <option value="temperato">⛅ Temperato / Primavera-Autunno</option>
-                            <option value="freddo">❄️ Freddo / Inverno</option>
-                            <option value="pioggia">🌧️ Instabile / Piovoso</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📍 Tipo di
-                            Meta</label>
-                        <select id="travel-destination"
-                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400 cursor-pointer">
-                            <option value="citta">🏙️ Città d'Arte / Metropolitana</option>
-                            <option value="mare">🏖️ Mare / Località Balneare</option>
-                            <option value="montagna">🏔️ Montagna / Natura isolata</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- ATTIVITÀ PRINCIPALE -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 <div class="space-y-1.5">
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">🎯 Attività
-                        Principale in Viaggio</label>
-                    <select id="travel-activity"
-                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold focus:outline-none focus:border-emerald-400 cursor-pointer">
-                        <option value="relax">☕ Relax, Camminate Leggere & Ristoranti</option>
-                        <option value="trekking">🥾 Trekking Sportivo & Esplorazione Intensa</option>
-                        <option value="lavoro">💼 Business, Meeting & Smart Working</option>
-                        <option value="serate">🍸 Serate, Clubbing & Eventi Eleganti</option>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">👤 Sesso</label>
+                    <select id="travel-gender" class="field">
+                        <option value="M">Maschile</option>
+                        <option value="F">Femminile</option>
+                        <option value="U">Unisex</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📅 Giorni</label>
+                    <input type="number" id="travel-days" min="1" max="30" value="3" class="field">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">🌤️ Meteo</label>
+                    <select id="travel-weather" class="field">
+                        <option value="caldo">☀️ Caldo</option>
+                        <option value="temperato">⛅ Temperato</option>
+                        <option value="freddo">❄️ Freddo</option>
+                        <option value="pioggia">🌧️ Piovoso</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📍 Meta</label>
+                    <select id="travel-destination" class="field">
+                        <option value="citta">🏙️ Città</option>
+                        <option value="mare">🏖️ Mare</option>
+                        <option value="montagna">🏔️ Montagna</option>
                     </select>
                 </div>
             </div>
 
-            <!-- PRO-TIPS STATICI AUTOMATICI -->
-            <div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30 text-[11px] text-slate-400 space-y-1">
-                <span class="font-bold text-emerald-400 block uppercase tracking-wide text-[9px]">💡 Regola Zero Peso
-                    attiva:</span>
-                <p>• Indossa i capi più pesanti (giacca, scarpe grandi) durante il viaggio per alleggerire la borsa.</p>
-                <p>• I calcoli ottimizzano lo spazio arrotolando i vestiti (tecnica militare), non piegandoli.</p>
+            <div class="space-y-1.5 mb-5">
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">🎯 Attività Principale</label>
+                <select id="travel-activity" class="field">
+                    <option value="relax">☕ Relax, Camminate & Ristoranti</option>
+                    <option value="trekking">🥾 Trekking Sportivo & Esplorazione</option>
+                    <option value="lavoro">💼 Business, Meeting & Smart Working</option>
+                    <option value="serate">🍸 Serate, Clubbing & Eventi Eleganti</option>
+                </select>
+            </div>
+
+            <!-- Salva configurazione -->
+            <div class="flex gap-3 border-t border-slate-700/30 pt-4">
+                <input type="text" id="travel-profile-name" placeholder="Nome configurazione per salvarla (es. Mare Estate)…" class="field flex-1">
+                <button id="btn-save-profile"
+                    class="shrink-0 bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm px-5 rounded-xl transition-all cursor-pointer active:scale-95 min-h-[48px] whitespace-nowrap">
+                    💾 Salva
+                </button>
             </div>
         </div>
 
-        <!-- PANNELLO GENERATORE DI LISTA (DESTRA) -->
-        <div class="lg:col-span-7 flex flex-col justify-between space-y-4">
-            <div>
-                <h3
-                    class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex justify-between items-center">
-                    <span>📋 Lista di Caricamento Calcolata</span>
-                    <span id="baggage-verdict" class="text-emerald-400 font-mono text-[11px]"></span>
-                </h3>
-
-                <!-- GRIGLIA BENTO DEL BAGAGLIO -->
-                <div id="packing-list-container"
-                    class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-1">
-                    <!-- Riempito dinamicamente dall'algoritmo -->
+        <!-- LISTA GENERATA -->
+        <div>
+            <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+                <div>
+                    <h2 class="text-sm font-bold text-white">📋 Lista di Caricamento Calcolata</h2>
+                    <span id="baggage-verdict" class="text-[11px] text-emerald-400 font-mono"></span>
+                </div>
+                <div class="flex gap-2">
+                    <button id="btn-reset-list"
+                        class="text-[11px] text-slate-500 active:text-amber-400 font-bold px-3 py-2 rounded-xl active:bg-amber-950/20 transition-colors cursor-pointer border border-slate-700/40 active:border-amber-500/20">
+                        ↺ Ripristina lista
+                    </button>
+                    <button id="btn-copy-list"
+                        class="bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer active:scale-95 flex items-center gap-2">
+                        📋 Copia Lista
+                    </button>
                 </div>
             </div>
 
-            <!-- PULSANTE DI AZIONE / SPUNTA RAPIDA -->
-            <button id="btn-copy-list"
-                class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm uppercase tracking-wider py-4 rounded-2xl shadow-lg transition-all transform active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2">
-                📥 Copia Lista Testuale negli Appunti
-            </button>
+            <div id="packing-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- AGGIUNGI OGGETTO -->
+        <div class="bg-slate-800/60 border border-slate-700/40 rounded-2xl p-5 backdrop-blur-sm">
+            <h2 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">➕ Aggiungi Oggetto Dimenticato</h2>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="custom-item-input" placeholder="Es. Adattatore, Libro, Occhiali da sole…" class="field flex-1">
+                <select id="custom-item-section" class="field sm:max-w-[200px]">
+                    <option value="abbigliamento">👕 Abbigliamento</option>
+                    <option value="attivita">🎯 Speciale Attività</option>
+                    <option value="beauty">🧼 Toilette & Cura</option>
+                    <option value="tech_essenziali">⚡ Tech & Documenti</option>
+                </select>
+                <button id="btn-add-custom-item"
+                    class="shrink-0 bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors cursor-pointer active:scale-95 min-h-[48px]">
+                    + Aggiungi
+                </button>
+            </div>
+        </div>
+
+        <!-- CONFIGURAZIONI SALVATE -->
+        <div class="bg-slate-800/60 border border-slate-700/40 rounded-2xl p-5 backdrop-blur-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-[10px] font-bold uppercase tracking-widest text-slate-400">📂 Configurazioni Salvate</h2>
+                <span id="profiles-count" class="text-[10px] text-slate-500">0 configurazioni</span>
+            </div>
+            <div id="profiles-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div class="text-center text-slate-600 italic text-xs py-6 col-span-full">Nessuna configurazione salvata ancora.</div>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="bg-emerald-950/30 border border-emerald-500/15 rounded-xl p-4 text-[11px] text-emerald-300/70 space-y-1">
+            <span class="font-bold text-emerald-400 block text-[10px] uppercase tracking-wide">💡 Regola Zero Peso</span>
+            <p>• Indossa i capi più pesanti (giacca, scarpe grandi) durante il viaggio.</p>
+            <p>• Arrotola i vestiti invece di piegarli — più spazio, meno grinze.</p>
         </div>
 
     </div>
 
     <script>
-        const genderInput = document.getElementById('travel-gender');
-        const daysInput = document.getElementById('travel-days');
-        const weatherInput = document.getElementById('travel-weather');
-        const destInput = document.getElementById('travel-destination');
-        const activityInput = document.getElementById('travel-activity');
+        // ─── DOM ───────────────────────────────────────────────────────────
+        const genderInput      = document.getElementById('travel-gender');
+        const daysInput        = document.getElementById('travel-days');
+        const weatherInput     = document.getElementById('travel-weather');
+        const destInput        = document.getElementById('travel-destination');
+        const activityInput    = document.getElementById('travel-activity');
+        const profileNameInput = document.getElementById('travel-profile-name');
+        const btnSaveProfile   = document.getElementById('btn-save-profile');
+        const btnResetList     = document.getElementById('btn-reset-list');
+        const profilesList     = document.getElementById('profiles-list');
+        const profilesCount    = document.getElementById('profiles-count');
+        const customItemInput  = document.getElementById('custom-item-input');
+        const customSectionSel = document.getElementById('custom-item-section');
+        const btnAddCustomItem = document.getElementById('btn-add-custom-item');
+        const listContainer    = document.getElementById('packing-list-container');
+        const verdictSpan      = document.getElementById('baggage-verdict');
+        const btnCopy          = document.getElementById('btn-copy-list');
 
-        const listContainer = document.getElementById('packing-list-container');
-        const verdictSpan = document.getElementById('baggage-verdict');
-        const btnCopy = document.getElementById('btn-copy-list');
+        // ─── STATE ─────────────────────────────────────────────────────────
+        // packingData: dati dell'ultima generazione
+        // deletedKeys: set di chiavi "sez|nome" degli item eliminati dall'utente
+        // customItems: oggetti aggiunti manualmente
+        let packingData  = {};
+        let deletedKeys  = new Set();
+        let customItems  = [];   // [{nome, sezione}]
 
-        function calcolaValigia() {
-            const giorni = parseInt(daysInput.value) || 1;
-            const sesso = genderInput.value;
-            const meteo = weatherInput.value;
-            const meta = destInput.value;
+        const labelGender   = { M:'Maschile', F:'Femminile', U:'Unisex' };
+        const labelMeteo    = { caldo:'☀️ Caldo', temperato:'⛅ Temperato', freddo:'❄️ Freddo', pioggia:'🌧️ Piovoso' };
+        const labelDest     = { citta:'🏙️ Città', mare:'🏖️ Mare', montagna:'🏔️ Montagna' };
+        const labelActivity = { relax:'☕ Relax', trekking:'🥾 Trekking', lavoro:'💼 Lavoro', serate:'🍸 Serate' };
+        const labelSection  = {
+            abbigliamento:   '👕 Abbigliamento',
+            attivita:        '🎯 Speciale Attività',
+            beauty:          '🧼 Toilette & Cura',
+            tech_essenziali: '⚡ Tech & Documenti'
+        };
+        const sectionColor = {
+            abbigliamento:   'sec-abbigliamento',
+            attivita:        'sec-attivita',
+            beauty:          'sec-beauty',
+            tech_essenziali: 'sec-tech'
+        };
+
+        // ─── GENERA DATI VALIGIA ───────────────────────────────────────────
+        function generaDati() {
+            const giorni   = parseInt(daysInput.value) || 1;
+            const sesso    = genderInput.value;
+            const meteo    = weatherInput.value;
+            const meta     = destInput.value;
             const attivita = activityInput.value;
 
-            // Logica matematica di rotazione dei capi
-            const intimo = giorni;
-            const calze = giorni;
-
-            // Formula magliette: 1 ogni 1.5 giorni, minimo 2
-            const tshirts = Math.max(2, Math.ceil(giorni / 1.2));
-
-            // Pantaloni/Bottom: 1 ogni 3 giorni, minimo 1 oltre a quello indossato
+            const intimo    = giorni;
+            const calze     = giorni;
+            const tshirts   = Math.max(2, Math.ceil(giorni / 1.2));
             const pantaloni = Math.max(1, Math.ceil(giorni / 3));
-
-            // Strati caldi (felpe/maglioni)
             let stratiCaldi = 1;
             if (meteo === 'freddo') stratiCaldi = Math.max(2, Math.ceil(giorni / 2));
-            if (meteo === 'temperato' || meteo === 'pioggia') stratiCaldi = Math.max(1, Math.ceil(giorni / 4));
+            else if (meteo === 'temperato' || meteo === 'pioggia') stratiCaldi = Math.max(1, Math.ceil(giorni / 4));
 
-            // Costruzione dei blocchi Bento della lista
-            const sezioni = {
-                abbigliamento: { titolo: "👕 Abbigliamento", oggetti: [] },
-                attivita: { titolo: "🎯 Speciale Attività", oggetti: [] },
-                beauty: { titolo: "🧼 Toilette & Cura (Liquidi)", oggetti: [] },
-                tech_essenziali: { titolo: "⚡ Tech & Documenti Vitali", oggetti: [] }
+            const dati = {
+                abbigliamento:   { titolo: '👕 Abbigliamento',         oggetti: [] },
+                attivita:        { titolo: '🎯 Speciale Attività',      oggetti: [] },
+                beauty:          { titolo: '🧼 Toilette & Cura',        oggetti: [] },
+                tech_essenziali: { titolo: '⚡ Tech & Documenti Vitali', oggetti: [] }
             };
 
-            // 1. ABBIGLIAMENTO CORRELAZIONE METEO/SESSO
-            sezioni.abbigliamento.oggetti.push(`${intimo}x Intimo ricambio`);
-            sezioni.abbigliamento.oggetti.push(`${calze}x Paia di calze`);
-            sezioni.abbigliamento.oggetti.push(`${tshirts}x Magliette / Top leggeri`);
-            sezioni.abbigliamento.oggetti.push(`${pantaloni}x Pantaloni / Gonne di ricambio`);
-
-            if (stratiCaldi > 0) {
-                sezioni.abbigliamento.oggetti.push(`${stratiCaldi}x Maglione / Felpa termica`);
+            // ABBIGLIAMENTO
+            dati.abbigliamento.oggetti.push(`${intimo}x Intimo ricambio`);
+            dati.abbigliamento.oggetti.push(`${calze}x Paia di calze`);
+            dati.abbigliamento.oggetti.push(`${tshirts}x Magliette / Top`);
+            dati.abbigliamento.oggetti.push(`${pantaloni}x Pantaloni / Gonne`);
+            if (stratiCaldi > 0) dati.abbigliamento.oggetti.push(`${stratiCaldi}x Maglione / Felpa`);
+            if (meteo === 'pioggia') dati.abbigliamento.oggetti.push('K-Way / Giacca impermeabile');
+            if (meteo === 'caldo' && meta === 'mare') {
+                dati.abbigliamento.oggetti.push('2x Costumi da bagno');
+                dati.abbigliamento.oggetti.push('Infradito da spiaggia');
+                dati.abbigliamento.oggetti.push('Telo mare compatto in microfibra');
             }
-
-            if (meteo === 'pioggia') sezioni.abbigliamento.oggetti.push("1x K-Way / Giacca impermeabile pieghevole");
-            if (meteo === 'caldo' && meta === 'mare') sezioni.abbigliamento.oggetti.push("2x Costumi da bagno");
-            if (sesso === 'F' && meteo === 'caldo') sezioni.abbigliamento.oggetti.push("1x Vestito leggero intero");
-
-            // 2. SPECIALE ATTIVITÀ
-            if (attivita === 'trekking') {
-                sezioni.attivita.oggetti.push("1x Scarponcini / Scarpe grip extra");
-                sezioni.attivita.oggetti.push("1x Borraccia termica vuota");
-                sezioni.attivita.oggetti.push("1x Occhiali da sole protettivi");
-                if (meteo === 'freddo' || meteo === 'pioggia') sezioni.attivita.oggetti.push("1x Pantalone tecnico anti-vento");
-            } else if (attivita === 'lavoro') {
-                sezioni.attivita.oggetti.push("1x Camicia / Blazer elegante");
-                sezioni.attivita.oggetti.push("1x Taccuino o blocco note sottile");
-                sezioni.attivita.oggetti.push("📌 Penna e biglietti da visita");
-            } else if (attivita === 'serate') {
-                sezioni.attivita.oggetti.push("1x Outfit elegante da sera completo");
-                sezioni.attivita.oggetti.push("1x Profumo formato travel recaricabile");
-                if (sesso === 'F') sezioni.attivita.oggetti.push("1x Scarpa con tacco o sandalo gioiello");
-                else sezioni.attivita.oggetti.push("1x Scarpa stringata / Mocassino pulito");
+            if (sesso === 'F' && meteo === 'caldo') dati.abbigliamento.oggetti.push('Vestito leggero intero');
+            if (meteo === 'freddo') {
+                dati.abbigliamento.oggetti.push('Cappello di lana / Beanie');
+                dati.abbigliamento.oggetti.push('Sciarpa calda');
+                dati.abbigliamento.oggetti.push('Guanti termici');
+                dati.abbigliamento.oggetti.push('Maglia termica intima');
             } else {
-                sezioni.attivita.oggetti.push("1x Scarpe da ginnastica comode da passeggio");
-                sezioni.attivita.oggetti.push("1x Ombrello compatto da viaggio");
+                dati.abbigliamento.oggetti.push('Cappellino con visiera');
+                dati.abbigliamento.oggetti.push('Giacca leggera / Cardigan');
             }
 
-            // 3. TOILETTE RIGOROSA TRAVEL
-            sezioni.beauty.oggetti.push("Spazzolino e dentifricio da viaggio");
-            sezioni.beauty.oggetti.push("Deodorante solido / Stick (no spray grande)");
-            sezioni.beauty.oggetti.push("Shampoo + Bagnoschiuma solido o in boccette <100ml");
-            if (sesso === 'F') sezioni.beauty.oggetti.push("Kit struccante ridotto + Micro specchio");
-            if (meteo === 'caldo' || meta === 'mare') sezioni.beauty.oggetti.push("Crema solare protettiva pocket");
-
-            // 4. TECH ED ESSENZIALI VITALI
-            sezioni.tech_essenziali.oggetti.push("Carta d'identità / Passaporto + Tesserino Sanitario");
-            sezioni.tech_essenziali.oggetti.push("Smartphone + Caricabatterie unico multi-presa");
-            if (attivita === 'lavoro') sezioni.tech_essenziali.oggetti.push("Laptop / Tablet + Cavo alimentazione");
-            sezioni.tech_essenziali.oggetti.push("Cuffie / Auricolari", "Piccolo Powerbank da 10.000 mAh");
-            sezioni.tech_essenziali.oggetti.push("💊 Piccola bustina farmaci emergenza (Ibuprofene, cerotti)");
-
-            // Renderizzazione visiva in Bento-cards
-            listContainer.innerHTML = '';
-
-            let totaleOggetti = 0;
-
-            for (const chiave in sezioni) {
-                const sez = sezioni[chiave];
-                if (sez.oggetti.length === 0) continue;
-
-                totaleOggetti += sez.oggetti.length;
-
-                const card = document.createElement('div');
-                card.className = "bg-slate-900/60 border border-slate-700/30 rounded-2xl p-4 flex flex-col justify-between";
-
-                let listaHtml = `<ul class="space-y-1.5 text-xs text-slate-300">`;
-                sez.oggetti.forEach(obj => {
-                    listaHtml += `<li class="flex items-start gap-2">
-                        <input type="checkbox" class="mt-0.5 accent-emerald-400 rounded cursor-pointer">
-                        <span>${obj}</span>
-                    </li>`;
-                });
-                listaHtml += `</ul>`;
-
-                card.innerHTML = `
-                    <div>
-                        <h4 class="text-xs font-bold text-white uppercase tracking-wide border-b border-slate-700/40 pb-2 mb-3">${sez.titolo}</h4>
-                        ${listaHtml}
-                    </div>
-                `;
-                listContainer.appendChild(card);
+            // ATTIVITÀ
+            if (attivita === 'trekking') {
+                dati.attivita.oggetti.push('Scarponcini da montagna grip extra');
+                dati.attivita.oggetti.push('Borraccia termica vuota');
+                dati.attivita.oggetti.push('Occhiali da sole protettivi UV');
+                dati.attivita.oggetti.push('Zaino da trekking 20-30L');
+                dati.attivita.oggetti.push('Snack energetici (barrette, frutta secca)');
+                if (meteo === 'freddo' || meteo === 'pioggia') dati.attivita.oggetti.push('Pantalone tecnico anti-vento');
+            } else if (attivita === 'lavoro') {
+                dati.attivita.oggetti.push('Camicia / Blazer elegante');
+                dati.attivita.oggetti.push('Taccuino sottile + penna');
+                dati.attivita.oggetti.push('Biglietti da visita');
+                dati.attivita.oggetti.push('Custodia protettiva laptop');
+                dati.attivita.oggetti.push('Chiavetta USB / Hard Disk esterno');
+            } else if (attivita === 'serate') {
+                dati.attivita.oggetti.push('Outfit elegante da sera');
+                dati.attivita.oggetti.push('Profumo formato travel');
+                dati.attivita.oggetti.push('Mini kit cosmetici / trucco rapido');
+                dati.attivita.oggetti.push(sesso === 'F' ? 'Scarpa con tacco o sandalo gioiello' : 'Scarpa stringata / Mocassino pulito');
+                if (sesso === 'F') dati.attivita.oggetti.push('Pochette da sera');
+            } else {
+                dati.attivita.oggetti.push('Scarpe da ginnastica comode');
+                dati.attivita.oggetti.push('Ombrello compatto da viaggio');
+                dati.attivita.oggetti.push('Occhiali da sole');
+                dati.attivita.oggetti.push('Zainetto leggero da giorno');
             }
 
-            // Calcolo verdetto peso
-            let tipoBagaglio = "🧳 ZAINO SMALL (Ideale Ryanair)";
-            if (giorni > 4) tipoBagaglio = "🧳 TROLLEY DA CABINA (Max 10kg)";
-            if (giorni > 10) tipoBagaglio = "🧳 VALIGIA GRANDE (Imbarcata)";
+            // TOILETTE
+            dati.beauty.oggetti.push('Spazzolino + dentifricio da viaggio');
+            dati.beauty.oggetti.push('Deodorante solido / Stick');
+            dati.beauty.oggetti.push('Shampoo + Bagnoschiuma <100ml');
+            dati.beauty.oggetti.push('Spazzola / Pettine pieghevole');
+            dati.beauty.oggetti.push('Tagliaunghie / Limetta');
+            dati.beauty.oggetti.push('Crema idratante viso/mani multiuso');
+            dati.beauty.oggetti.push('Salviette umidificate + igienizzante');
+            dati.beauty.oggetti.push(sesso === 'F' ? 'Kit struccante + micro specchio' : 'Rasoio + schiuma / regolabarba USB');
+            if (meteo === 'caldo' || meta === 'mare') dati.beauty.oggetti.push('Crema solare pocket');
 
-            verdictSpan.innerText = `${totaleOggetti} oggetti • ${tipoBagaglio}`;
+            // TECH & DOCUMENTI
+            dati.tech_essenziali.oggetti.push("Carta d'identità / Passaporto + Tessera Sanitaria");
+            dati.tech_essenziali.oggetti.push('Portafoglio con contanti e carte');
+            dati.tech_essenziali.oggetti.push('Biglietti / Prenotazioni (digitali o stampe)');
+            dati.tech_essenziali.oggetti.push('Smartphone + Caricabatterie multi-presa');
+            if (attivita === 'lavoro') dati.tech_essenziali.oggetti.push('Laptop / Tablet + cavi alimentazione');
+            dati.tech_essenziali.oggetti.push('Cuffie / Auricolari');
+            dati.tech_essenziali.oggetti.push('Powerbank 10.000 mAh');
+            dati.tech_essenziali.oggetti.push('💊 Bustina farmaci emergenza (ibuprofene, cerotti)');
+            dati.tech_essenziali.oggetti.push('🔌 Adattatore prese internazionale');
+            dati.tech_essenziali.oggetti.push('😴 Mascherina occhi + Tappi orecchie');
+            dati.tech_essenziali.oggetti.push('💧 Borraccia vuota (dopo i controlli sicurezza)');
+
+            // CUSTOM ITEMS
+            customItems.forEach(ci => {
+                if (dati[ci.sezione]) dati[ci.sezione].oggetti.push('✏️ ' + ci.nome);
+            });
+
+            return { dati, giorni };
         }
 
-        // Event Listeners per rigenerazione istantanea in tempo reale
-        [genderInput, daysInput, weatherInput, destInput, activityInput].forEach(elem => {
-            elem.addEventListener('change', calcolaValigia);
-            elem.addEventListener('input', calcolaValigia);
-        });
+        // ─── RENDER LISTA ──────────────────────────────────────────────────
+        function renderLista() {
+            listContainer.innerHTML = '';
+            let totaleOggetti = 0;
+            let totaleVisibili = 0;
 
-        // Copia testuale strutturata della lista
-        btnCopy.addEventListener('click', () => {
-            if (!daysInput.value) return;
+            const { dati, giorni } = packingData;
 
-            let testoCopia = `✨ MIA LISTA VALIGIA ZERO PESO (${daysInput.value} Giorni - Attività: ${activityInput.value})\n\n`;
+            for (const chiave in dati) {
+                const sez = dati[chiave];
+                const oggettiVisibili = sez.oggetti.filter(o => !deletedKeys.has(`${chiave}|${o}`));
+                totaleOggetti += sez.oggetti.length;
+                totaleVisibili += oggettiVisibili.length;
 
-            const cards = listContainer.querySelectorAll('.bg-slate-900/60');
-            cards.forEach(card => {
-                const titolo = card.querySelector('h4').innerText;
-                testoCopia += `--- ${titolo} ---\n`;
-                const elementi = card.querySelectorAll('li span');
-                elementi.forEach(el => {
-                    testoCopia += `[ ] ${el.innerText}\n`;
+                if (sez.oggetti.length === 0) continue;
+
+                const card = document.createElement('div');
+                card.className = `section-card ${sectionColor[chiave] || ''}`;
+
+                // Header sezione con contatore
+                const eliminati = sez.oggetti.length - oggettiVisibili.length;
+                const headerExtra = eliminati > 0
+                    ? `<span class="text-[10px] text-slate-600 font-normal normal-case">${eliminati} eliminat${eliminati > 1 ? 'i' : 'o'}</span>`
+                    : '';
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-current/10 pb-2 mb-2">
+                        <h3 class="text-xs font-black text-white uppercase tracking-wide">${sez.titolo}</h3>
+                        ${headerExtra}
+                    </div>
+                    <div id="sec-${chiave}"></div>
+                `;
+                listContainer.appendChild(card);
+
+                const secContainer = card.querySelector(`#sec-${chiave}`);
+                sez.oggetti.forEach(obj => {
+                    const key = `${chiave}|${obj}`;
+                    if (deletedKeys.has(key)) return;
+
+                    const row = document.createElement('div');
+                    row.className = 'item-row';
+                    row.innerHTML = `
+                        <input type="checkbox" class="item-cb">
+                        <span class="item-text">${obj}</span>
+                        <button class="btn-item-del" onclick="rimuoviItem('${key.replace(/'/g, "\\'")}')" title="Rimuovi dalla lista">×</button>
+                    `;
+                    row.querySelector('.item-cb').addEventListener('change', (e) => {
+                        row.querySelector('.item-text').classList.toggle('checked', e.target.checked);
+                    });
+                    secContainer.appendChild(row);
                 });
-                testoCopia += `\n`;
-            });
+            }
 
-            navigator.clipboard.writeText(testoCopia).then(() => {
-                const origText = btnCopy.innerHTML;
-                btnCopy.innerHTML = "✨ Lista Copiata negli Appunti!";
-                btnCopy.className = btnCopy.className.replace('bg-emerald-500', 'bg-blue-500').replace('hover:bg-emerald-400', 'hover:bg-blue-400');
-                setTimeout(() => {
-                    btnCopy.innerHTML = origText;
-                    btnCopy.className = btnCopy.className.replace('bg-blue-500', 'bg-emerald-500').replace('hover:bg-blue-400', 'hover:bg-emerald-400');
-                }, 1500);
+            let tipoBagaglio = '🎒 Zaino Small (Ryanair ok)';
+            if (giorni > 4)  tipoBagaglio = '🧳 Trolley da Cabina (max 10kg)';
+            if (giorni > 10) tipoBagaglio = '🧳 Valigia Grande (imbarcata)';
+            verdictSpan.innerText = `${totaleVisibili} oggetti • ${tipoBagaglio}`;
+        }
+
+        // ─── RICALCOLA (parametri cambiati → lista fresca) ────────────────
+        function calcolaValigia() {
+            deletedKeys.clear(); // Parametri cambiati → lista pulita
+            packingData = generaDati();
+            renderLista();
+            salvaParams();
+        }
+
+        // ─── RIMUOVI SINGOLO ITEM ──────────────────────────────────────────
+        window.rimuoviItem = function(key) {
+            deletedKeys.add(key);
+            renderLista(); // Re-render senza ricalcolare
+        };
+
+        // ─── RIPRISTINA LISTA ORIGINALE ────────────────────────────────────
+        btnResetList.addEventListener('click', () => {
+            if (deletedKeys.size === 0) return;
+            deletedKeys.clear();
+            renderLista();
+        });
+
+        // ─── AGGIUNTA OGGETTO CUSTOM ───────────────────────────────────────
+        btnAddCustomItem.addEventListener('click', () => {
+            const val = customItemInput.value.trim();
+            if (!val) return;
+            customItems.push({ nome: val, sezione: customSectionSel.value });
+            customItemInput.value = '';
+            packingData = generaDati(); // Rigenera con il nuovo item (senza pulire deletedKeys)
+            renderLista();
+        });
+
+        customItemInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); btnAddCustomItem.click(); }
+        });
+
+        // ─── STORAGE PARAMS ───────────────────────────────────────────────
+        function salvaParams() {
+            localStorage.setItem('valigia_gender', genderInput.value);
+            localStorage.setItem('valigia_days', daysInput.value);
+            localStorage.setItem('valigia_weather', weatherInput.value);
+            localStorage.setItem('valigia_destination', destInput.value);
+            localStorage.setItem('valigia_activity', activityInput.value);
+        }
+
+        // ─── PROFILI SALVATI ──────────────────────────────────────────────
+        function caricaProfili() { return JSON.parse(localStorage.getItem('valigia_profili') || '[]'); }
+        function salvaProfili(p) { localStorage.setItem('valigia_profili', JSON.stringify(p)); }
+
+        btnSaveProfile.addEventListener('click', () => {
+            const nome = profileNameInput.value.trim();
+            if (!nome) { alert('Inserisci un nome (es. "Mare Estate").'); return; }
+            const giorni = parseInt(daysInput.value) || 0;
+            if (giorni < 1) { alert('Inserisci un numero di giorni valido.'); return; }
+
+            let profili = caricaProfili();
+            const esistente = profili.findIndex(p => p.nome.toLowerCase() === nome.toLowerCase());
+
+            const nuovoProfilo = {
+                id: esistente !== -1 ? profili[esistente].id : Date.now(),
+                nome, gender: genderInput.value, days: daysInput.value,
+                weather: weatherInput.value, destination: destInput.value, activity: activityInput.value
+            };
+
+            if (esistente !== -1) {
+                if (!confirm(`Sovrascrivere "${nome}"?`)) return;
+                profili[esistente] = nuovoProfilo;
+            } else {
+                profili.push(nuovoProfilo);
+            }
+
+            salvaProfili(profili);
+            renderProfili();
+
+            const orig = btnSaveProfile.innerHTML;
+            btnSaveProfile.innerHTML = '✅ Salvata!';
+            setTimeout(() => { btnSaveProfile.innerHTML = orig; }, 1500);
+        });
+
+        function caricaProfilo(id) {
+            const p = caricaProfili().find(pr => pr.id === id);
+            if (!p) return;
+            profileNameInput.value = p.nome;
+            genderInput.value = p.gender;
+            daysInput.value = p.days;
+            weatherInput.value = p.weather;
+            destInput.value = p.destination;
+            activityInput.value = p.activity;
+            customItems = [];
+            calcolaValigia();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function eliminaProfilo(id) {
+            salvaProfili(caricaProfili().filter(p => p.id !== id));
+            renderProfili();
+        }
+
+        function renderProfili() {
+            const profili = caricaProfili();
+            profilesCount.innerText = `${profili.length} configurazion${profili.length === 1 ? 'e' : 'i'}`;
+
+            if (profili.length === 0) {
+                profilesList.innerHTML = `<div class="text-center text-slate-600 italic text-xs py-6 col-span-full">Nessuna configurazione salvata ancora.</div>`;
+                return;
+            }
+
+            profilesList.innerHTML = profili.map(p => `
+                <div class="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4 flex flex-col gap-3 transition-all">
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm font-bold text-white truncate">${p.nome}</h3>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                <span class="pill">${labelGender[p.gender] || p.gender}</span>
+                                <span class="pill">📅 ${p.days}gg</span>
+                                <span class="pill">${labelMeteo[p.weather] || p.weather}</span>
+                                <span class="pill">${labelDest[p.destination] || p.destination}</span>
+                                <span class="pill">${labelActivity[p.activity] || p.activity}</span>
+                            </div>
+                        </div>
+                        <button onclick="eliminaProfilo(${p.id})" class="text-slate-600 active:text-rose-400 text-xl font-bold cursor-pointer shrink-0 p-1 min-w-[36px] min-h-[36px] flex items-center justify-center">×</button>
+                    </div>
+                    <button onclick="caricaProfilo(${p.id})" class="w-full bg-slate-800 active:bg-emerald-900/40 border border-slate-700 active:border-emerald-500/40 text-slate-300 text-xs font-bold py-3 rounded-xl transition-all cursor-pointer active:scale-95">
+                        📋 Carica questa Configurazione
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // ─── COPIA LISTA ───────────────────────────────────────────────────
+        btnCopy.addEventListener('click', () => {
+            const cards = listContainer.querySelectorAll('.section-card');
+            let testo = `✨ LISTA VALIGIA ZERO PESO (${daysInput.value} Giorni)\n\n`;
+            cards.forEach(card => {
+                const titolo = card.querySelector('h3').innerText;
+                testo += `--- ${titolo} ---\n`;
+                card.querySelectorAll('.item-text:not(.checked)').forEach(el => {
+                    testo += `[ ] ${el.innerText.replace('✏️ ', '')}\n`;
+                });
+                testo += '\n';
+            });
+            navigator.clipboard.writeText(testo).then(() => {
+                const orig = btnCopy.innerHTML;
+                btnCopy.innerHTML = '✅ Copiata!';
+                setTimeout(() => { btnCopy.innerHTML = orig; }, 1500);
             });
         });
 
-        // Esegui primo calcolo all'avvio
+        // ─── INIT ─────────────────────────────────────────────────────────
+        const sg = localStorage.getItem('valigia_gender');
+        const sd = localStorage.getItem('valigia_days');
+        const sw = localStorage.getItem('valigia_weather');
+        const ss = localStorage.getItem('valigia_destination');
+        const sa = localStorage.getItem('valigia_activity');
+
+        if (sg) genderInput.value   = sg;
+        if (sd) daysInput.value     = sd;
+        if (sw) weatherInput.value  = sw;
+        if (ss) destInput.value     = ss;
+        if (sa) activityInput.value = sa;
+
+        [genderInput, daysInput, weatherInput, destInput, activityInput].forEach(el => {
+            el.addEventListener('change', calcolaValigia);
+            el.addEventListener('input',  calcolaValigia);
+        });
+
         calcolaValigia();
+        renderProfili();
     </script>
 
-    <!-- Registrazione Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('../sw.js')
-                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
-                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+                    .then(r => console.log('SW:', r.scope))
+                    .catch(e => console.error('SW:', e));
             });
         }
     </script>
 </body>
-
 </html>

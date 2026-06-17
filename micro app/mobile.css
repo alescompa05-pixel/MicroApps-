@@ -1,0 +1,198 @@
+/*
+ * mobile.css — Fix usabilità mobile globale per MicroApps Suite
+ * Incluso da index.html hub e da ogni micro app.
+ */
+
+/* ─── BASE TOUCH / PREVENTION ──────────────────────────────────────────── */
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
+html, body {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+button, a, input, select, textarea, label {
+    touch-action: manipulation;
+}
+
+button, a {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Previene zoom automatico su focus degli input su iOS */
+input, select, textarea {
+    font-size: 16px !important;
+}
+
+/* ─── TOUCH TARGETS MINIMI (44×44 px) ──────────────────────────────────── */
+/* Applicato solo su schermi touch reali (no hover = mobile/tablet) */
+@media (hover: none) and (pointer: coarse) {
+    /* Solo bottoni "block-level" principali, non quelli inline piccoli */
+    button:not(.btn-inline):not(.btn-icon) {
+        min-height: 44px;
+    }
+    /* Link navigazione */
+    a[href]:not(.link-text) {
+        display: inline-flex;
+        align-items: center;
+    }
+}
+
+/* ─── FEEDBACK TATTILE SUI BOTTONI ──────────────────────────────────────── */
+button:active,
+a:active {
+    opacity: 0.85;
+    transform: scale(0.97);
+    transition: transform 0.08s ease, opacity 0.08s ease;
+}
+
+/* ─── SCROLLBAR MOBILE (nascosta ma funzionale) ─────────────────────────── */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar { width: 3px; height: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.4); border-radius: 99px; }
+}
+
+/* ─── GRIGLIE RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    /* Forza colonna singola su mobile dove ha senso */
+    .sm-stack-cols {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Spaziatura ridotta su mobile */
+    .sm-p-tight { padding: 16px !important; }
+    .sm-gap-tight { gap: 12px !important; }
+}
+
+/* ─── HUB — CARD TOUCH ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Le card hub devono avere area di tap chiara */
+    .hub-card {
+        min-height: 130px;
+        border-radius: 18px;
+        padding: 16px;
+        /* Rimuove effetti hover che non funzionano su touch */
+    }
+
+    /* Bottone stella preferiti — più grande su mobile */
+    .hub-star-btn {
+        width: 40px; height: 40px;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Titolo card più leggibile su mobile */
+    .hub-card-title {
+        font-size: 15px;
+    }
+
+    /* Descrizione card — non troppo piccola */
+    .hub-card-desc {
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    /* Filtri categoria — scrollabili orizzontalmente senza wrap */
+    #filters-container {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        justify-content: flex-start !important;
+    }
+    #filters-container::-webkit-scrollbar { display: none; }
+
+    /* Bottoni filtro più grandi */
+    #filters-container button {
+        min-height: 36px;
+        padding: 6px 14px;
+        white-space: nowrap;
+        font-size: 12px;
+    }
+
+    /* Barra ricerca più alta */
+    #search-input {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+    }
+
+    /* Griglia hub — 1 colonna su mobile stretto, 2 su tablet */
+    #apps-container,
+    #favs-grid,
+    #active-widgets-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Header hub ridotto */
+    header h2 {
+        font-size: 2rem !important;
+    }
+}
+
+@media (min-width: 480px) and (max-width: 768px) {
+    #apps-container,
+    #favs-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ─── MICRO APP — ELEMENTI COMUNI ───────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Margine top per il pulsante "torna all'hub" fisso */
+    body > .max-w-6xl:first-of-type,
+    body > div.max-w-6xl:first-of-type {
+        padding-top: 60px;
+    }
+
+    /* Form fields più alti su mobile */
+    select, input[type="text"], input[type="number"],
+    input[type="email"], input[type="password"], textarea {
+        padding: 12px 14px !important;
+        border-radius: 12px;
+    }
+
+    /* Pulsanti principali di azione più alti */
+    .btn-primary, button[type="submit"] {
+        min-height: 52px;
+        font-size: 15px;
+        border-radius: 14px;
+    }
+
+    /* Due colonne che diventano una sola su mobile stretto */
+    .lg\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    /* Padding ridotto per le card */
+    .rounded-3xl {
+        border-radius: 20px;
+        padding: 16px;
+    }
+    .rounded-2xl {
+        border-radius: 14px;
+    }
+}
+
+/* ─── PULSANTE "TORNA ALL'HUB" ──────────────────────────────────────────── */
+a[href="../index.html"].fixed,
+a[href="./index.html"].fixed {
+    min-height: 40px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    gap: 6px;
+}
+
+/* ─── SEZIONE WIDGET HUB — LAYOUT MOBILE ───────────────────────────────── */
+@media (max-width: 640px) {
+    #active-widgets-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ─── PREVENZIONE OVERFLOW X ─────────────────────────────────────────────── */
+html, body { max-width: 100vw; overflow-x: hidden; }

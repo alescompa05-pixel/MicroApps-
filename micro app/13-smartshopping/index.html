@@ -4,298 +4,509 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🛒 SmartShopping | Lista Spesa per Reparto</title>
-    <!-- Tailwind CSS per il design -->
+    <title>🛒 SmartShopping | Lista Spesa Salvabile</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <style>
-        /* Ottimizzazioni Mobile: disabilita tap-highlight, zoom automatici su input e zoom da doppio tocco */
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        html, body {
-            touch-action: manipulation;
-            -webkit-text-size-adjust: 100%;
-        }
-        
-        button, a, input, select, textarea {
-            touch-action: manipulation;
-        }
-        
-        button, a {
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
-        input, select, textarea {
-            font-size: 16px !important;
-        }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+    button, a, input, select, textarea { touch-action: manipulation; }
+    button, a { user-select: none; -webkit-user-select: none; }
+    input, select, textarea { font-size: 16px !important; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 99px; }
+
+    /* Touch-friendly item rows — almeno 44px di altezza */
+    .item-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(51,65,85,0.25);
+    }
+    .item-row:last-child { border-bottom: none; }
+
+    /* Checkbox più grande su mobile */
+    .item-cb {
+        width: 20px; height: 20px;
+        accent-color: #84cc16;
+        cursor: pointer;
+        flex-shrink: 0;
+        border-radius: 4px;
+    }
+
+    .item-label {
+        flex: 1;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        line-height: 1.3;
+        word-break: break-word;
+        min-width: 0;
+    }
+    .item-label.spuntato {
+        text-decoration: line-through;
+        color: #475569;
+    }
+
+    /* Select reparto — stile discreto inline */
+    .reparto-sel {
+        background: rgba(15,23,42,0.8);
+        border: 1px solid rgba(71,85,105,0.6);
+        border-radius: 8px;
+        color: #94a3b8;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 6px;
+        cursor: pointer;
+        max-width: 130px;
+        flex-shrink: 0;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        text-align: center;
+    }
+    .reparto-sel:focus { border-color: #84cc16; color: #bef264; }
+
+    /* Elimina item — sempre visibile su mobile (no hover needed) */
+    .btn-del {
+        color: #475569;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 4px 8px;
+        min-width: 36px;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        flex-shrink: 0;
+        transition: color 0.15s, background 0.15s;
+        background: transparent;
+        border: none;
+    }
+    .btn-del:active { color: #f87171; background: rgba(239,68,68,0.1); }
+    @media (hover: hover) {
+        .btn-del { opacity: 0; transition: opacity 0.15s, color 0.15s; }
+        .item-row:hover .btn-del { opacity: 1; }
+        .btn-del:hover { color: #f87171; }
+    }
 </style>
+    <link rel="stylesheet" href="../mobile.css">
+    <style>
+        @supports (padding: max(0px)) {
+            body { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+        }
+    </style>
 </head>
 
-<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
-    <!-- Torna all'Hub Floating Button -->
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen pb-8">
+
+    <!-- Back button -->
     <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         <span>Torna all'Hub</span>
     </a>
 
+    <div class="max-w-5xl mx-auto px-4 pt-16 space-y-5">
 
-    <div
-        class="max-w-5xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- CARD PRINCIPALE -->
+        <div class="bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-5 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
 
-        <!-- PANNELLO INPUT ED AGGIUNTA RAPIDA (SINISTRA) -->
-        <div
-            class="lg:col-span-5 space-y-5 border-b lg:border-b-0 lg:border-r border-slate-700/40 pb-6 lg:pb-0 lg:pr-6">
-            <div>
-                <div class="flex items-center gap-1.5 mb-1">
-                    <span class="text-xl">🛒</span>
-                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-lime-400">Home Automation App</h1>
+            <!-- PANNELLO INPUT (SINISTRA) -->
+            <div class="lg:col-span-5 space-y-4 border-b lg:border-b-0 lg:border-r border-slate-700/40 pb-5 lg:pb-0 lg:pr-6">
+                <div>
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="text-xl">🛒</span>
+                        <h1 class="text-[10px] font-bold uppercase tracking-widest text-lime-400">Home Automation App</h1>
+                    </div>
+                    <h2 class="text-2xl font-black text-white">SmartShopping</h2>
+                    <p class="text-slate-400 text-xs mt-1">Scrivi i prodotti alla rinfusa — vengono smistati per reparto. Tocca il badge del reparto su qualsiasi prodotto per spostarlo.</p>
                 </div>
-                <h2 class="text-2xl font-black text-white">SmartShopping</h2>
-                <p class="text-slate-400 text-xs mt-1">Scrivi i prodotti alla rinfusa. L'app li smista automaticamente
-                    nei reparti del supermercato per farti risparmiare tempo tra le corsie.</p>
+
+                <!-- AGGIUNTA SINGOLA -->
+                <form id="form-item" class="space-y-3 bg-slate-900/40 p-4 rounded-2xl border border-slate-700/40">
+                    <h3 class="text-xs font-bold uppercase text-lime-400 tracking-wider">Aggiungi Prodotto</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="item-name" placeholder="Es. Mele, Petto di pollo, Latte..." required
+                            class="flex-1 min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-lime-400 font-semibold">
+                        <button type="submit"
+                            class="bg-lime-500 active:bg-lime-600 text-slate-950 font-black text-base px-4 rounded-xl transition-colors cursor-pointer shrink-0 min-w-[48px] min-h-[48px] flex items-center justify-center active:scale-95">➕</button>
+                    </div>
+                </form>
+
+                <!-- INSERIMENTO MULTIPLO -->
+                <div class="space-y-2 bg-slate-900/20 p-4 rounded-2xl border border-slate-700/20">
+                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">⚡ Inserimento Multiplo</h4>
+                    <p class="text-[11px] text-slate-500 leading-tight">Prodotti separati da virgola o su righe separate.</p>
+                    <textarea id="bulk-text" placeholder="Es. Pane, Zucchine, Sapone, Uova, Tonno..."
+                        class="w-full h-16 bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-slate-300 focus:outline-none focus:border-lime-400 resize-none font-sans"></textarea>
+                    <button id="btn-bulk-add"
+                        class="w-full bg-slate-700 active:bg-slate-600 text-slate-200 font-bold text-sm py-3 rounded-xl border border-slate-600 cursor-pointer transition-colors active:scale-95">
+                        Smista Lista
+                    </button>
+                </div>
+
+                <!-- SALVA LISTA -->
+                <div class="space-y-2 bg-lime-950/20 p-4 rounded-2xl border border-lime-500/20">
+                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-lime-400">💾 Salva Lista come Modello</h4>
+                    <p class="text-[11px] text-slate-500 leading-tight">Es. "Spesa Settimanale", "BBQ Sabato"</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="save-list-name" placeholder="Nome lista…"
+                            class="flex-1 min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-lime-400">
+                        <button id="btn-save-list"
+                            class="bg-lime-600 active:bg-lime-700 text-white font-black text-sm px-4 rounded-xl transition-colors cursor-pointer shrink-0 min-h-[48px] active:scale-95">
+                            Salva
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- FORM AGGIUNTA SINGOLO PRODOTTO -->
-            <form id="form-item" class="space-y-3 bg-slate-900/40 p-4 rounded-2xl border border-slate-700/40">
-                <h3 class="text-xs font-bold uppercase text-lime-400 tracking-wider">Aggiungi Prodotto</h3>
-                <div class="flex gap-2">
-                    <input type="text" id="item-name" placeholder="Es. Mele, Petto di pollo, Latte..." required
-                        class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-lime-400 font-semibold">
-                    <button type="submit"
-                        class="bg-lime-500 hover:bg-lime-400 text-slate-950 font-black text-xs uppercase px-4 rounded-xl transition-colors cursor-pointer shrink-0">➕</button>
+            <!-- PANNELLO REPARTI (DESTRA) -->
+            <div class="lg:col-span-7 flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">La tua Spesa per Reparto</h3>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[11px] text-slate-500"><strong id="stat-count" class="text-slate-300">0</strong> prodotti</span>
+                        <button id="btn-clear-all"
+                            class="text-[11px] text-slate-500 active:text-rose-400 font-bold uppercase tracking-wide transition-colors cursor-pointer px-2 py-1 rounded-lg active:bg-rose-950/20">
+                            🗑️ Svuota
+                        </button>
+                    </div>
                 </div>
-            </form>
 
-            <!-- AGGIUNTA DI MASSA (PASTE BIN) -->
-            <div class="space-y-2 bg-slate-900/20 p-4 rounded-2xl border border-slate-700/20">
-                <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">⚡ Inserimento Multiplo Rapido
-                </h4>
-                <p class="text-[11px] text-slate-500 leading-tight">Incolla una lista o scrivi più prodotti separati da
-                    una virgola.</p>
-                <textarea id="bulk-text" placeholder="Es. Pane, Zucchine, Sapone, Uova, Tonno..."
-                    class="w-full h-16 bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-300 focus:outline-none focus:border-lime-400 resize-none font-sans"></textarea>
-                <button id="btn-bulk-add"
-                    class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs py-2 rounded-xl border border-slate-600 cursor-pointer transition-colors">
-                    Smista Lista Massiva
-                </button>
+                <div id="departments-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[520px] overflow-y-auto pr-1"></div>
             </div>
         </div>
 
-        <!-- PANNELLO DISPLAY REPARTI IN BENTO GRID (DESTRA) -->
-        <div class="lg:col-span-7 flex flex-col justify-between">
-            <div>
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">La tua Spesa Ordinata</h3>
-                    <button id="btn-clear-all"
-                        class="text-[10px] text-slate-500 hover:text-rose-400 font-bold uppercase tracking-wide transition-colors cursor-pointer">🗑️
-                        Svuota Carrello</button>
-                </div>
-
-                <!-- GRIGLIA REPARTI DINAMICI -->
-                <div id="departments-container"
-                    class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[440px] overflow-y-auto pr-1">
-                    <!-- Iniettato da JS -->
-                </div>
+        <!-- CARD LISTE SALVATE -->
+        <div class="bg-slate-800 rounded-3xl border border-slate-700/50 p-5 md:p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">📂 Liste Spesa Salvate</h3>
+                <span id="saved-lists-count" class="text-[10px] text-slate-500">0 liste</span>
             </div>
-
-            <!-- STATISTICHE FOOTER -->
-            <div
-                class="border-t border-slate-700/40 pt-4 mt-6 flex justify-between items-center text-[10px] text-slate-500 font-medium">
-                <span>Prodotti in lista: <strong id="stat-count" class="text-slate-300">0</strong></span>
-                <span>Spunta i prodotti mentre li metti nel carrello reale</span>
+            <div id="saved-lists-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div class="text-center text-slate-600 italic text-xs py-6 col-span-full">Nessuna lista salvata ancora.</div>
             </div>
         </div>
 
     </div>
 
-    <!-- LOGICA DI RICONOSCIMENTO E SMISTAMENTO SEMANTICO -->
     <script>
-        // Database locale dei prodotti (Il dizionario intelligente)
-        // Può essere ampliato liberamente
         const dizionarioReparti = {
-            ortofrutta: ['mela', 'mele', 'banana', 'banane', 'arancia', 'insalata', 'pomodoro', 'pomodori', 'zucchine', 'carote', 'limone', 'patate', 'fragole', 'verdura', 'frutta', 'cipolla', 'aglio', 'fungo', 'funghi'],
-            macelleria: ['pollo', 'carne', 'manzo', 'maiale', 'bistecca', 'salsiccia', 'hamburger', 'prosciutto', 'salame', 'affettato', 'tacchino', 'pesce', 'salmone', 'tonno fresco'],
-            frigo: ['latte', 'uova', 'uovo', 'burro', 'formaggio', 'mozzarella', 'yogurt', 'panna', 'stracchino', 'parmigiano', 'ricotta', 'gorgonzola'],
-            dispensa: ['pane', 'pasta', 'riso', 'biscotti', 'caffè', 'zucchero', 'sale', 'olio', 'aceto', 'tonno', 'passata', 'pelati', 'farina', 'cereali', 'snack', 'cioccolato', 'acqua', 'bibita', 'vino', 'birra', 'fette biscottate', 'marmellata'],
-            igiene: ['sapone', 'shampoo', 'bagnoschiuma', 'dentifricio', 'spazzolino', 'carta igienica', 'scottex', 'detersivo', 'ammorbidente', 'sgrassatore', 'sacchi', 'candeggina', 'fazzoletti']
+            ortofrutta: [
+                'mela','mele','banana','banane','arancia','arance','insalata','pomodoro','pomodori',
+                'zucchina','zucchine','carota','carote','limone','limoni','patata','patate','fragola',
+                'fragole','verdura','frutta','cipolla','cipolle','aglio','fungo','funghi','melanzana',
+                'melanzane','peperone','peperoni','spinaci','rucola','lattuga','sedano','prezzemolo',
+                'basilico','kiwi','pesca','pesche','albicocca','albicocche','ciliegia','ciliegie','uva',
+                'mandarino','mandarini','pompelmo','melone','anguria','pera','pere','prugna','cavolo',
+                'broccoli','broccolo','carciofo','carciofi','asparagi','zucca','finocchio','porri',
+                'porro','zenzero','mirtilli','lamponi','more','fichi','noci','mandorle','nocciole',
+                'castagne','pistacchi','radicchio','verza','ananas','mango','avocado','papaya','lime',
+                'ribes','erba cipollina','salvia','rosmarino','timo','menta','origano fresco'
+            ],
+            macelleria: [
+                'pollo','carne','manzo','maiale','bistecca','bistecche','salsiccia','salsicce',
+                'hamburger','prosciutto','salame','affettato','affettati','tacchino','pesce','salmone',
+                'tonno fresco','petto di pollo','cotoletta','cotolette','macinato','spezzatino',
+                'pancetta','bresaola','mortadella','speck','coppa','agnello','vitello','spigola',
+                'orata','merluzzo','sogliola','gamberi','calamari','polpo','cozze','vongole',
+                'braciola','braciole','costine','spiedini','arrosticini','anatra','coniglio','fegato',
+                'trippa','pesce spada','branzino','platessa','bastoncini di pesce','polpettone',
+                'polpette','cotechino','guanciale','lonza','filetto','arrosto','wurstel','würstel',
+                'hot dog','prosciutto crudo','prosciutto cotto','carpaccio'
+            ],
+            frigo: [
+                'latte','uova','uovo','burro','formaggio','formaggi','mozzarella','mozzarelle',
+                'yogurt','panna','stracchino','parmigiano','ricotta','gorgonzola','mascarpone',
+                'panna da cucina','philadelphia','certosa','provola','scamorza','fontina','pecorino',
+                'grana padano','lievito fresco','margarina','latte di soia','latte di mandorla',
+                'kefir','pesto fresco','pasta sfoglia','pasta frolla','robiola','crescenza','tofu',
+                'seitan','hummus','salmone affumicato','sottilette','burrata','besciamella fresca',
+                'panna acida','brie','camembert','emmenthal','asiago','taleggio','latte vegetale'
+            ],
+            dispensa: [
+                'pane','pasta','riso','biscotti','caffè','zucchero','sale','olio','aceto','tonno',
+                'passata','pelati','farina','cereali','snack','cioccolato','acqua','bibita','bibite',
+                'vino','birra','birre','fette biscottate','marmellata','miele','tè','tisana',
+                'camomilla','maionese','ketchup','senape','sugo','legumi','fagioli','lenticchie',
+                'ceci','piselli','mais','cracker','taralli','patatine','merendine','cornetti',
+                'lievito','spezie','pepe','noce moscata','cannella','dado','couscous','orzo','farro',
+                'gnocchi','nutella','crema spalmabile','succo di frutta','succhi','avena','polenta',
+                'piadina','pan bauletto','focaccia','grissini','sottaceti','olive','capperi',
+                'salsa di soia','tavoletta di cioccolato','noccioline','popcorn','quinoa','succo',
+                'acqua frizzante','acqua naturale','brodo','dado da brodo','pangrattato','barrette'
+            ],
+            igiene: [
+                'sapone','shampoo','bagnoschiuma','dentifricio','spazzolino','spazzolini',
+                'carta igienica','scottex','detersivo','ammorbidente','sgrassatore','sacchi',
+                'candeggina','fazzoletti','assorbenti','dischetti','struccante','crema viso',
+                'bagnodoccia','balsamo','lacca','gel capelli','schiuma da barba','lamette','rasoio',
+                'deodorante','profumo','spugna','spugne','panni','guanti','candele','incenso',
+                'cotton fioc','collutorio','filo interdentale','sapone piatti','brillantante',
+                'pastiglie lavastoviglie','detergente','panno microfibra','pastiglie lavatrice',
+                'anticalcare','igienizzante','crema mani','salviette','tonico','pannolini','smalto',
+                'solvente','carta cucina','pellicola','alluminio','sacchetti freezer','farmaci',
+                'vitamina','aspirina','ibuprofene','paracetamolo','tachipirina','cerotti','dopobarba'
+            ]
         };
 
-        // Nomi reali dei reparti e icone corrispondenti per l'interfaccia
         const infoReparti = {
-            ortofrutta: { titolo: "🥦 Ortofrutta", colore: "border-emerald-500/30 bg-emerald-950/10 text-emerald-300" },
-            macelleria: { titolo: "🥩 Macelleria & Pescheria", colore: "border-rose-500/30 bg-rose-950/10 text-rose-300" },
-            frigo: { titolo: "🧀 Banco Frigo & Latticini", colore: "border-cyan-500/30 bg-cyan-950/10 text-cyan-300" },
-            dispensa: { titolo: "📦 Dispensa & Alimentari", colore: "border-amber-500/30 bg-amber-950/10 text-amber-300" },
-            igiene: { titolo: "🧼 Igiene & Cura Casa", colore: "border-purple-500/30 bg-purple-950/10 text-purple-300" },
-            generico: { titolo: "🛒 Altri Reparti", colore: "border-slate-600/40 bg-slate-900/40 text-slate-300" }
+            ortofrutta: { titolo: "🥦 Ortofrutta",            icona: "🥦", colore: "border-emerald-500/30 bg-emerald-950/10 text-emerald-300" },
+            macelleria: { titolo: "🥩 Macelleria & Pescheria", icona: "🥩", colore: "border-rose-500/30 bg-rose-950/10 text-rose-300" },
+            frigo:      { titolo: "🧀 Banco Frigo & Latticini", icona: "🧀", colore: "border-cyan-500/30 bg-cyan-950/10 text-cyan-300" },
+            dispensa:   { titolo: "📦 Dispensa & Alimentari",   icona: "📦", colore: "border-amber-500/30 bg-amber-950/10 text-amber-300" },
+            igiene:     { titolo: "🧼 Igiene & Cura Casa",      icona: "🧼", colore: "border-purple-500/30 bg-purple-950/10 text-purple-300" },
+            generico:   { titolo: "🛒 Altri Reparti",           icona: "🛒", colore: "border-slate-600/40 bg-slate-900/40 text-slate-300" }
         };
 
         let listaSpesa = [];
 
-        const container = document.getElementById('departments-container');
-        const formItem = document.getElementById('form-item');
-        const inputName = document.getElementById('item-name');
-        const textareaBulk = document.getElementById('bulk-text');
-        const btnBulkAdd = document.getElementById('btn-bulk-add');
-        const statCount = document.getElementById('stat-count');
+        const container           = document.getElementById('departments-container');
+        const formItem            = document.getElementById('form-item');
+        const inputName           = document.getElementById('item-name');
+        const textareaBulk        = document.getElementById('bulk-text');
+        const btnBulkAdd          = document.getElementById('btn-bulk-add');
+        const statCount           = document.getElementById('stat-count');
+        const saveListNameInput   = document.getElementById('save-list-name');
+        const btnSaveList         = document.getElementById('btn-save-list');
+        const savedListsContainer = document.getElementById('saved-lists-container');
+        const savedListsCount     = document.getElementById('saved-lists-count');
 
-        // Algoritmo di smistamento semantico della stringa
+        // ─── SMISTAMENTO ──────────────────────────────────────────────────
         function rilevaReparto(nomeProdotto) {
             const testo = nomeProdotto.toLowerCase();
-
-            // Cicla sulle categorie del dizionario per trovare corrispondenze nelle sottostringhe
             for (let chiave in dizionarioReparti) {
-                if (dizionarioReparti[chiave].some(parola => testo.includes(parola))) {
-                    return chiave;
-                }
+                if (dizionarioReparti[chiave].some(p => testo.includes(p))) return chiave;
             }
-            return 'generico'; // Se non trova nulla, lo sposta nel reparto jolly
+            return 'generico';
         }
 
-        // Renderizza a schermo i blocchi bento divisi per reparto
+        // ─── SPOSTA REPARTO ────────────────────────────────────────────────
+        // Cambia il reparto manuale di un item e re-renderizza
+        window.spostaReparto = function(id, nuovoReparto) {
+            const item = listaSpesa.find(i => i.id === id);
+            if (!item) return;
+            item.reparto = nuovoReparto;
+            renderizzaSpesa();
+        };
+
+        // ─── RENDER SPESA ─────────────────────────────────────────────────
         function renderizzaSpesa() {
             container.innerHTML = '';
 
             if (listaSpesa.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-2 text-center py-16 bg-slate-900/20 rounded-2xl border border-dashed border-slate-700/60 text-slate-500 text-xs">
-                        La lista è vuota. Scrivi a sinistra per pianificare la spesa!
-                    </div>
-                `;
+                    <div class="col-span-2 text-center py-16 bg-slate-900/20 rounded-2xl border border-dashed border-slate-700/60 text-slate-500 text-sm">
+                        Lista vuota. Scrivi i prodotti a sinistra! 🛒
+                    </div>`;
                 statCount.innerText = "0";
                 localStorage.setItem('smartshopping_lista', JSON.stringify([]));
                 return;
             }
 
-            // Raggruppa i prodotti per reparto corrente
+            // Raggruppa per reparto effettivo
             const raggruppati = {};
             listaSpesa.forEach(item => {
-                if (!raggruppati[item.reparto]) raggruppati[item.reparto] = [];
-                raggruppati[item.reparto].push(item);
+                const rep = item.reparto || 'generico';
+                if (!raggruppati[rep]) raggruppati[rep] = [];
+                raggruppati[rep].push(item);
             });
 
-            // Costruisce una card per ogni reparto che contiene almeno un prodotto
+            // Opzioni select per riassegnazione
+            const opzioniSelect = Object.entries(infoReparti).map(([key, info]) =>
+                `<option value="${key}">${info.icona} ${info.titolo.replace(/^[^\s]+\s/, '')}</option>`
+            ).join('');
+
             Object.keys(infoReparti).forEach(repChiave => {
                 const elementiReparto = raggruppati[repChiave] || [];
-                if (elementiReparto.length === 0) return; // Salta i reparti vuoti
+                if (elementiReparto.length === 0) return;
 
                 const repInfo = infoReparti[repChiave];
                 const cardReparto = document.createElement('div');
-                cardReparto.className = `border rounded-2xl p-4 flex flex-col justify-between gap-3 ${repInfo.colore}`;
+                cardReparto.className = `border rounded-2xl p-4 ${repInfo.colore}`;
 
-                let htmlProdotti = `<ul class="space-y-1.5 text-xs text-slate-200">`;
-
+                let htmlProdotti = '';
                 elementiReparto.forEach(prod => {
-                    const stileTestoSpuntato = prod.spuntato ? 'line-through text-slate-500 decoration-slate-600 font-normal' : 'font-semibold text-slate-200';
                     htmlProdotti += `
-                        <li class="flex justify-between items-center gap-2 group/item">
-                            <label class="flex items-center gap-2 min-w-0 flex-1 cursor-pointer select-none">
-                                <input type="checkbox" ${prod.spuntato ? 'checked' : ''} onchange="toggleSpunta(${prod.id})" class="w-3.5 h-3.5 rounded border-slate-700 accent-lime-500 shrink-0 cursor-pointer">
-                                <span class="truncate ${stileTestoSpuntato}">${prod.nome}</span>
-                            </label>
-                            <button onclick="eliminaProdotto(${prod.id})" class="text-slate-600 hover:text-rose-400 text-[10px] opacity-0 group-hover/item:opacity-100 transition-opacity px-1 cursor-pointer">✕</button>
-                        </li>
+                        <div class="item-row">
+                            <input type="checkbox" class="item-cb" ${prod.spuntato ? 'checked' : ''}
+                                onchange="toggleSpunta(${prod.id})">
+                            <span class="item-label ${prod.spuntato ? 'spuntato' : ''}">${prod.nome}</span>
+                            <select class="reparto-sel" onchange="spostaReparto(${prod.id}, this.value)" title="Cambia reparto">
+                                ${Object.entries(infoReparti).map(([k, v]) =>
+                                    `<option value="${k}" ${k === prod.reparto ? 'selected' : ''}>${v.icona}</option>`
+                                ).join('')}
+                            </select>
+                            <button class="btn-del" onclick="eliminaProdotto(${prod.id})" aria-label="Rimuovi">×</button>
+                        </div>
                     `;
                 });
-                htmlProdotti += `</ul>`;
 
                 cardReparto.innerHTML = `
-                    <div>
-                        <h4 class="text-xs font-black uppercase tracking-wider mb-2.5 pb-1 border-b border-current/10">${repInfo.titolo}</h4>
-                        ${htmlProdotti}
-                    </div>
+                    <h4 class="text-xs font-black uppercase tracking-wider mb-2 pb-1.5 border-b border-current/10">${repInfo.titolo}</h4>
+                    <div>${htmlProdotti}</div>
                 `;
                 container.appendChild(cardReparto);
             });
 
-            // Conta quanti prodotti totali ci sono
             statCount.innerText = listaSpesa.length;
             localStorage.setItem('smartshopping_lista', JSON.stringify(listaSpesa));
         }
 
-        // Inserimento singolo tramite form principale
+        // ─── AGGIUNTA ─────────────────────────────────────────────────────
         formItem.addEventListener('submit', (e) => {
             e.preventDefault();
             const nome = inputName.value.trim();
             if (!nome) return;
-
-            listaSpesa.push({
-                id: Date.now(),
-                nome: nome,
-                reparto: rilevaReparto(nome),
-                spuntato: false
-            });
-
+            listaSpesa.push({ id: Date.now(), nome, reparto: rilevaReparto(nome), spuntato: false });
             inputName.value = '';
             renderizzaSpesa();
         });
 
-        // Inserimento multiplo di massa (separato da virgole o a capo)
         btnBulkAdd.addEventListener('click', () => {
-            const testoElenco = textareaBulk.value.trim();
-            if (!testoElenco) return;
-
-            // Divide le righe sia per virgola che per invio a capo
-            const elementiSmistati = testoElenco.split(/[\n,]+/).map(str => str.trim()).filter(str => str.length > 0);
-
-            elementiSmistati.forEach((nome, i) => {
-                listaSpesa.push({
-                    id: Date.now() + i, // Evita ID identici generati nello stesso millisecondo
-                    nome: nome,
-                    reparto: rilevaReparto(nome),
-                    spuntato: false
-                });
+            const testo = textareaBulk.value.trim();
+            if (!testo) return;
+            const elementi = testo.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
+            elementi.forEach((nome, i) => {
+                listaSpesa.push({ id: Date.now() + i, nome, reparto: rilevaReparto(nome), spuntato: false });
             });
-
             textareaBulk.value = '';
             renderizzaSpesa();
         });
 
-        // FUNZIONI DI GESTIONE STATO ELEMENTI
-        window.toggleSpunta = function (id) {
-            const index = listaSpesa.findIndex(item => item.id === id);
-            if (index !== -1) {
-                listaSpesa[index].spuntato = !listaSpesa[index].spuntato;
-                renderizzaSpesa();
-            }
+        window.toggleSpunta = function(id) {
+            const item = listaSpesa.find(i => i.id === id);
+            if (item) { item.spuntato = !item.spuntato; renderizzaSpesa(); }
         };
 
-        window.eliminaProdotto = function (id) {
-            listaSpesa = listaSpesa.filter(item => item.id !== id);
+        window.eliminaProdotto = function(id) {
+            listaSpesa = listaSpesa.filter(i => i.id !== id);
             renderizzaSpesa();
         };
 
         document.getElementById('btn-clear-all').addEventListener('click', () => {
-            if (confirm("Vuoi cancellare definitivamente tutti gli elementi della lista della spesa attuale?")) {
-                listaSpesa = [];
-                renderizzaSpesa();
-            }
+            if (confirm("Svuotare tutta la lista?")) { listaSpesa = []; renderizzaSpesa(); }
         });
 
-        // Caricamento dei dati pregressi dal database locale del browser
+        // ─── LISTE SALVATE ─────────────────────────────────────────────────
+        function caricaListeSalvate() {
+            return JSON.parse(localStorage.getItem('smartshopping_liste_salvate') || '[]');
+        }
+        function salvaListeSalvate(liste) {
+            localStorage.setItem('smartshopping_liste_salvate', JSON.stringify(liste));
+        }
+
+        btnSaveList.addEventListener('click', () => {
+            const nome = saveListNameInput.value.trim();
+            if (!nome) { alert('Inserisci un nome per la lista.'); return; }
+            if (listaSpesa.length === 0) { alert('La lista è vuota. Aggiungi prodotti prima.'); return; }
+
+            let liste = caricaListeSalvate();
+            const esistente = liste.findIndex(l => l.nome.toLowerCase() === nome.toLowerCase());
+
+            const nuovaLista = {
+                id: esistente !== -1 ? liste[esistente].id : Date.now(),
+                nome,
+                prodotti: listaSpesa.map(item => ({ id: item.id, nome: item.nome, reparto: item.reparto, spuntato: false })),
+                dataCreazione: new Date().toLocaleDateString('it-IT')
+            };
+
+            if (esistente !== -1) {
+                if (!confirm(`Sovrascrivere "${nome}"?`)) return;
+                liste[esistente] = nuovaLista;
+            } else {
+                liste.push(nuovaLista);
+            }
+
+            salvaListeSalvate(liste);
+            renderListeSalvate();
+            saveListNameInput.value = '';
+
+            const orig = btnSaveList.innerHTML;
+            btnSaveList.innerHTML = '✅';
+            setTimeout(() => { btnSaveList.innerHTML = orig; }, 1500);
+        });
+
+        window.caricaLista = function(id) {
+            const lista = caricaListeSalvate().find(l => l.id === id);
+            if (!lista) return;
+            listaSpesa = lista.prodotti.map(p => ({ ...p, id: Date.now() + Math.random(), spuntato: false }));
+            renderizzaSpesa();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.aggiungiLista = function(id) {
+            const lista = caricaListeSalvate().find(l => l.id === id);
+            if (!lista) return;
+            listaSpesa = [...listaSpesa, ...lista.prodotti.map(p => ({ ...p, id: Date.now() + Math.random(), spuntato: false }))];
+            renderizzaSpesa();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.eliminaLista = function(id) {
+            salvaListeSalvate(caricaListeSalvate().filter(l => l.id !== id));
+            renderListeSalvate();
+        };
+
+        function renderListeSalvate() {
+            const liste = caricaListeSalvate();
+            savedListsCount.innerText = `${liste.length} list${liste.length === 1 ? 'a' : 'e'}`;
+
+            if (liste.length === 0) {
+                savedListsContainer.innerHTML = `<div class="text-center text-slate-600 italic text-xs py-6 col-span-full">Nessuna lista salvata ancora.</div>`;
+                return;
+            }
+
+            savedListsContainer.innerHTML = liste.map(l => {
+                const repartiPresenti = [...new Set(l.prodotti.map(p => p.reparto))];
+                const icone = repartiPresenti.map(r => infoReparti[r]?.icona || '🛒').join(' ');
+                return `
+                <div class="bg-slate-900/60 border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-3 active:border-lime-500/40 transition-colors">
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-sm font-bold text-white truncate">${l.nome}</h4>
+                            <p class="text-[11px] text-slate-400 mt-0.5">${l.prodotti.length} prodotti &nbsp;${icone}</p>
+                            <p class="text-[10px] text-slate-600">Salvata il ${l.dataCreazione}</p>
+                        </div>
+                        <button onclick="eliminaLista(${l.id})" class="text-slate-600 active:text-rose-400 text-xl font-bold cursor-pointer shrink-0 p-1 min-w-[36px] min-h-[36px] flex items-center justify-center">×</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="caricaLista(${l.id})" class="bg-lime-950/40 active:bg-lime-900/60 text-lime-400 border border-lime-500/20 text-xs font-bold py-3 rounded-xl transition-colors cursor-pointer active:scale-95">
+                            📋 Carica
+                        </button>
+                        <button onclick="aggiungiLista(${l.id})" class="bg-slate-800 active:bg-slate-700 text-slate-300 text-xs font-bold py-3 rounded-xl transition-colors cursor-pointer active:scale-95">
+                            ➕ Aggiungi
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ─── INIT ─────────────────────────────────────────────────────────
         const datiSalvati = localStorage.getItem('smartshopping_lista');
         if (datiSalvati) {
             listaSpesa = JSON.parse(datiSalvati);
-            // Rimuove gli elementi di default se presenti
-            const defaultNomi = ["Mele fuji", "Petto di pollo", "Latte parzialmente scremato", "Pasta integrale", "Detersivo piatti"];
+            const defaultNomi = ["Mele fuji","Petto di pollo","Latte parzialmente scremato","Pasta integrale","Detersivo piatti"];
             listaSpesa = listaSpesa.filter(item => !defaultNomi.includes(item.nome));
         }
 
         renderizzaSpesa();
+        renderListeSalvate();
     </script>
 
-    <!-- Registrazione Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('../sw.js')
-                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
-                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+                    .then(reg => console.log('SW:', reg.scope))
+                    .catch(err => console.error('SW err:', err));
             });
         }
     </script>
 </body>
-
 </html>

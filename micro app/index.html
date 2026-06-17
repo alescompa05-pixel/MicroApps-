@@ -85,7 +85,59 @@
             background: rgba(30, 41, 59, 0.6);
             box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.8), 0 0 25px -5px rgba(59, 130, 246, 0.15);
         }
+
+        /* ── MOBILE HUB SPECIFICO ─────────────────────── */
+        /* Feedback tattile card su touch */
+        .glass-card:active {
+            background: rgba(30, 41, 59, 0.7);
+            transform: scale(0.985);
+        }
+
+        /* Griglia 2 colonne da 480px */
+        @media (min-width: 480px) and (max-width: 639px) {
+            #apps-container, #favs-grid, #active-widgets-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+
+        /* Card più compatta su mobile stretto */
+        @media (max-width: 479px) {
+            .glass-card { padding: 14px !important; }
+            .glass-card h3 { font-size: 14px !important; }
+            .glass-card p { font-size: 11px !important; }
+        }
+
+        /* Filtri scroll orizzontale su mobile */
+        @media (max-width: 768px) {
+            #filters-container {
+                mask-image: linear-gradient(to right, transparent 0%, black 5%, black 90%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 90%, transparent 100%);
+            }
+
+            /* Widget section — stack su mobile */
+            #active-widgets-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Sezione ricerca piena larghezza su mobile */
+            #search-input {
+                font-size: 16px !important;
+            }
+
+            /* Stats box ridotte su mobile */
+            header .bg-slate-900\/60 {
+                padding: 10px 16px;
+            }
+        }
+
+        /* iOS safe area bottom (home indicator) */
+        @supports (padding: max(0px)) {
+            body {
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+        }
     </style>
+    <link rel="stylesheet" href="./mobile.css">
 </head>
 
 <body
@@ -105,10 +157,10 @@
     </div>
 
     <!-- Container Centrale -->
-    <div class="max-w-6xl w-full mx-auto px-4 md:px-8 py-8 md:py-16 flex-grow">
+    <div class="max-w-6xl w-full mx-auto px-4 md:px-8 py-6 md:py-16 flex-grow">
 
         <!-- Header -->
-        <header class="mb-12 text-center md:text-left">
+        <header class="mb-8 md:mb-12 text-center md:text-left">
             <div class="flex items-center justify-center md:justify-start gap-3 mb-4">
                 <span
                     class="text-2xl inline-flex items-center justify-center bg-blue-500/10 text-blue-400 p-2 rounded-xl border border-blue-500/20 shadow-lg shadow-blue-500/5">
@@ -121,10 +173,10 @@
             </div>
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div>
-                    <h2 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-none">
+                    <h2 class="text-3xl md:text-6xl font-extrabold text-white tracking-tight leading-none">
                         Micro<span class="text-blue-500">Apps</span> Suite
                     </h2>
-                    <p class="text-slate-400 text-sm md:text-base mt-3 max-w-xl leading-relaxed">
+                    <p class="text-slate-400 text-sm mt-2 max-w-xl leading-relaxed">
                         Collezione curata di strumenti intelligenti e pronti all'uso per ottimizzare finanze, studio,
                         salute e lavoro quotidiano. Interamente locali, veloci e privati.
                     </p>
@@ -148,7 +200,7 @@
 
         <!-- Barra di Controllo: Ricerca & Filtri (Bento Style) -->
         <section
-            class="mb-10 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 md:p-6 backdrop-blur-md space-y-4">
+            class="mb-8 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-3 md:p-6 backdrop-blur-md space-y-3">
             <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
                 <!-- Ricerca Integrata -->
                 <div class="relative w-full md:w-80">
@@ -159,7 +211,7 @@
                         class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-base md:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all">
                 </div>
                 <!-- Filtri Categoria -->
-                <div class="flex flex-wrap gap-2 w-full md:w-auto justify-center md:justify-end" id="filters-container">
+                <div class="flex gap-2 w-full md:w-auto justify-start md:justify-end overflow-x-auto pb-1 snap-x snap-mandatory" id="filters-container" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;">
                     <!-- Generato Dinamicamente da JS -->
                 </div>
             </div>
@@ -184,7 +236,7 @@
                 <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Strumenti
                     Preferiti</h3>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="favs-grid">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="favs-grid">
                 <!-- Card Preferite Iniettate Qui -->
             </div>
             <div class="h-px bg-slate-800/60 my-10"></div>
@@ -197,7 +249,7 @@
                 <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Catalogo
                     Utility</h3>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="apps-container">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="apps-container">
                 <!-- Card Standard Iniettate Qui -->
             </div>
             <!-- Nessun Risultato Feedback -->
@@ -464,9 +516,9 @@
                 btn.innerText = cat;
 
                 if (categoriaAttiva === cat) {
-                    btn.className = "px-4 py-1.5 text-xs font-bold bg-blue-500 text-slate-950 rounded-lg cursor-pointer transition-all";
+                    btn.className = "px-4 py-2 text-xs font-bold bg-blue-500 text-slate-950 rounded-lg cursor-pointer transition-all snap-start whitespace-nowrap min-h-[36px]";
                 } else {
-                    btn.className = "px-4 py-1.5 text-xs font-medium text-slate-400 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer hover:border-slate-700 hover:text-slate-200 transition-all";
+                    btn.className = "px-4 py-2 text-xs font-medium text-slate-400 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer hover:border-slate-700 hover:text-slate-200 transition-all snap-start whitespace-nowrap min-h-[36px]";
                 }
 
                 btn.addEventListener('click', () => {
@@ -486,17 +538,17 @@
             const stellaTitolo = isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti';
 
             return `
-                <div data-app-title="${app.titolo}" onclick="navigaVerso(event, '${app.url}')" class="glass-card border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between h-full relative group hover:border-slate-700/60 transition-all duration-300 cursor-pointer">
+                <div data-app-title="${app.titolo}" onclick="navigaVerso(event, '${app.url}')" class="glass-card border border-slate-800/80 rounded-2xl p-4 md:p-6 flex flex-col justify-between h-full relative group hover:border-slate-700/60 transition-all duration-300 cursor-pointer active:scale-[0.98]">
                     
                     <!-- Bottone Preferiti (Star Icon) -->
-                    <button onclick="event.stopPropagation(); togglePreferito(event, '${app.titolo}')" class="absolute top-6 right-6 p-1.5 bg-slate-950/60 border border-slate-800/80 rounded-xl cursor-pointer hover:scale-105 transition-all z-20" title="${stellaTitolo}">
+                    <button onclick="event.stopPropagation(); togglePreferito(event, '${app.titolo}')" class="absolute top-3 right-3 md:top-6 md:right-6 p-2 bg-slate-950/60 border border-slate-800/80 rounded-xl cursor-pointer hover:scale-105 transition-all z-20 min-w-[40px] min-h-[40px]" title="${stellaTitolo}">
                         <i class="${stellaClasse} fa-star text-sm"></i>
                     </button>
 
                     <!-- Contenuto principale della Card -->
                     <div class="block relative h-full flex flex-col">
                         <div class="flex justify-between items-start mb-4">
-                            <div class="text-3xl bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 group-hover:scale-105 transition-transform duration-300">
+                            <div class="text-2xl md:text-3xl bg-slate-950/80 p-2.5 md:p-3 rounded-xl border border-slate-800/80 group-hover:scale-105 transition-transform duration-300">
                                 ${app.icona}
                             </div>
                         </div>
@@ -509,10 +561,10 @@
                                 <!-- Badge Live per Timer Attivo -->
                                 <div class="timer-badge-container hidden flex items-center"></div>
                             </div>
-                            <h3 class="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                            <h3 class="text-base md:text-lg font-bold text-white mb-1.5 group-hover:text-blue-400 transition-colors leading-snug">
                                 ${app.titolo}
                             </h3>
-                            <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                            <p class="text-slate-400 text-xs md:text-xs leading-relaxed mb-3">
                                 ${app.descrizione}
                             </p>
                             <!-- Contenitore Widget Interattivo -->

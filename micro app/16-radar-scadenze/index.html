@@ -30,6 +30,12 @@
             font-size: 16px !important;
         }
 </style>
+    <link rel="stylesheet" href="../mobile.css">
+    <style>
+        @supports (padding: max(0px)) {
+            body { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+        }
+    </style>
 </head>
 
 <body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
@@ -99,6 +105,15 @@
                         prepararti, comprare un regalo o completare il task.</span>
                 </div>
 
+                <!-- RICORRENZA -->
+                <div class="flex items-center gap-2.5 bg-violet-950/30 border border-violet-500/20 rounded-xl px-3 py-2.5">
+                    <input type="checkbox" id="event-recurring" class="w-4 h-4 accent-violet-500 cursor-pointer rounded">
+                    <div>
+                        <label for="event-recurring" class="text-[11px] font-bold text-violet-300 cursor-pointer block leading-none">♻️ Si ripete ogni anno automaticamente</label>
+                        <span class="text-[9px] text-slate-500">Per compleanni, anniversari, rinnovi annuali…</span>
+                    </div>
+                </div>
+
                 <button type="submit"
                     class="w-full bg-violet-600 hover:bg-violet-500 text-white font-black text-xs uppercase tracking-wider py-3 rounded-xl shadow-lg transition-all transform active:scale-[0.98] cursor-pointer">
                     ➕ Inserisci nel Radar
@@ -156,12 +171,14 @@
                 titolo: document.getElementById('event-title').value,
                 categoria: document.getElementById('event-category').value,
                 data: document.getElementById('event-date').value,
-                cuscinetto: parseInt(bufferInput.value)
+                cuscinetto: parseInt(bufferInput.value),
+                ricorrente: document.getElementById('event-recurring').checked
             };
             scadenze.push(nuovaScadenza);
             salvaERenderizza();
             form.reset();
             bufferVal.innerText = "5 giorni";
+            document.getElementById('event-recurring').checked = false;
         });
 
         function cancella(id) {
@@ -183,6 +200,27 @@
             container.innerHTML = '';
             const oggi = new Date();
             oggi.setHours(0, 0, 0, 0);
+
+            // Auto-rinnovo eventi ricorrenti scaduti
+            let aggiornato = false;
+            scadenze = scadenze.map(s => {
+                if (!s.ricorrente) return s;
+                const dataScadenza = new Date(s.data);
+                dataScadenza.setHours(0, 0, 0, 0);
+                if (dataScadenza < oggi) {
+                    // Avanza di un anno finché non è nel futuro
+                    const nuovaData = new Date(s.data);
+                    while (nuovaData < oggi) {
+                        nuovaData.setFullYear(nuovaData.getFullYear() + 1);
+                    }
+                    aggiornato = true;
+                    return { ...s, data: nuovaData.toISOString().split('T')[0] };
+                }
+                return s;
+            });
+            if (aggiornato) {
+                localStorage.setItem('microapps_radar', JSON.stringify(scadenze));
+            }
 
             // Ordina per urgenza (scadenze più vicine per prime)
             const scadenzeOrdinate = [...scadenze].sort((a, b) => new Date(a.data) - new Date(b.data));
@@ -228,9 +266,12 @@
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start gap-2 mb-1.5">
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-950/60 border border-slate-800">
-                                ${catSimboli[s.categoria]} ${s.categoria}
-                            </span>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-950/60 border border-slate-800">
+                                    ${catSimboli[s.categoria]} ${s.categoria}
+                                </span>
+                                ${s.ricorrente ? '<span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-violet-950/60 border border-violet-500/30 text-violet-400">♻️ Annuale</span>' : ''}
+                            </div>
                             <span class="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded ${statoColore.split(' ')[0]} bg-slate-950/30">
                                 ${badgeTesto}
                             </span>

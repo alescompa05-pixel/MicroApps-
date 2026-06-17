@@ -37,6 +37,12 @@
             opacity: 0.7;
         }
     </style>
+    <link rel="stylesheet" href="../mobile.css">
+    <style>
+        @supports (padding: max(0px)) {
+            body { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+        }
+    </style>
 </head>
 
 <body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4">
