@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗃️ LinkBox | Salva-Link Temporaneo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body
+    class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-10 px-4 flex items-center justify-center">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div
+        class="max-w-2xl w-full bg-slate-800 rounded-2xl shadow-2xl border border-slate-700/50 p-6 md:p-8 relative overflow-hidden">
+
+        <div class="mb-6">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-2xl">🗃️</span>
+                <h1 class="text-xs font-bold uppercase tracking-widest text-cyan-400">MicroUtility App</h1>
+            </div>
+            <h2 class="text-2xl font-black text-white">LinkBox</h2>
+            <p class="text-slate-400 text-xs mt-1">Incolla qui i link che vuoi leggere o usare più tardi. Svuota la
+                lista quando hai finito.</p>
+        </div>
+
+        <form id="form-link" class="space-y-3 bg-slate-900/40 p-4 rounded-xl border border-slate-700/50 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
+                <div class="md:col-span-8">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">URL da
+                        salvare *</label>
+                    <input type="url" id="link-url" placeholder="https://esempio.com/articolo-importante" required
+                        class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-400 font-medium">
+                </div>
+                <div class="md:col-span-4">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nota
+                        facoltativa</label>
+                    <input type="text" id="link-nota" placeholder="Es. Lavoro, Idea..."
+                        class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-400 font-medium">
+                </div>
+            </div>
+            <button type="submit"
+                class="w-full bg-cyan-600 hover:bg-cyan-500 active:scale-98 text-slate-950 font-black text-xs uppercase tracking-wider py-2.5 rounded-lg transition-all cursor-pointer">
+                ➕ Salva Link in Cassetta
+            </button>
+        </form>
+
+        <div>
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">I tuoi Link Salvati (<span
+                        id="contatore">0</span>)</h3>
+                <button id="btn-clear-all"
+                    class="text-[10px] text-slate-500 hover:text-rose-400 font-bold uppercase transition-colors hidden cursor-pointer">🗑️
+                    Svuota Tutto</button>
+            </div>
+
+            <div id="stato-vuoto"
+                class="text-center py-8 bg-slate-900/20 rounded-xl border border-dashed border-slate-700/60">
+                <p class="text-slate-500 text-sm">Nessun link salvato al momento. La cassetta è pulita!</p>
+            </div>
+
+            <div id="lista-links" class="space-y-2 max-h-80 overflow-y-auto pr-1">
+            </div>
+        </div>
+
+        <div class="text-center text-[10px] text-slate-500 border-t border-slate-700/50 pt-4 mt-6">
+            I link sono memorizzati esclusivamente sul tuo dispositivo.
+        </div>
+
+    </div>
+
+    <script>
+        let databaseLinks = [];
+
+        const formLink = document.getElementById('form-link');
+        const inputUrl = document.getElementById('link-url');
+        const inputNota = document.getElementById('link-nota');
+
+        const listaContainer = document.getElementById('lista-links');
+        const statoVuoto = document.getElementById('stato-vuoto');
+        const contatore = document.getElementById('contatore');
+        const btnClearAll = document.getElementById('btn-clear-all');
+
+        // Funzione helper per estrarre elegantemente il dominio pulito da un URL complesso
+        function estraiDominio(urlStringa) {
+            try {
+                const urlObj = new URL(urlStringa);
+                // Rimuove il "www." iniziale per avere un look più pulito
+                return urlObj.hostname.replace('www.', '');
+            } catch (e) {
+                return "Link Esterno";
+            }
+        }
+
+        // Renderizza la lista dei link sullo schermo
+        function renderLista() {
+            listaContainer.innerHTML = '';
+            contatore.innerText = databaseLinks.length;
+
+            if (databaseLinks.length === 0) {
+                statoVuoto.classList.remove('hidden');
+                btnClearAll.classList.add('hidden');
+                return;
+            }
+
+            statoVuoto.classList.add('hidden');
+            btnClearAll.classList.remove('hidden');
+
+            databaseLinks.forEach(item => {
+                const dominio = estraiDominio(item.url);
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-900/60 border border-slate-700/40 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-slate-600 transition-all group";
+
+                card.innerHTML = `
+                    <div class="flex-1 min-w-0 w-full">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-bold text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-900/50 uppercase tracking-wide truncate max-w-[150px]">${dominio}</span>
+                            ${item.nota ? `<span class="text-[11px] font-semibold text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[200px]">${item.nota}</span>` : ''}
+                        </div>
+                        <p class="text-xs text-slate-400 truncate w-full group-hover:text-slate-300 font-mono select-all">${item.url}</p>
+                    </div>
+                    
+                    <div class="flex gap-1.5 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
+                        <a href="${item.url}" target="_blank" class="bg-slate-800 hover:bg-cyan-600 hover:text-slate-950 p-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 flex-1 sm:flex-initial">
+                            🚀 Apri
+                        </a>
+                        <button onclick="copiaLink('${item.url}', this)" class="bg-slate-800 hover:bg-slate-700 p-2 rounded-lg text-xs transition-all flex items-center justify-center flex-1 sm:flex-initial" title="Copia link negli appunti">
+                            📋
+                        </button>
+                        <button onclick="rimuoviLink(${item.id})" class="bg-slate-800 hover:bg-rose-950/40 text-slate-500 hover:text-rose-400 p-2 rounded-lg text-xs transition-all flex items-center justify-center flex-1 sm:flex-initial">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+                listaContainer.appendChild(card);
+            });
+
+            // Salva lo stato aggiornato nel browser
+            localStorage.setItem('linkbox_salvati', JSON.stringify(databaseLinks));
+        }
+
+        // Gestione inserimento nuovo link tramite form
+        formLink.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            let url = inputUrl.value.trim();
+            // Trucchetto UX: se l'utente dimentica di scrivere http:// o https:// lo aggiungiamo noi
+            if (!/^https?:\/\//i.test(url)) {
+                url = 'https://' + url;
+            }
+
+            const nuovoLink = {
+                id: Date.now(),
+                url: url,
+                nota: inputNota.value.trim()
+            };
+
+            databaseLinks.unshift(nuovoLink); // Aggiunge in cima alla lista
+            formLink.reset();
+            renderLista();
+        });
+
+        // Funzione per copiare l'URL negli appunti usando le API moderne del browser
+        function copiaLink(url, bottone) {
+            navigator.clipboard.writeText(url).then(() => {
+                const testoOriginale = bottone.innerText;
+                bottone.innerText = '✅';
+                setTimeout(() => {
+                    bottone.innerText = testoOriginale;
+                }, 1200);
+            });
+        }
+
+        // Rimuove un singolo link per ID
+        function rimuoviLink(id) {
+            databaseLinks = databaseLinks.filter(item => item.id !== id);
+            renderLista();
+        }
+
+        // Svuota completamente l'intera lista
+        btnClearAll.addEventListener('click', () => {
+            if (confirm("Sei sicuro di voler cancellare tutti i link salvati?")) {
+                databaseLinks = [];
+                renderLista();
+            }
+        });
+
+        // Caricamento e ripristino dati all'apertura della pagina
+        const datiSalvati = localStorage.getItem('linkbox_salvati');
+        if (datiSalvati) {
+            databaseLinks = JSON.parse(datiSalvati);
+        }
+
+        renderLista();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

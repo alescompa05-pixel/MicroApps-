@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Scratchpad | Multi-Appunti Volatile</title>
+    <!-- Tailwind CSS per il design -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex flex-col justify-between">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div class="max-w-5xl w-full mx-auto bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8">
+
+        <!-- HEADER -->
+        <div
+            class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8 border-b border-slate-700/40 pb-4">
+            <div>
+                <div class="flex items-center gap-1.5 mb-0.5">
+                    <span class="text-xl">📋</span>
+                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-cyan-400">MicroUtility App</h1>
+                </div>
+                <h2 class="text-2xl font-black text-white">Scratchpad Volatile</h2>
+                <p class="text-slate-400 text-xs mt-0.5">Appunti temporanei e indipendenti. Scrivi, copia e svuota al
+                    volo senza salvare file.</p>
+            </div>
+
+            <!-- TASTO RESET GENERALE -->
+            <button id="btn-clear-all"
+                class="text-[10px] bg-slate-900/60 hover:bg-rose-950/40 border border-slate-700/60 text-slate-400 hover:text-rose-400 px-3 py-2 rounded-xl font-bold uppercase tracking-wide transition-all cursor-pointer self-start sm:self-center">
+                🗑️ Svuota Tutti i Blocchi
+            </button>
+        </div>
+
+        <!-- BENTO GRID DEI 4 BLOCCHI -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- BLOCCO 1 -->
+            <div
+                class="bg-slate-900/40 border border-slate-700/40 rounded-2xl p-4 flex flex-col justify-between gap-3 group focus-within:border-cyan-500/50 transition-colors">
+                <div class="flex justify-between items-center gap-2">
+                    <input type="text" id="title-1" value="Appunti A"
+                        class="bg-transparent border-none text-sm font-bold text-slate-200 focus:text-white focus:outline-none w-2/3 truncate uppercase tracking-wider">
+                    <span id="counter-1" class="text-[9px] font-mono text-slate-500 font-bold">0 char</span>
+                </div>
+                <textarea id="pad-1" placeholder="Incolla o digita qui il tuo primo testo temporaneo..."
+                    class="w-full h-32 bg-slate-950/60 border border-slate-800 focus:border-slate-700 rounded-xl p-3 text-xs font-mono leading-relaxed text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-0 resize-none"></textarea>
+                <div class="flex gap-1 text-[10px] font-bold">
+                    <button data-id="1"
+                        class="btn-copy flex-1 bg-slate-800 hover:bg-cyan-600 hover:text-slate-950 text-slate-300 py-1.5 rounded-lg transition-all cursor-pointer">📋
+                        Copia</button>
+                    <button data-id="1"
+                        class="btn-paste bg-slate-800 hover:bg-slate-700 text-slate-400 px-2.5 rounded-lg transition-all cursor-pointer"
+                        title="Incolla dagli appunti di sistema">📥</button>
+                    <button data-id="1"
+                        class="btn-clear bg-slate-800 hover:bg-rose-950/40 text-slate-500 hover:text-rose-400 px-2.5 rounded-lg transition-all cursor-pointer">🗑️</button>
+                </div>
+            </div>
+
+            <!-- BLOCCO 2 -->
+            <div
+                class="bg-slate-900/40 border border-slate-700/40 rounded-2xl p-4 flex flex-col justify-between gap-3 group focus-within:border-cyan-500/50 transition-colors">
+                <div class="flex justify-between items-center gap-2">
+                    <input type="text" id="title-2" value="Appunti B"
+                        class="bg-transparent border-none text-sm font-bold text-slate-200 focus:text-white focus:outline-none w-2/3 truncate uppercase tracking-wider">
+                    <span id="counter-2" class="text-[9px] font-mono text-slate-500 font-bold">0 char</span>
+                </div>
+                <textarea id="pad-2" placeholder="Incolla o digita qui il tuo secondo testo temporaneo..."
+                    class="w-full h-32 bg-slate-950/60 border border-slate-800 focus:border-slate-700 rounded-xl p-3 text-xs font-mono leading-relaxed text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-0 resize-none"></textarea>
+                <div class="flex gap-1 text-[10px] font-bold">
+                    <button data-id="2"
+                        class="btn-copy flex-1 bg-slate-800 hover:bg-cyan-600 hover:text-slate-950 text-slate-300 py-1.5 rounded-lg transition-all cursor-pointer">📋
+                        Copia</button>
+                    <button data-id="2"
+                        class="btn-paste bg-slate-800 hover:bg-slate-700 text-slate-400 px-2.5 rounded-lg transition-all cursor-pointer"
+                        title="Incolla dagli appunti di sistema">📥</button>
+                    <button data-id="2"
+                        class="btn-clear bg-slate-800 hover:bg-rose-950/40 text-slate-500 hover:text-rose-400 px-2.5 rounded-lg transition-all cursor-pointer">🗑️</button>
+                </div>
+            </div>
+
+            <!-- BLOCCO 3 -->
+            <div
+                class="bg-slate-900/40 border border-slate-700/40 rounded-2xl p-4 flex flex-col justify-between gap-3 group focus-within:border-cyan-500/50 transition-colors">
+                <div class="flex justify-between items-center gap-2">
+                    <input type="text" id="title-3" value="Codici / ID"
+                        class="bg-transparent border-none text-sm font-bold text-slate-200 focus:text-white focus:outline-none w-2/3 truncate uppercase tracking-wider">
+                    <span id="counter-3" class="text-[9px] font-mono text-slate-500 font-bold">0 char</span>
+                </div>
+                <textarea id="pad-3" placeholder="Ottimo per stringhe di codice, link veloci o ID di tracciamento..."
+                    class="w-full h-32 bg-slate-950/60 border border-slate-800 focus:border-slate-700 rounded-xl p-3 text-xs font-mono leading-relaxed text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-0 resize-none"></textarea>
+                <div class="flex gap-1 text-[10px] font-bold">
+                    <button data-id="3"
+                        class="btn-copy flex-1 bg-slate-800 hover:bg-cyan-600 hover:text-slate-950 text-slate-300 py-1.5 rounded-lg transition-all cursor-pointer">📋
+                        Copia</button>
+                    <button data-id="3"
+                        class="btn-paste bg-slate-800 hover:bg-slate-700 text-slate-400 px-2.5 rounded-lg transition-all cursor-pointer"
+                        title="Incolla dagli appunti di sistema">📥</button>
+                    <button data-id="3"
+                        class="btn-clear bg-slate-800 hover:bg-rose-950/40 text-slate-500 hover:text-rose-400 px-2.5 rounded-lg transition-all cursor-pointer">🗑️</button>
+                </div>
+            </div>
+
+            <!-- BLOCCO 4 -->
+            <div
+                class="bg-slate-900/40 border border-slate-700/40 rounded-2xl p-4 flex flex-col justify-between gap-3 group focus-within:border-cyan-500/50 transition-colors">
+                <div class="flex justify-between items-center gap-2">
+                    <input type="text" id="title-4" value="Da Sistemare"
+                        class="bg-transparent border-none text-sm font-bold text-slate-200 focus:text-white focus:outline-none w-2/3 truncate uppercase tracking-wider">
+                    <span id="counter-4" class="text-[9px] font-mono text-slate-500 font-bold">0 char</span>
+                </div>
+                <textarea id="pad-4" placeholder="Incolla qui testi disordinati da impaginare o manipolare dopo..."
+                    class="w-full h-32 bg-slate-950/60 border border-slate-800 focus:border-slate-700 rounded-xl p-3 text-xs font-mono leading-relaxed text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-0 resize-none"></textarea>
+                <div class="flex gap-1 text-[10px] font-bold">
+                    <button data-id="4"
+                        class="btn-copy flex-1 bg-slate-800 hover:bg-cyan-600 hover:text-slate-950 text-slate-300 py-1.5 rounded-lg transition-all cursor-pointer">📋
+                        Copia</button>
+                    <button data-id="4"
+                        class="btn-paste bg-slate-800 hover:bg-slate-700 text-slate-400 px-2.5 rounded-lg transition-all cursor-pointer"
+                        title="Incolla dagli appunti di sistema">📥</button>
+                    <button data-id="4"
+                        class="btn-clear bg-slate-800 hover:bg-rose-950/40 text-slate-500 hover:text-rose-400 px-2.5 rounded-lg transition-all cursor-pointer">🗑️</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LOGICA DI TRACCIAMENTO ED EVENTI -->
+    <script>
+        const ids = ['1', '2', '3', '4'];
+
+        // Funzione per salvare testi e titoli nel localStorage
+        function salvaBlocco(id) {
+            const testo = document.getElementById(`pad-${id}`).value;
+            const titolo = document.getElementById(`title-${id}`).value;
+
+            localStorage.setItem(`scratchpad_testo_${id}`, testo);
+            localStorage.setItem(`scratchpad_titolo_${id}`, titolo);
+
+            // Aggiorna il contatore caratteri al volo
+            document.getElementById(`counter-${id}`).innerText = `${testo.length} char`;
+        }
+
+        // Funzione per ricaricare i dati salvati all'apertura
+        function caricaDati() {
+            ids.forEach(id => {
+                const txtArea = document.getElementById(`pad-${id}`);
+                const inputTitolo = document.getElementById(`title-${id}`);
+
+                const txtSalvato = localStorage.getItem(`scratchpad_testo_${id}`);
+                const titSalvato = localStorage.getItem(`scratchpad_titolo_${id}`);
+
+                if (txtSalvato !== null) txtArea.value = txtSalvato;
+                if (titSalvato !== null) inputTitolo.value = titSalvato;
+
+                // Calcola il conteggio iniziale dei caratteri
+                document.getElementById(`counter-${id}`).innerText = `${txtArea.value.length} char`;
+            });
+        }
+
+        // Configurazione dei listener su ciascun blocco
+        ids.forEach(id => {
+            const txtArea = document.getElementById(`pad-${id}`);
+            const inputTitolo = document.getElementById(`title-${id}`);
+
+            // Auto-salvataggio ad ogni lettera modificata o digitata
+            txtArea.addEventListener('input', () => salvaBlocco(id));
+            inputTitolo.addEventListener('input', () => salvaBlocco(id));
+        });
+
+        // ASSEGNAZIONE LOGICA AI PULSANTI AZIONE (COPIA, INCOLLA, SVUOTA)
+        document.addEventListener('click', (e) => {
+            // Intercetta il pulsante COPIA
+            if (e.target.classList.contains('btn-copy')) {
+                const id = e.target.getAttribute('data-id');
+                const testo = document.getElementById(`pad-${id}`).value;
+
+                if (testo.trim() !== "") {
+                    navigator.clipboard.writeText(testo).then(() => {
+                        const testoOriginale = e.target.innerText;
+                        e.target.innerText = "✅ Copiato!";
+                        setTimeout(() => e.target.innerText = testoOriginale, 1200);
+                    });
+                }
+            }
+
+            // Intercetta il pulsante INCOLLA (Sfrutta le API Clipboard del browser)
+            if (e.target.classList.contains('btn-paste')) {
+                const id = e.target.getAttribute('data-id');
+                const txtArea = document.getElementById(`pad-${id}`);
+
+                navigator.clipboard.readText().then(text => {
+                    txtArea.value += text; // Aggiunge in coda al testo esistente
+                    salvaBlocco(id);
+                }).catch(err => {
+                    console.warn("L'utente ha negato l'accesso agli appunti o l'API non è supportata da questo browser.");
+                });
+            }
+
+            // Intercetta il pulsante SVUOTA SINGOLO
+            if (e.target.classList.contains('btn-clear')) {
+                const id = e.target.getAttribute('data-id');
+                document.getElementById(`pad-${id}`).value = '';
+                salvaBlocco(id);
+            }
+        });
+
+        // Svuota completamente l'intera griglia
+        document.getElementById('btn-clear-all').addEventListener('click', () => {
+            if (confirm("Vuoi azzerare contemporaneamente il testo di tutti e 4 i blocchi?")) {
+                ids.forEach(id => {
+                    document.getElementById(`pad-${id}`).value = '';
+                    salvaBlocco(id);
+                });
+            }
+        });
+
+        // Esegui il caricamento di partenza
+        caricaDati();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

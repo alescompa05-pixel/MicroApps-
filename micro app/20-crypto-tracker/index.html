@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📈 Simple Ticker Tracker | MicroApps Suite</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
+
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="max-w-5xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8 space-y-6">
+
+        <!-- HEADER APPLICAZIONE -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-700/40 pb-4">
+            <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span class="text-xl">💰</span>
+                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Minimalist Market Watch
+                    </h1>
+                </div>
+                <h2 class="text-2xl font-black text-white">Simple Ticker Tracker</h2>
+                <p class="text-slate-400 text-xs mt-1">Crypto, Azioni ed ETF. Cerca per nome (es. "S&P 500", "Apple",
+                    "Bitcoin") e monitora i prezzi live.</p>
+            </div>
+
+            <!-- BARRA DI RICERCA INTELLIGENTE CON AUTOCOMPLETAMENTO -->
+            <div class="relative w-full md:w-80">
+                <input type="text" id="search-input" oninput="gestisciRicerca()"
+                    placeholder="Cerca azioni, ETF o crypto..."
+                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400">
+
+                <!-- MENU DI SUGGERIMENTO DROP DOWN -->
+                <div id="search-results"
+                    class="absolute left-0 right-0 top-full mt-1 bg-slate-950 border border-slate-700 rounded-xl shadow-2xl overflow-hidden hidden z-50 max-h-60 overflow-y-auto divide-y divide-slate-800">
+                </div>
+            </div>
+        </div>
+
+        <!-- GRIGLIA BENTO TICKERS -->
+        <div id="tickers-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+        <!-- FOOTER STATO -->
+        <div class="flex justify-between items-center text-[10px] text-slate-500 pt-2">
+            <span id="update-status">🔄 Recupero dati in corso...</span>
+            <span class="font-mono">Auto-refresh: 30s</span>
+        </div>
+    </div>
+
+    <script>
+        let watchlist = JSON.parse(localStorage.getItem('microapps_watchlist')) || [
+            { id: "bitcoin", tipo: "Crypto", label: "BTC", name: "Bitcoin" },
+            { id: "AAPL", tipo: "Azione", label: "AAPL", name: "Apple Inc." },
+            { id: "VUAA.MI", tipo: "ETF", label: "VUAA", name: "Vanguard S&P 500 UCITS ETF" }
+        ];
+
+        let debounceTimer;
+
+        function salvaWatchlist() {
+            localStorage.setItem('microapps_watchlist', JSON.stringify(watchlist));
+        }
+
+        function gestisciRicerca() {
+            clearTimeout(debounceTimer);
+            const query = document.getElementById('search-input').value.trim();
+            const resultsContainer = document.getElementById('search-results');
+
+            if (query.length < 2) {
+                resultsContainer.classList.add('hidden');
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                eseguiRicercaAPI(query);
+            }, 300);
+        }
+
+        async function eseguiRicercaAPI(query) {
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '<div class="p-3 text-[11px] text-slate-500 italic">Ricerca in corso...</div>';
+            resultsContainer.classList.remove('hidden');
+
+            let risultatiFinali = [];
+
+            try {
+                // Ricerca Azioni ed ETF (Yahoo Finance Search API)
+                const resStock = await fetch(`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=5&newsCount=0`);
+                const dataStock = await resStock.json();
+                if (dataStock.quotes) {
+                    dataStock.quotes.forEach(q => {
+                        let tipoLabel = "Azione";
+                        if (q.quoteType === "ETF") tipoLabel = "ETF";
+
+                        if (q.quoteType === "EQUITY" || q.quoteType === "ETF") {
+                            risultatiFinali.push({
+                                id: q.symbol,
+                                label: q.symbol.split('.')[0], // Pulisce suffissi di borsa tipo .MI per la label
+                                name: q.shortname || q.longname || q.symbol,
+                                tipo: tipoLabel
+                            });
+                        }
+                    });
+                }
+            } catch (e) { console.error("Errore ricerca Yahoo:", e); }
+
+            try {
+                // Ricerca Crypto (CoinGecko Search API)
+                const resCrypto = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`);
+                const dataCrypto = await resCrypto.json();
+                if (dataCrypto.coins) {
+                    dataCrypto.coins.slice(0, 3).forEach(c => {
+                        risultatiFinali.push({
+                            id: c.id,
+                            label: c.symbol.toUpperCase(),
+                            name: c.name,
+                            tipo: 'Crypto'
+                        });
+                    });
+                }
+            } catch (e) { console.error("Errore ricerca Crypto:", e); }
+
+            if (risultatiFinali.length === 0) {
+                resultsContainer.innerHTML = '<div class="p-3 text-[11px] text-slate-500 italic">Nessun risultato trovato.</div>';
+                return;
+            }
+
+            resultsContainer.innerHTML = '';
+            risultatiFinali.forEach(item => {
+                const row = document.createElement('div');
+                row.className = "p-3 hover:bg-slate-900 cursor-pointer flex justify-between items-center transition-colors";
+                const badgeColori = {
+                    'Crypto': 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                    'Azione': 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+                    'ETF': 'text-purple-400 bg-purple-500/10 border-purple-500/20'
+                };
+                row.innerHTML = `
+                    <div class="pr-4 overflow-hidden text-ellipsis whitespace-nowrap">
+                        <span class="text-xs font-bold text-white">${item.label}</span>
+                        <span class="text-[10px] text-slate-400 ml-1.5">${item.name}</span>
+                    </div>
+                    <span class="text-[9px] uppercase font-black px-1.5 py-0.5 rounded border shrink-0 ${badgeColori[item.tipo]}">${item.tipo}</span>
+                `;
+                row.onclick = () => {
+                    if (watchlist.some(t => t.id === item.id)) {
+                        alert(`${item.label} è già in watchlist.`);
+                        return;
+                    }
+                    watchlist.push(item);
+                    salvaWatchlist();
+                    document.getElementById('search-input').value = '';
+                    resultsContainer.classList.add('hidden');
+                    fetchDatiMercato();
+                };
+                resultsContainer.appendChild(row);
+            });
+        }
+
+        async function fetchDatiMercato() {
+            document.getElementById('update-status').innerText = "🔄 Aggiornamento in corso...";
+            const grid = document.getElementById('tickers-grid');
+
+            if (watchlist.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-xs text-slate-500">Cerca e aggiungi asset per popolare il tuo radar finanziario.</div>`;
+                document.getElementById('update-status').innerText = "💤 Nessun asset attivo";
+                return;
+            }
+
+            const cryptos = watchlist.filter(t => t.tipo === 'Crypto').map(t => t.id).join(',');
+            let datiCrypto = {};
+
+            if (cryptos) {
+                try {
+                    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptos}&vs_currencies=eur&include_24hr_change=true`);
+                    datiCrypto = await res.json();
+                } catch (e) { console.error("Errore mercati Crypto:", e); }
+            }
+
+            grid.innerHTML = '';
+
+            for (const asset of watchlist) {
+                let prezzo = "N/D";
+                let variazione = 0;
+                let isPositive = true;
+
+                if (asset.tipo === 'Crypto') {
+                    if (datiCrypto[asset.id] && datiCrypto[asset.id].eur !== undefined) {
+                        prezzo = datiCrypto[asset.id].eur.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+                        variazione = datiCrypto[asset.id].eur_24h_change || 0;
+                        isPositive = variazione >= 0;
+                    }
+                } else {
+                    // Gestisce Azioni ed ETF tramite Yahoo Finance Quote Endpoint
+                    try {
+                        const res = await fetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${asset.id}`);
+                        const data = await res.json();
+                        const result = data.quoteResponse.result[0];
+                        if (result) {
+                            const valutaSimbolo = result.currency === 'USD' ? '$' : (result.currency === 'EUR' ? '€' : result.currency);
+                            prezzo = result.regularMarketPrice.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ` ${valutaSimbolo}`;
+                            variazione = result.regularMarketChangePercent || 0;
+                            isPositive = variazione >= 0;
+                        }
+                    } catch (e) { console.error(`Errore mercato stock ${asset.id}:`, e); }
+                }
+
+                const coloreVar = isPositive ? 'text-emerald-400' : 'text-rose-500';
+                const segnoVar = isPositive ? '▲ +' : '▼ ';
+
+                const bentoBorder = asset.tipo === 'ETF' ? 'hover:border-purple-500/40' : (asset.tipo === 'Azione' ? 'hover:border-blue-500/40' : 'hover:border-amber-500/40');
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-950/80 border border-slate-700/40 rounded-2xl p-5 flex flex-col justify-between relative group transition-all ${bentoBorder}`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="overflow-hidden">
+                            <span class="text-[9px] font-black tracking-widest uppercase text-slate-500 block truncate">${asset.tipo} • ${asset.name}</span>
+                            <h3 class="text-xl font-black text-white tracking-tight">${asset.label}</h3>
+                        </div>
+                        <button onclick="rimuoviTicker('${asset.id}')" class="text-slate-600 hover:text-rose-400 text-xs font-bold transition-colors cursor-pointer opacity-0 group-hover:opacity-100 shrink-0">×</button>
+                    </div>
+                    
+                    <div class="my-5">
+                        <div class="text-3xl md:text-4xl font-black text-slate-100 tracking-tighter truncate">${prezzo}</div>
+                    </div>
+
+                    <div class="flex items-center gap-1 text-xs font-black tracking-tight ${coloreVar}">
+                        <span>${segnoVar}${variazione.toFixed(2)}%</span>
+                        <span class="text-[9px] font-bold uppercase text-slate-500 ml-1">24h</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+
+            document.getElementById('update-status').innerText = `✅ Aggiornato: ${new Date().toLocaleTimeString('it-IT')}`;
+        }
+
+        function rimuoviTicker(id) {
+            watchlist = watchlist.filter(t => t.id !== id);
+            salvaWatchlist();
+            fetchDatiMercato();
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#search-input') && !e.target.closest('#search-results')) {
+                document.getElementById('search-results').classList.add('hidden');
+            }
+        });
+
+        fetchDatiMercato();
+        setInterval(fetchDatiMercato, 30000);
+    </script>
+</body>
+
+</html>

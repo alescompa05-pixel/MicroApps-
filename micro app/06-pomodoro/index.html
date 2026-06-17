@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Focus | MicroPomodoro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body id="bg-theme"
+    class="bg-rose-950/20 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4 transition-colors duration-500">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div
+        class="max-w-md w-full bg-slate-800 rounded-2xl shadow-2xl border border-slate-700/50 p-6 md:p-8 text-center relative overflow-hidden">
+
+        <div class="mb-6">
+            <div class="flex items-center justify-center gap-2 mb-2">
+                <span id="header-emoji" class="text-2xl">⏱️</span>
+                <h1 class="text-xs font-bold uppercase tracking-widest text-rose-400" id="header-subtitle">MicroFocus
+                    App</h1>
+            </div>
+            <h2 class="text-2xl font-black text-white" id="state-title">Sessione di Focus</h2>
+        </div>
+
+        <div
+            class="flex justify-center gap-2 mb-8 bg-slate-900/60 p-1.5 rounded-xl border border-slate-700/60 text-xs font-bold">
+            <button id="mode-focus"
+                class="px-3 py-1.5 rounded-lg transition-all text-rose-400 bg-slate-800 shadow cursor-pointer">🎯
+                Focus</button>
+            <button id="mode-short"
+                class="px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white cursor-pointer">☕ Pausa
+                Corta</button>
+            <button id="mode-long"
+                class="px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white cursor-pointer">🌴 Pausa
+                Lunga</button>
+        </div>
+
+        <div class="mb-8 select-none">
+            <div class="text-7xl md:text-8xl font-black font-mono tracking-tight text-white drop-shadow-md mb-2"
+                id="timer-display">
+                25:00
+            </div>
+            <div class="flex justify-center gap-1.5 text-sm" id="streak-container">
+            </div>
+        </div>
+
+        <div class="flex gap-3 mb-4">
+            <button id="btn-start"
+                class="flex-1 bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-black text-sm uppercase tracking-wider py-3.5 rounded-xl shadow-lg transition-all cursor-pointer">
+                Avvia
+            </button>
+            <button id="btn-reset"
+                class="bg-slate-700 hover:bg-slate-600 active:scale-95 text-white font-bold text-sm px-5 rounded-xl border border-slate-600 transition-all cursor-pointer">
+                Reset
+            </button>
+        </div>
+
+        <div class="text-[10px] text-slate-500 border-t border-slate-700/50 pt-4 flex justify-between items-center">
+            <span>Ogni 4 sessioni: Pausa Lunga</span>
+            <button id="btn-clear-streak" class="hover:text-rose-400 transition-colors cursor-pointer">Azzera Cicli
+                (0)</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Minuti standard costanti
+        const MINUTI_FOCUS = 25;
+        const MINUTI_SHORT = 5;
+        const MINUTI_LONG = 15;
+
+        let modalitaCorrente = 'focus'; // 'focus', 'short', 'long'
+        let tempoRimanente = MINUTI_FOCUS * 60; // in secondi
+        let timerId = null;
+        let pomodoriCompletati = 0;
+
+        // Elementi DOM
+        const display = document.getElementById('timer-display');
+        const btnStart = document.getElementById('btn-start');
+        const btnReset = document.getElementById('btn-reset');
+        const stateTitle = document.getElementById('state-title');
+        const bgTheme = document.getElementById('bg-theme');
+        const subTitle = document.getElementById('header-subtitle');
+        const emojiHeader = document.getElementById('header-emoji');
+        const streakContainer = document.getElementById('streak-container');
+        const btnClearStreak = document.getElementById('btn-clear-streak');
+
+        const btnModeFocus = document.getElementById('mode-focus');
+        const btnModeShort = document.getElementById('mode-short');
+        const btnModeLong = document.getElementById('mode-long');
+
+        // Audio sintetizzato sicuro: viene istanziato SOLO al millesimo esatto del bisogno
+        function suona() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch (e) {
+                console.warn("Audio bloccato dal browser");
+            }
+        }
+
+        // Calcola e stampa i minuti sul display e sul titolo della scheda
+        function aggiornaDisplay() {
+            const min = Math.floor(tempoRimanente / 60);
+            const sec = tempoRimanente % 60;
+            const testo = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+
+            display.innerText = testo;
+
+            let tag = '🎯 Focus';
+            if (modalitaCorrente === 'short') tag = '☕ Pausa';
+            if (modalitaCorrente === 'long') tag = '🌴 Relax';
+            document.title = `(${testo}) ${tag}`;
+        }
+
+        // Cambia la modalità strutturale del timer
+        function impostaModalita(nuova) {
+            modalitaCorrente = nuova;
+
+            // Ferma eventuali cicli attivi
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+            }
+            btnStart.innerText = "Avvia";
+
+            // Pulisce le classi CSS attive dei tre bottoni
+            [btnModeFocus, btnModeShort, btnModeLong].forEach(b => {
+                b.className = "px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white cursor-pointer";
+            });
+
+            // Configura i tempi e la grafica a seconda dello stato
+            if (nuova === 'focus') {
+                tempoRimanente = MINUTI_FOCUS * 60;
+                btnModeFocus.className = "px-3 py-1.5 rounded-lg transition-all text-rose-400 bg-slate-800 shadow cursor-pointer";
+                stateTitle.innerText = "Sessione di Focus";
+                subTitle.innerText = "MicroFocus App";
+                subTitle.className = "text-xs font-bold uppercase tracking-widest text-rose-400";
+                btnStart.className = "flex-1 bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-black text-sm uppercase tracking-wider py-3.5 rounded-xl shadow-lg transition-all cursor-pointer";
+                bgTheme.className = "bg-rose-950/20 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4 transition-colors duration-500";
+                emojiHeader.innerText = "⏱️";
+            } else if (nuova === 'short') {
+                tempoRimanente = MINUTI_SHORT * 60;
+                btnModeShort.className = "px-3 py-1.5 rounded-lg transition-all text-emerald-400 bg-slate-800 shadow cursor-pointer";
+                stateTitle.innerText = "Pausa Corta";
+                subTitle.innerText = "Tempo di ricarica";
+                subTitle.className = "text-xs font-bold uppercase tracking-widest text-emerald-400";
+                btnStart.className = "flex-1 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black text-sm uppercase tracking-wider py-3.5 rounded-xl shadow-lg transition-all cursor-pointer";
+                bgTheme.className = "bg-emerald-950/20 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4 transition-colors duration-500";
+                emojiHeader.innerText = "☕";
+            } else if (nuova === 'long') {
+                tempoRimanente = MINUTI_LONG * 60;
+                btnModeLong.className = "px-3 py-1.5 rounded-lg transition-all text-sky-400 bg-slate-800 shadow cursor-pointer";
+                stateTitle.innerText = "Pausa Lunga";
+                subTitle.innerText = "Stacca completamente";
+                subTitle.className = "text-xs font-bold uppercase tracking-widest text-sky-400";
+                btnStart.className = "flex-1 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-black text-sm uppercase tracking-wider py-3.5 rounded-xl shadow-lg transition-all cursor-pointer";
+                bgTheme.className = "bg-sky-950/20 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4 transition-colors duration-500";
+                emojiHeader.innerText = "🌴";
+            }
+
+            aggiornaDisplay();
+        }
+
+        // Stampa i pallini rossi o vuoti in basso
+        function aggiornaGraficaCicli() {
+            let stringaCicli = '';
+            const bloccoCorrente = pomodoriCompletati % 4;
+
+            for (let i = 1; i <= 4; i++) {
+                if (i <= bloccoCorrente || (bloccoCorrente === 0 && pomodoriCompletati > 0 && modalitaCorrente !== 'focus')) {
+                    stringaCicli += `<span>🔴</span>`;
+                } else {
+                    stringaCicli += `<span>⭕</span>`;
+                }
+            }
+            streakContainer.innerHTML = stringaCicli;
+            btnClearStreak.innerText = `Azzera Cicli (${pomodoriCompletati})`;
+            localStorage.setItem('pomodoro_salvato_streak', pomodoriCompletati);
+        }
+
+        // Logica di switch automatico allo scadere dello zero
+        function timerScaduto() {
+            suona();
+
+            if (modalitaCorrente === 'focus') {
+                pomodoriCompletati++;
+                if (pomodoriCompletati % 4 === 0) {
+                    impostaModalita('long');
+                } else {
+                    impostaModalita('short');
+                }
+            } else {
+                impostaModalita('focus');
+            }
+            aggiornaGraficaCicli();
+        }
+
+        // Listener Pulsante Avvia / Pausa
+        btnStart.addEventListener('click', () => {
+            if (timerId) {
+                // Metti in pausa
+                clearInterval(timerId);
+                timerId = null;
+                btnStart.innerText = "Riprendi";
+            } else {
+                // Avvia conto alla rovescia reale
+                btnStart.innerText = "Pausa";
+                timerId = setInterval(() => {
+                    tempoRimanente--;
+                    aggiornaDisplay();
+
+                    if (tempoRimanente <= 0) {
+                        clearInterval(timerId);
+                        timerId = null;
+                        timerScaduto();
+                    }
+                }, 1000);
+            }
+        });
+
+        // Pulsante di Reset
+        btnReset.addEventListener('click', () => {
+            impostaModalita(modalitaCorrente);
+        });
+
+        // Pulsanti selettori manuali
+        btnModeFocus.addEventListener('click', () => impostaModalita('focus'));
+        btnModeShort.addEventListener('click', () => impostaModalita('short'));
+        btnModeLong.addEventListener('click', () => impostaModalita('long'));
+
+        // Reset dei cicli storici
+        btnClearStreak.addEventListener('click', () => {
+            if (confirm("Vuoi azzerare i cicli completati?")) {
+                pomodoriCompletati = 0;
+                aggiornaGraficaCicli();
+            }
+        });
+
+        // Avvio e recupero dati dal browser all'apertura
+        const streakRecuperato = localStorage.getItem('pomodoro_salvato_streak');
+        if (streakRecuperato) {
+            pomodoriCompletati = parseInt(streakRecuperato);
+        }
+
+        // Forza la configurazione di partenza
+        impostaModalita('focus');
+        aggiornaGraficaCicli();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

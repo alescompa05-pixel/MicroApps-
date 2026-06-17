@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore QR Code Wi-Fi</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Stile speciale per la stampa del badge */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #print-area,
+            #print-area * {
+                visibility: visible;
+            }
+
+            #print-area {
+                position: absolute;
+                left: 50%;
+                top: 40%;
+                transform: translate(-50%, -50%) scale(1.3);
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            #btn-print-zone {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div
+        class="max-w-4xl w-full bg-slate-800 rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden grid grid-cols-1 md:grid-cols-12">
+
+        <div
+            class="md:col-span-6 p-6 md:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-700/50">
+            <div>
+                <div class="flex items-center gap-2 mb-6">
+                    <span class="text-2xl">📶</span>
+                    <h1 class="text-xs font-bold uppercase tracking-widest text-emerald-400">MicroTech App</h1>
+                </div>
+                <h2 class="text-2xl font-black text-white mb-2">Wi-Fi QR Code</h2>
+                <p class="text-slate-400 text-sm mb-6">Genera un codice QR per far connettere i tuoi ospiti alla rete di
+                    casa all'istante, senza digitare la password.</p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Nome
+                            della Rete (SSID)</label>
+                        <input type="text" id="wifi-name" placeholder="Es. Wi-Fi_Casa_Rossi"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400 font-medium">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Password
+                            della Rete</label>
+                        <div class="relative">
+                            <input type="password" id="wifi-pass" placeholder="Inserisci la password"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400 font-medium">
+                            <button id="toggle-pass"
+                                class="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300 text-sm">👁️</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Tipo di
+                            Protezione</label>
+                        <select id="wifi-type"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400 font-medium">
+                            <option value="WPA">WPA / WPA2 / WPA3 (Standard)</option>
+                            <option value="WEP">WEP (Vecchio sistema)</option>
+                            <option value="nopass">Nessuna Password (Aperta)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 text-xs text-slate-500 mt-6 md:mt-0">
+                🔒 Privacy garantita: i dati non lasciano mai il tuo dispositivo.
+            </div>
+        </div>
+
+        <div class="md:col-span-6 bg-slate-850 p-6 md:p-8 flex flex-col items-center justify-center">
+
+            <div id="print-area"
+                class="bg-white text-slate-900 p-6 rounded-2xl shadow-xl border border-slate-200 flex flex-col items-center text-center max-w-[280px] w-full">
+                <span class="text-xs font-black uppercase tracking-widest text-emerald-600 mb-1">Connettiti al
+                    Wi-Fi</span>
+                <p id="badge-name" class="text-sm font-bold text-slate-500 mb-4 truncate w-full">Inserisci i dati...</p>
+
+                <div
+                    class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-center mb-4 min-h-[174px] min-w-[174px]">
+                    <div id="qrcode"></div>
+                </div>
+
+                <p class="text-[9px] text-slate-400 font-medium leading-tight">Inquadra il QR Code con la fotocamera
+                    dello smartphone per connetterti automaticamente.</p>
+            </div>
+
+            <div id="btn-print-zone" class="w-full max-w-[280px] mt-4">
+                <button id="btn-print" disabled
+                    class="w-full bg-slate-700 hover:bg-emerald-600 text-slate-400 hover:text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all cursor-not-allowed opacity-50 flex items-center justify-center gap-2 shadow-lg">
+                    🖨️ Stampa Cartellino
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const wifiName = document.getElementById('wifi-name');
+        const wifiPass = document.getElementById('wifi-pass');
+        const wifiType = document.getElementById('wifi-type');
+        const togglePass = document.getElementById('toggle-pass');
+
+        const badgeName = document.getElementById('badge-name');
+        const btnPrint = document.getElementById('btn-print');
+        const qrcodeContainer = document.getElementById('qrcode');
+
+        let qrCodeIstance = null;
+
+        // Mostra/Nascondi password al click sull'occhio
+        togglePass.addEventListener('click', () => {
+            if (wifiPass.type === 'password') {
+                wifiPass.type = 'text';
+                togglePass.innerText = '🙈';
+            } else {
+                wifiPass.type = 'password';
+                togglePass.innerText = '👁️';
+            }
+        });
+
+        // Funzione per generare la stringa di configurazione Wi-Fi standard dei QR Code
+        // Il formato universale è: WIFI:S:NomeRete;T:WPA;P:PasswordRete;;
+        function generaStringaWifi(ssid, password, protezione) {
+            let stringa = `WIFI:S:${ssid};`;
+            if (protezione !== 'nopass') {
+                stringa += `T:${protezione};P:${password};`;
+            } else {
+                stringa += `T:nopass;P:;`;
+            }
+            stringa += ';';
+            return stringa;
+        }
+
+        // Funzione per aggiornare il QR Code in tempo reale
+        function aggiornaQrCode() {
+            const ssid = wifiName.value.trim();
+            const password = wifiPass.value;
+            const protezione = wifiType.value;
+
+            // Se il nome della rete è vuoto, puliamo tutto e disattiviamo la stampa
+            if (ssid === '') {
+                qrcodeContainer.innerHTML = '';
+                badgeName.innerText = 'Inserisci i dati...';
+                btnPrint.disabled = true;
+                btnPrint.classList.add('cursor-not-allowed', 'opacity-50');
+                btnPrint.classList.remove('hover:bg-emerald-600', 'text-slate-400');
+                qrCodeIstance = null;
+                return;
+            }
+
+            // Attiviamo il bottone di stampa
+            btnPrint.disabled = false;
+            btnPrint.classList.remove('cursor-not-allowed', 'opacity-50');
+            btnPrint.classList.add('hover:bg-emerald-600', 'text-slate-400');
+
+            // Aggiorna il testo del nome della rete sul cartellino stampabile
+            badgeName.innerText = `Rete: ${ssid}`;
+
+            const testoQr = generaStringaWifi(ssid, password, protezione);
+
+            // Se il QR code esiste già, lo rigeneriamo cancellando il vecchio
+            qrcodeContainer.innerHTML = '';
+            qrCodeIstance = new QRCode(qrcodeContainer, {
+                text: testoQr,
+                width: 150,
+                height: 150,
+                colorDark: "#0f172a", // Slate 900 per massima leggibilità
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H // Alto livello di correzione errore
+            });
+        }
+
+        // Ascolta le modifiche sui campi per aggiornare il QR in tempo reale
+        wifiName.addEventListener('input', aggiornaQrCode);
+        wifiPass.addEventListener('input', aggiornaQrCode);
+        wifiType.addEventListener('change', aggiornaQrCode);
+
+        // Lancia la stampa del browser ottimizzata tramite i fogli di stile CSS incorporati
+        btnPrint.addEventListener('click', () => {
+            if (!btnPrint.disabled) {
+                window.print();
+            }
+        });
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

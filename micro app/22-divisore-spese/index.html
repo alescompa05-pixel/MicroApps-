@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 EquiSplit - Divisore Spese di Gruppo | MicroApps Suite</title>
+    <!-- Tailwind CSS v4 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Font Awesome per le icone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .font-mono-custom {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Scrollbar personalizzata estetica */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 99px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.6);
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.8), 0 0 25px -5px rgba(16, 185, 129, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center relative overflow-x-hidden selection:bg-emerald-500/30 selection:text-emerald-200">
+
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+    <!-- Sfondo Geometrico Dinamico -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20"></div>
+        <div class="absolute top-10 left-10 w-80 h-80 bg-emerald-500/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-10 right-10 w-80 h-80 bg-teal-500/10 rounded-full blur-[120px]"></div>
+    </div>
+
+    <!-- Container Centrale Bento -->
+    <div class="max-w-6xl w-full bg-slate-900/80 border border-slate-800/80 rounded-3xl shadow-2xl p-6 md:p-8 space-y-6 backdrop-blur-md relative">
+        
+        <!-- Header Applicazione -->
+        <div class="border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-1.5 mb-1">
+                <span class="text-xl">📊</span>
+                <h1 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 font-mono-custom">Finance & Sharing</h1>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">EquiSplit</h2>
+            <p class="text-slate-400 text-xs mt-1">Dividi le spese per viaggi, cene o convivenze in modo ottimale. L'algoritmo calcolerà il minor numero possibile di transazioni per pareggiare i conti.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- COLONNA DI DESTRA/CONFIGURAZIONE (lg:col-span-5) -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- SEZIONE MEMBRI -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-emerald-400"></i>
+                        1. Gestione Partecipanti
+                    </h3>
+                    
+                    <form onsubmit="aggiungiMembro(event)" class="flex gap-2">
+                        <input type="text" id="new-member-name" placeholder="Nome (es. Marco)" required
+                            class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                        <button type="submit"
+                            class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 rounded-xl cursor-pointer transition-colors flex items-center gap-1 shrink-0">
+                            Aggiungi
+                        </button>
+                    </form>
+
+                    <!-- Lista Membri -->
+                    <div id="members-list" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto pr-1">
+                        <!-- Generato da JS -->
+                    </div>
+                </div>
+
+                <!-- SEZIONE AGGIUNGI SPESA -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice-dollar text-emerald-400"></i>
+                        2. Registra Nuova Spesa
+                    </h3>
+
+                    <form id="expense-form" onsubmit="aggiungiSpesa(event)" class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Descrizione Spesa</label>
+                            <input type="text" id="expense-desc" placeholder="es. Spesa supermercato, Benzina..." required
+                                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Importo (€)</label>
+                                <input type="number" id="expense-amount" placeholder="0.00" min="0.01" step="0.01" required
+                                    class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors font-mono-custom font-bold">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Pagato da</label>
+                                <select id="expense-payer" required
+                                    class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                    <!-- Popolato da JS -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Diviso Tra</label>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="selezionaTuttiPartecipanti(true)" class="text-[9px] text-emerald-400 hover:underline cursor-pointer">Tutti</button>
+                                    <span class="text-[9px] text-slate-600">|</span>
+                                    <button type="button" onclick="selezionaTuttiPartecipanti(false)" class="text-[9px] text-slate-500 hover:underline cursor-pointer">Nessuno</button>
+                                </div>
+                            </div>
+                            <!-- Griglia Checkbox Partecipanti -->
+                            <div id="expense-participants" class="grid grid-cols-2 gap-2 bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 max-h-32 overflow-y-auto">
+                                <!-- Popolato da JS -->
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-lg transition-all transform active:scale-[0.98] cursor-pointer">
+                            ✨ Aggiungi Spesa
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- COLONNA DI SINISTRA/RISULTATI (lg:col-span-7) -->
+            <div class="lg:col-span-7 flex flex-col gap-6">
+
+                <!-- LISTA SPESE -->
+                <div class="bg-slate-950/40 border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between min-h-[200px]">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-emerald-400"></i>
+                                Registro Spese
+                            </h3>
+                            <button onclick="svuotaTutto()" class="text-[10px] text-slate-500 hover:text-rose-400 font-bold transition-colors cursor-pointer">
+                                Svuota tutto ×
+                            </button>
+                        </div>
+                        
+                        <div id="expenses-list" class="overflow-y-auto max-h-[180px] space-y-2 pr-1">
+                            <!-- Generato da JS -->
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800/60 flex justify-between items-center text-xs text-slate-400">
+                        <span>Spese registrate: <strong id="total-expenses-count" class="text-white">0</strong></span>
+                        <span>Totale transazioni: <strong id="total-expenses-sum" class="text-emerald-400 font-mono-custom font-bold">0.00 €</strong></span>
+                    </div>
+                </div>
+
+                <!-- BILANCI & TRANSAZIONI DI PAREGGIO -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 flex-1">
+                    
+                    <!-- BILANCI SINGOLI (md:col-span-5) -->
+                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 md:col-span-5 flex flex-col">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-scale-balanced text-emerald-400"></i>
+                            Stato Saldi
+                        </h3>
+                        <div id="balances-container" class="space-y-2.5 overflow-y-auto flex-1 max-h-[220px] pr-1">
+                            <!-- Generato da JS -->
+                        </div>
+                    </div>
+
+                    <!-- TRANSAZIONI DI PAREGGIO (md:col-span-7) -->
+                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 md:col-span-7 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-right-left text-emerald-400"></i>
+                                Pareggi Ottimizzati
+                            </h3>
+                            <div id="settlements-container" class="space-y-2 overflow-y-auto max-h-[170px] pr-1 font-mono-custom text-[11px]">
+                                <!-- Generato da JS -->
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                            <button id="btn-copy-summary" onclick="copiaResoconto()"
+                                class="w-full bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2">
+                                <i class="fa-regular fa-clipboard"></i>
+                                Copia Riepilogo per WhatsApp/Telegram
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // Stato dell'applicazione con valori dimostrativi di default se vuoto
+        let defaultData = {
+            members: ["Alice", "Bob", "Charlie", "Diana"],
+            expenses: [
+                { id: "e1", desc: "Cena di benvenuto", amount: 64.00, paidBy: "Alice", participants: ["Alice", "Bob", "Charlie", "Diana"] },
+                { id: "e2", desc: "Benzina per auto", amount: 35.00, paidBy: "Bob", participants: ["Alice", "Bob", "Charlie"] },
+                { id: "e3", desc: "Biglietti museo", amount: 20.00, paidBy: "Charlie", participants: ["Charlie", "Diana"] }
+            ]
+        };
+
+        let dbData = JSON.parse(localStorage.getItem('microapps_equisplit_data')) || defaultData;
+
+        // Salva nel localStorage
+        function salvaDB() {
+            localStorage.setItem('microapps_equisplit_data', JSON.stringify(dbData));
+        }
+
+        // Inizializzazione
+        function init() {
+            renderTutto();
+        }
+
+        // Aggiungi un nuovo partecipante al gruppo
+        function aggiungiMembro(e) {
+            e.preventDefault();
+            const input = document.getElementById('new-member-name');
+            const nome = input.value.trim();
+            if (!nome) return;
+
+            // Evita duplicati case-insensitive
+            if (dbData.members.some(m => m.toLowerCase() === nome.toLowerCase())) {
+                alert("Questo nome è già presente nel gruppo.");
+                return;
+            }
+
+            dbData.members.push(nome);
+            input.value = '';
+            salvaDB();
+            renderTutto();
+        }
+
+        // Rimuovi un partecipante
+        function rimuoviMembro(index) {
+            const nomeMembro = dbData.members[index];
+            
+            // Controlla se il membro ha pagato o partecipa a spese esistenti
+            const haSpesePagate = dbData.expenses.some(exp => exp.paidBy === nomeMembro);
+            const haSpeseComePartecipante = dbData.expenses.some(exp => exp.participants.includes(nomeMembro));
+
+            if (haSpesePagate || haSpeseComePartecipante) {
+                if (!confirm(`Attenzione: "${nomeMembro}" è coinvolto in alcune spese registrate. Rimuovendolo eliminerai le sue transazioni o la sua quota. Vuoi procedere?`)) {
+                    return;
+                }
+                // Rimuovi il membro come partecipante dalle spese o pulisci
+                dbData.expenses.forEach(exp => {
+                    exp.participants = exp.participants.filter(p => p !== nomeMembro);
+                });
+                // Rimuove spese interamente pagate da lui
+                dbData.expenses = dbData.expenses.filter(exp => exp.paidBy !== nomeMembro);
+                // Rimuove spese che non hanno più partecipanti
+                dbData.expenses = dbData.expenses.filter(exp => exp.participants.length > 0);
+            }
+
+            dbData.members.splice(index, 1);
+            salvaDB();
+            renderTutto();
+        }
+
+        // Seleziona o deseleziona tutti i partecipanti nel form
+        function selezionaTuttiPartecipanti(seleziona) {
+            const checkboxes = document.querySelectorAll('.participant-checkbox');
+            checkboxes.forEach(cb => cb.checked = seleziona);
+        }
+
+        // Aggiungi una spesa nel registro
+        function aggiungiSpesa(e) {
+            e.preventDefault();
+            const desc = document.getElementById('expense-desc').value.trim();
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const paidBy = document.getElementById('expense-payer').value;
+
+            // Raccogli partecipanti selezionati
+            const checkboxes = document.querySelectorAll('.participant-checkbox');
+            const participants = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    participants.push(cb.value);
+                }
+            });
+
+            if (participants.length === 0) {
+                alert("Seleziona almeno un partecipante che deve dividere la spesa.");
+                return;
+            }
+
+            const nuovaSpesa = {
+                id: 'exp_' + Date.now(),
+                desc,
+                amount,
+                paidBy,
+                participants
+            };
+
+            dbData.expenses.push(nuovaSpesa);
+            
+            // Resetta il form
+            document.getElementById('expense-form').reset();
+            selezionaTuttiPartecipanti(true); // Rimetti la selezione di default su tutti
+
+            salvaDB();
+            renderTutto();
+        }
+
+        // Rimuovi una singola spesa
+        function rimuoviSpesa(id) {
+            dbData.expenses = dbData.expenses.filter(exp => exp.id !== id);
+            salvaDB();
+            renderTutto();
+        }
+
+        // Svuota l'intero registro spese
+        function svuotaTutto() {
+            if (confirm("Vuoi cancellare tutte le spese registrate? I partecipanti rimarranno memorizzati.")) {
+                dbData.expenses = [];
+                salvaDB();
+                renderTutto();
+            }
+        }
+
+        // Renderizza tutte le componenti dell'interfaccia
+        function renderTutto() {
+            renderMembri();
+            renderFormInputs();
+            renderSpese();
+            calcolaPareggi();
+        }
+
+        // Visualizza i partecipanti (badge rimovibili)
+        function renderMembri() {
+            const list = document.getElementById('members-list');
+            list.innerHTML = '';
+
+            if (dbData.members.length === 0) {
+                list.innerHTML = `<span class="text-xs text-slate-500 italic">Nessun partecipante. Aggiungine uno sopra.</span>`;
+                return;
+            }
+
+            dbData.members.forEach((m, idx) => {
+                const badge = document.createElement('div');
+                badge.className = "flex items-center gap-1.5 px-3 py-1 bg-slate-900 border border-slate-800 rounded-full text-xs font-semibold text-slate-300";
+                badge.innerHTML = `
+                    <span>${m}</span>
+                    <button onclick="rimuoviMembro(${idx})" class="text-slate-500 hover:text-rose-400 font-bold pl-0.5 cursor-pointer" title="Rimuovi">×</button>
+                `;
+                list.appendChild(badge);
+            });
+        }
+
+        // Aggiorna select e checkbox nel form della nuova spesa
+        function renderFormInputs() {
+            const payerSelect = document.getElementById('expense-payer');
+            const participantsContainer = document.getElementById('expense-participants');
+
+            // Salva valore precedentemente selezionato se presente e ancora valido
+            const prevSelectedPayer = payerSelect.value;
+
+            payerSelect.innerHTML = '';
+            participantsContainer.innerHTML = '';
+
+            if (dbData.members.length === 0) {
+                const opt = document.createElement('option');
+                opt.innerText = "Nessuno";
+                payerSelect.appendChild(opt);
+                participantsContainer.innerHTML = `<span class="text-[10px] text-slate-600 col-span-2 italic text-center py-2">Nessun membro disponibile</span>`;
+                return;
+            }
+
+            dbData.members.forEach(m => {
+                // Popola select del pagatore
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.innerText = m;
+                if (m === prevSelectedPayer) {
+                    opt.selected = true;
+                }
+                payerSelect.appendChild(opt);
+
+                // Popola checkbox dei partecipanti
+                const wrapper = document.createElement('label');
+                wrapper.className = "flex items-center gap-2 text-xs text-slate-300 hover:text-white cursor-pointer select-none py-1";
+                wrapper.innerHTML = `
+                    <input type="checkbox" value="${m}" checked class="participant-checkbox accent-emerald-400 rounded cursor-pointer">
+                    <span class="truncate">${m}</span>
+                `;
+                participantsContainer.appendChild(wrapper);
+            });
+        }
+
+        // Visualizza il registro spese
+        function renderSpese() {
+            const container = document.getElementById('expenses-list');
+            const totalCountSpan = document.getElementById('total-expenses-count');
+            const totalSumSpan = document.getElementById('total-expenses-sum');
+
+            container.innerHTML = '';
+            
+            let sommaTotale = 0;
+            totalCountSpan.innerText = dbData.expenses.length;
+
+            if (dbData.expenses.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-600 italic text-xs py-12">Nessuna spesa inserita nel registro.</div>`;
+                totalSumSpan.innerText = "0.00 €";
+                return;
+            }
+
+            dbData.expenses.forEach(exp => {
+                sommaTotale += exp.amount;
+                const quota = (exp.amount / exp.participants.length).toFixed(2);
+                
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center gap-4 relative group";
+                card.innerHTML = `
+                    <div class="overflow-hidden flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-white truncate max-w-[180px] md:max-w-[240px]">${exp.desc}</span>
+                            <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border border-slate-800 bg-slate-950/60 text-slate-400 shrink-0">${exp.participants.length} persone</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1">
+                            Pagato da <span class="text-slate-300 font-bold">${exp.paidBy}</span> • ${quota}€ a testa
+                        </p>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 shrink-0">
+                        <span class="text-xs font-black text-emerald-400 font-mono-custom">${exp.amount.toFixed(2)} €</span>
+                        <button onclick="rimuoviSpesa('${exp.id}')" class="text-rose-400/50 hover:text-rose-400 font-bold px-1 text-xs cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" title="Elimina Spesa">×</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            totalSumSpan.innerText = sommaTotale.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+        }
+
+        // ALGORITMO DI PAREGGIO GREEDY E CALCOLO BILANCI
+        function calcolaPareggi() {
+            const balancesContainer = document.getElementById('balances-container');
+            const settlementsContainer = document.getElementById('settlements-container');
+
+            balancesContainer.innerHTML = '';
+            settlementsContainer.innerHTML = '';
+
+            if (dbData.members.length === 0) {
+                balancesContainer.innerHTML = `<span class="text-xs text-slate-600 italic">Nessun membro.</span>`;
+                settlementsContainer.innerHTML = `<div class="text-center text-slate-600 italic text-xs py-8">Nessun bilancio da calcolare.</div>`;
+                return;
+            }
+
+            // 1. Calcola il saldo netto di ognuno
+            // saldo = totale pagato - quota dovuta
+            const netBalances = {};
+            dbData.members.forEach(m => netBalances[m] = 0);
+
+            dbData.expenses.forEach(exp => {
+                // Aggiunge la somma al pagatore
+                if (netBalances[exp.paidBy] !== undefined) {
+                    netBalances[exp.paidBy] += exp.amount;
+                }
+
+                // Sottrae la quota a ciascun partecipante
+                const costPerPerson = exp.amount / exp.participants.length;
+                exp.participants.forEach(p => {
+                    if (netBalances[p] !== undefined) {
+                        netBalances[p] -= costPerPerson;
+                    }
+                });
+            });
+
+            // 2. Renderizza i saldi individuali a schermo
+            dbData.members.forEach(m => {
+                const bal = netBalances[m];
+                const balFormatted = bal.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+                
+                let textClass = "text-slate-300";
+                let sign = "";
+                let bgCircle = "bg-slate-900 border-slate-800";
+
+                if (bal > 0.005) {
+                    textClass = "text-emerald-400 font-bold";
+                    sign = "+";
+                    bgCircle = "bg-emerald-500/10 border-emerald-500/20";
+                } else if (bal < -0.005) {
+                    textClass = "text-rose-400 font-bold";
+                    bgCircle = "bg-rose-500/10 border-rose-500/20";
+                }
+
+                const item = document.createElement('div');
+                item.className = `flex justify-between items-center bg-slate-950/40 border ${bgCircle} p-2 px-3 rounded-xl`;
+                item.innerHTML = `
+                    <span class="text-xs font-semibold text-slate-200 truncate max-w-[100px]">${m}</span>
+                    <span class="text-xs font-mono-custom ${textClass}">${sign}${balFormatted}</span>
+                `;
+                balancesContainer.appendChild(item);
+            });
+
+            // 3. Algoritmo di pareggio Greedy
+            // Separiamo in Creditori (>0) e Debitori (<0)
+            const debtors = [];
+            const creditors = [];
+
+            for (const name in netBalances) {
+                const val = netBalances[name];
+                if (val > 0.005) {
+                    creditors.push({ name, amount: val });
+                } else if (val < -0.005) {
+                    debtors.push({ name, amount: Math.abs(val) });
+                }
+            }
+
+            // Ordina i debitori decrescenti (chi deve dare di più prima)
+            debtors.sort((a, b) => b.amount - a.amount);
+            // Ordina i creditori decrescenti (chi deve ricevere di più prima)
+            creditors.sort((a, b) => b.amount - a.amount);
+
+            const transfers = [];
+
+            let dIdx = 0;
+            let cIdx = 0;
+
+            // Eseguiamo il matching
+            while (dIdx < debtors.length && cIdx < creditors.length) {
+                const debtor = debtors[dIdx];
+                const creditor = creditors[cIdx];
+
+                // Importo da saldare è il minimo tra il debito e il credito
+                const settleAmount = Math.min(debtor.amount, creditor.amount);
+
+                if (settleAmount > 0.005) {
+                    transfers.push({
+                        from: debtor.name,
+                        to: creditor.name,
+                        amount: settleAmount
+                    });
+                }
+
+                // Sottrai l'importo saldato
+                debtor.amount -= settleAmount;
+                creditor.amount -= settleAmount;
+
+                // Sposta i puntatori se saldati completamente
+                if (debtor.amount < 0.005) dIdx++;
+                if (creditor.amount < 0.005) cIdx++;
+            }
+
+            // 4. Renderizza i pareggi a schermo
+            if (transfers.length === 0) {
+                settlementsContainer.innerHTML = `
+                    <div class="text-center text-slate-600 italic text-xs py-12 flex flex-col items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-check text-2xl text-emerald-500/40"></i>
+                        Conti in perfetto pari!
+                    </div>`;
+                document.getElementById('btn-copy-summary').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('btn-copy-summary').classList.remove('hidden');
+
+            transfers.forEach(t => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex items-center justify-between text-slate-300 gap-2";
+                card.innerHTML = `
+                    <div class="truncate flex items-center gap-1.5 flex-1">
+                        <span class="text-slate-400 font-bold truncate max-w-[80px] block">${t.from}</span>
+                        <span class="text-[9px] text-slate-500 font-bold uppercase px-1.5 py-0.5 rounded border border-slate-800/80 bg-slate-950 shrink-0">deve dare</span>
+                        <span class="text-slate-400 font-bold truncate max-w-[80px] block">${t.to}</span>
+                    </div>
+                    <span class="text-xs font-black text-emerald-400 shrink-0">${t.amount.toFixed(2)} €</span>
+                `;
+                settlementsContainer.appendChild(card);
+            });
+
+            // Conserva i trasferimenti correnti per la funzione di copia
+            window.activeTransfers = transfers;
+            window.activeBalances = netBalances;
+        }
+
+        // Funzione per copiare il riepilogo in formato testo leggibile
+        function copiaResoconto() {
+            if (!window.activeTransfers || window.activeTransfers.length === 0) return;
+
+            let testo = `📊 *RIEPILOGO SPESE E PAREGGI (EquiSplit)*\n\n`;
+            
+            // Aggiunge bilancio
+            testo += `*SALDO GENERALE:*\n`;
+            for (const name in window.activeBalances) {
+                const bal = window.activeBalances[name];
+                const segn = bal > 0.005 ? "+" : "";
+                testo += `• ${name}: ${segn}${bal.toFixed(2)}€\n`;
+            }
+
+            testo += `\n*TRANSAZIONI DI PAREGGIO CONSIGLIATE:*\n`;
+            window.activeTransfers.forEach((t, i) => {
+                testo += `${i + 1}. *${t.from}* deve dare 💸 *${t.amount.toFixed(2)}€* a *${t.to}*\n`;
+            });
+
+            testo += `\nGenerato automaticamente da MicroApps Hub 🚀`;
+
+            navigator.clipboard.writeText(testo).then(() => {
+                const btn = document.getElementById('btn-copy-summary');
+                const origHtml = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Riepilogo copiato negli appunti!`;
+                btn.classList.add('border-emerald-500/40', 'text-emerald-400');
+                
+                setTimeout(() => {
+                    btn.innerHTML = origHtml;
+                    btn.classList.remove('border-emerald-500/40', 'text-emerald-400');
+                }, 2000);
+            });
+        }
+
+        // Avvio iniziale
+        init();
+    </script>
+</body>
+
+</html>

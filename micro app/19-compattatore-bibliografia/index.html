@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 QuickCite | Compattatore di Bibliografia & Citazioni</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
+
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-72 h-72 bg-yellow-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div
+        class="max-w-6xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <div
+            class="lg:col-span-5 space-y-5 border-b lg:border-b-0 lg:border-r border-slate-700/40 pb-6 lg:pb-0 lg:pr-6">
+            <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span class="text-xl">📚</span>
+                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-amber-400">Academic Formatting Tool
+                    </h1>
+                </div>
+                <h2 class="text-2xl font-black text-white">QuickCite</h2>
+                <p class="text-slate-400 text-xs mt-1">Formatta istantaneamente le tue fonti per tesi, tesine o report
+                    di lavoro senza impazzire con la punteggiatura.</p>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📖 Tipo di
+                    Fonte</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setTipoFonte('libro')" id="btn-f-libro"
+                        class="bg-amber-600/20 border border-amber-500 rounded-xl py-2 text-xs text-amber-400 font-bold cursor-pointer transition-all">Libro</button>
+                    <button onclick="setTipoFonte('sito')" id="btn-f-sito"
+                        class="bg-slate-950 border border-slate-700 rounded-xl py-2 text-xs text-slate-300 font-bold hover:border-amber-500 cursor-pointer transition-all">Sito
+                        Web</button>
+                    <button onclick="setTipoFonte('articolo')" id="btn-f-articolo"
+                        class="bg-slate-950 border border-slate-700 rounded-xl py-2 text-xs text-slate-300 font-bold hover:border-amber-500 cursor-pointer transition-all">Articolo
+                        Sci.</button>
+                </div>
+            </div>
+
+            <form id="cite-form" onsubmit="generazioneAnteprima(event)" class="space-y-3 pt-2">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Autore /
+                            i</label>
+                        <input type="text" id="input-autore" placeholder="es. Rossi, M." required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Anno
+                            Pubblicazione</label>
+                        <input type="text" id="input-anno" placeholder="es. 2024" required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label id="label-titolo"
+                        class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Titolo del
+                        Libro</label>
+                    <input type="text" id="input-titolo" placeholder="es. Antropologia Digitale" required
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                </div>
+
+                <div id="campo-extra-1" class="space-y-1">
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Casa Editrice /
+                        Città</label>
+                    <input type="text" id="input-extra-1" placeholder="es. Mondadori, Milano" required
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                </div>
+
+                <div id="campo-extra-2" class="space-y-1 hidden">
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">URL del Sito /
+                        Nome Piattaforma</label>
+                    <input type="text" id="input-extra-2" placeholder="es. https://www.esempio.it"
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-amber-600 hover:bg-amber-500 text-white font-black text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-lg transition-all transform active:scale-[0.98] cursor-pointer pt-3">
+                    ✨ Genera Citazione
+                </button>
+            </form>
+        </div>
+
+        <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
+
+            <div class="space-y-3">
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📋 Formati Generati
+                    (Clicca per copiare)</label>
+
+                <div class="grid grid-cols-1 gap-2.5">
+                    <div onclick="copiaTestoStile('apa')"
+                        class="bg-slate-950 p-3 rounded-xl border border-slate-700/50 hover:border-amber-500/60 cursor-pointer transition-all group relative">
+                        <span
+                            class="absolute right-3 top-2.5 text-[9px] font-bold text-slate-500 group-hover:text-amber-400">APA
+                            7th</span>
+                        <p id="output-apa" class="text-xs text-slate-300 pr-12 italic">Compila i campi a sinistra per
+                            generare la stringa...</p>
+                    </div>
+                    <div onclick="copiaTestoStile('harvard')"
+                        class="bg-slate-950 p-3 rounded-xl border border-slate-700/50 hover:border-amber-500/60 cursor-pointer transition-all group relative">
+                        <span
+                            class="absolute right-3 top-2.5 text-[9px] font-bold text-slate-500 group-hover:text-amber-400">HARVARD</span>
+                        <p id="output-harvard" class="text-xs text-slate-300 pr-12">Compila i campi a sinistra per
+                            generare la stringa...</p>
+                    </div>
+                    <div onclick="copiaTestoStile('vancouver')"
+                        class="bg-slate-950 p-3 rounded-xl border border-slate-700/50 hover:border-amber-500/60 cursor-pointer transition-all group relative">
+                        <span
+                            class="absolute right-3 top-2.5 text-[9px] font-bold text-slate-500 group-hover:text-amber-400">VANCOUVER</span>
+                        <p id="output-vancouver" class="text-xs text-slate-300 pr-12">Compila i campi a sinistra per
+                            generare la stringa...</p>
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <button id="btn-add-list" onclick="aggiungiAInsieme()"
+                        class="hidden text-xs bg-slate-900 border border-slate-700 hover:border-amber-500/60 px-4 py-1.5 rounded-xl font-bold text-amber-400 cursor-pointer transition-all">
+                        ➕ Aggiungi alla tua Bibliografia locale
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 border-t border-slate-700/40 pt-4 flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">🗂️ Tua
+                        Bibliografia Raccolta (Ordinata A-Z)</label>
+                    <button onclick="svuotaLista()"
+                        class="text-[10px] text-slate-500 hover:text-rose-400 font-bold transition-colors cursor-pointer">Svuota
+                        Lista ×</button>
+                </div>
+
+                <div id="lista-bibliografia"
+                    class="bg-slate-950/60 rounded-2xl border border-slate-700/30 p-3 min-h-[140px] max-h-[220px] overflow-y-auto space-y-2 text-xs text-slate-400">
+                    <div class="text-center text-slate-600 py-8 italic">Nessuna fonte salvata in questa sessione.</div>
+                </div>
+
+                <button onclick="esportaBibliografia()"
+                    class="w-full bg-slate-950 border border-slate-700 hover:border-slate-600 text-slate-300 font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer mt-3">
+                    💾 Esporta l'intero blocco Bibliografico (.txt)
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let tipoFonteCorrente = 'libro';
+        let citazioneCorrenteOggetto = null;
+        let archivioBibliografia = [];
+
+        function setTipoFonte(tipo) {
+            tipoFonteCorrente = tipo;
+            ['libro', 'sito', 'articolo'].forEach(f => {
+                const btn = document.getElementById(`btn-f-${f}`);
+                if (f === tipo) {
+                    btn.className = "bg-amber-600/20 border border-amber-500 rounded-xl py-2 text-xs text-amber-400 font-bold cursor-pointer transition-all";
+                } else {
+                    btn.className = "bg-slate-950 border border-slate-700 rounded-xl py-2 text-xs text-slate-300 font-bold hover:border-amber-500 cursor-pointer transition-all";
+                }
+            });
+
+            // Adatta etichette e placeholder dei campi di testo
+            const lblTitolo = document.getElementById('label-titolo');
+            const inpTitolo = document.getElementById('input-titolo');
+            const cExtra1 = document.getElementById('campo-extra-1');
+            const lblExtra1 = cExtra1.querySelector('label');
+            const inpExtra1 = document.getElementById('input-extra-1');
+            const cExtra2 = document.getElementById('campo-extra-2');
+            const inpExtra2 = document.getElementById('input-extra-2');
+
+            if (tipo === 'libro') {
+                lblTitolo.innerText = "Titolo del Libro";
+                inpTitolo.placeholder = "es. Antropologia Digitale";
+                cExtra1.classList.remove('hidden');
+                lblExtra1.innerText = "Casa Editrice, Città";
+                inpExtra1.placeholder = "es. Mondadori, Milano";
+                inpExtra1.required = true;
+                cExtra2.classList.add('hidden');
+                inpExtra2.required = false;
+            } else if (tipo === 'sito') {
+                lblTitolo.innerText = "Titolo della Pagina Web / Articolo Online";
+                inpTitolo.placeholder = "es. Guida ai Sistemi Offline";
+                cExtra1.classList.remove('hidden');
+                lblExtra1.innerText = "Nome del Sito Web";
+                inpExtra1.placeholder = "es. Wikipedia o Wired IT";
+                inpExtra1.required = true;
+                cExtra2.classList.remove('hidden');
+                inpExtra2.placeholder = "es. https://www.esempio.com/pagina";
+                inpExtra2.required = true;
+            } else if (tipo === 'articolo') {
+                lblTitolo.innerText = "Titolo dell'Articolo Scientifico";
+                inpTitolo.placeholder = "es. Quantum Computing Breakthrough";
+                cExtra1.classList.remove('hidden');
+                lblExtra1.innerText = "Nome della Rivista / Journal & Volume (Fascicolo)";
+                inpExtra1.placeholder = "es. Nature, Vol. 42 (No. 3)";
+                inpExtra1.required = true;
+                cExtra2.classList.remove('hidden');
+                inpExtra2.placeholder = "es. Pagine o DOI (es. pp. 120-135)";
+                inpExtra2.required = true;
+            }
+        }
+
+        function generazioneAnteprima(e) {
+            e.preventDefault();
+
+            const autore = document.getElementById('input-autore').value.trim();
+            const anno = document.getElementById('input-anno').value.trim();
+            const titolo = document.getElementById('input-titolo').value.trim();
+            const extra1 = document.getElementById('input-extra-1').value.trim();
+            const extra2 = document.getElementById('input-extra-2').value.trim();
+
+            let stringaApa = "";
+            let stringaHarvard = "";
+            let stringaVancouver = "";
+
+            if (tipoFonteCorrente === 'libro') {
+                stringaApa = `${autore} (${anno}). _${titolo}_. ${extra1}.`;
+                stringaHarvard = `${autore}, ${anno}. _${titolo}_, ${extra1}.`;
+                stringaVancouver = `${autore}. ${titolo}. ${extra1}; ${anno}.`;
+            } else if (tipoFonteCorrente === 'sito') {
+                stringaApa = `${autore} (${anno}). _${titolo}_. ${extra1}. Disponibile su: ${extra2}`;
+                stringaHarvard = `${autore}, ${anno}. _${titolo}_. [online] ${extra1}. Disponibile su: <${extra2}>`;
+                stringaVancouver = `${autore}. ${titolo}. ${extra1} [Internet]. ${anno}. Disponibile su: ${extra2}`;
+            } else if (tipoFonteCorrente === 'articolo') {
+                stringaApa = `${autore} (${anno}). ${titolo}. _${extra1}_, ${extra2}.`;
+                stringaHarvard = `${autore}, ${anno}. ${titolo}. _${extra1}_, ${extra2}.`;
+                stringaVancouver = `${autore}. ${titolo}. ${extra1}. ${anno};${extra2}.`;
+            }
+
+            // Renderizza a schermo togliendo gli underscore del corsivo per la lettura, ma conservandoli per la copia pulita
+            document.getElementById('output-apa').innerText = stringaApa.replace(/_/g, "");
+            document.getElementById('output-harvard').innerText = stringaHarvard.replace(/_/g, "");
+            document.getElementById('output-vancouver').innerText = stringaVancouver.replace(/_/g, "");
+
+            // Salva l'oggetto corrente per eventuale inserimento in lista
+            citazioneCorrenteOggetto = {
+                chiaveOrdinamento: autore.toUpperCase(),
+                testo: stringaApa.replace(/_/g, "") // Usiamo APA come default per la lista cumulativa
+            };
+
+            document.getElementById('btn-add-list').classList.remove('hidden');
+        }
+
+        function copiaTestoStile(stile) {
+            const idMappa = { apa: 'output-apa', harvard: 'output-harvard', vancouver: 'output-vancouver' };
+            const testo = document.getElementById(idMappa[stile]).innerText;
+            if (testo.includes("Compila i campi")) return;
+
+            navigator.clipboard.writeText(testo).then(() => {
+                alert(`Citazione in stile ${stile.toUpperCase()} copiata con successo!`);
+            });
+        }
+
+        function aggiungiAInsieme() {
+            if (!citazioneCorrenteOggetto) return;
+
+            archivioBibliografia.push(citazioneCorrenteOggetto);
+            // Ordina alfabeticamente per Autore
+            archivioBibliografia.sort((a, b) => a.chiaveOrdinamento.localeCompare(b.chiaveOrdinamento));
+
+            aggiornaInterfacciaLista();
+            document.getElementById('cite-form').reset();
+            document.getElementById('btn-add-list').classList.add('hidden');
+            citazioneCorrenteOggetto = null;
+        }
+
+        function aggiornaInterfacciaLista() {
+            const container = document.getElementById('lista-bibliografia');
+            if (archivioBibliografia.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-600 py-8 italic">Nessuna fonte salvata in questa sessione.</div>`;
+                return;
+            }
+
+            container.innerHTML = archivioBibliografia.map((item, index) => `
+                <div class="bg-slate-900 border border-slate-700/40 p-2.5 rounded-xl flex justify-between items-start gap-3">
+                    <p class="text-slate-300 select-all">${item.testo}</p>
+                    <button onclick="rimuoviElemento(${index})" class="text-rose-400/60 hover:text-rose-400 font-bold px-1 cursor-pointer">×</button>
+                </div>
+            `).join('');
+        }
+
+        function rimuoviElemento(index) {
+            archivioBibliografia.splice(index, 1);
+            aggiornaInterfacciaLista();
+        }
+
+        function svuotaLista() {
+            if (confirm("Vuoi azzerare l'intera bibliografia accumulata?")) {
+                archivioBibliografia = [];
+                aggiornaInterfacciaLista();
+            }
+        }
+
+        function esportaBibliografia() {
+            if (archivioBibliografia.length === 0) return;
+            const testoCompleto = archivioBibliografia.map(i => i.testo).join('\n\n');
+            const blob = new Blob([testoCompleto], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bibliografia-compilata.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>

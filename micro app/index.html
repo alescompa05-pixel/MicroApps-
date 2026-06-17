@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroApps Hub - Semplifica la tua Vita</title>
+    <!-- Configurazione PWA & Installabilità -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#090d16">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+
+    <!-- Tailwind CSS v4 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Font Awesome per le icone premium -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Setup Font Premium */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .font-mono-custom {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Scrollbar Personalizzata Estetica */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 99px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Animazione per i bordi sfumati al passaggio del mouse */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.6);
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.8), 0 0 25px -5px rgba(59, 130, 246, 0.15);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden selection:bg-blue-500/30 selection:text-blue-200">
+
+    <!-- Sfondo Geometrico Dinamico -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <!-- Griglia di sfondo tech -->
+        <div
+            class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20">
+        </div>
+
+        <!-- Sfumature d'ambiente neon diffuse -->
+        <div class="absolute -top-40 -left-40 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[130px]"></div>
+        <div class="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px]"></div>
+        <div class="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[140px]"></div>
+    </div>
+
+    <!-- Container Centrale -->
+    <div class="max-w-6xl w-full mx-auto px-4 md:px-8 py-8 md:py-16 flex-grow">
+
+        <!-- Header -->
+        <header class="mb-12 text-center md:text-left">
+            <div class="flex items-center justify-center md:justify-start gap-3 mb-4">
+                <span
+                    class="text-2xl inline-flex items-center justify-center bg-blue-500/10 text-blue-400 p-2 rounded-xl border border-blue-500/20 shadow-lg shadow-blue-500/5">
+                    <i class="fa-solid fa-bolt animate-pulse"></i>
+                </span>
+                <h1
+                    class="text-xs font-extrabold uppercase tracking-[0.2em] bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400 bg-clip-text text-transparent font-mono-custom">
+                    Open Source Micro-Utilities Ecosystem
+                </h1>
+            </div>
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                <div>
+                    <h2 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-none">
+                        Micro<span class="text-blue-500">Apps</span> Suite
+                    </h2>
+                    <p class="text-slate-400 text-sm md:text-base mt-3 max-w-xl leading-relaxed">
+                        Collezione curata di strumenti intelligenti e pronti all'uso per ottimizzare finanze, studio,
+                        salute e lavoro quotidiano. Interamente locali, veloci e privati.
+                    </p>
+                </div>
+                <!-- Statistiche veloci dell'Hub -->
+                <div
+                    class="flex gap-4 self-center md:self-end bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-md">
+                    <div class="text-center px-2">
+                        <span id="total-apps-count" class="block text-2xl font-black text-white">0</span>
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Utility
+                            Attive</span>
+                    </div>
+                    <div class="w-px bg-slate-800"></div>
+                    <div class="text-center px-2">
+                        <span id="favs-count" class="block text-2xl font-black text-amber-400">0</span>
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Preferiti</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Barra di Controllo: Ricerca & Filtri (Bento Style) -->
+        <section
+            class="mb-10 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 md:p-6 backdrop-blur-md space-y-4">
+            <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                <!-- Ricerca Integrata -->
+                <div class="relative w-full md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="search-input" placeholder="Cerca utilità..."
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all">
+                </div>
+                <!-- Filtri Categoria -->
+                <div class="flex flex-wrap gap-2 w-full md:w-auto justify-center md:justify-end" id="filters-container">
+                    <!-- Generato Dinamicamente da JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Sezione Preferiti Appuntati (Dinamica) -->
+        <section id="favorites-section" class="mb-10 hidden">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="text-amber-400 text-sm"><i class="fa-solid fa-star"></i></span>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Strumenti
+                    Preferiti</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="favs-grid">
+                <!-- Card Preferite Iniettate Qui -->
+            </div>
+            <div class="h-px bg-slate-800/60 my-10"></div>
+        </section>
+
+        <!-- Sezione Griglia Principale delle App -->
+        <section>
+            <div class="flex items-center gap-2 mb-6">
+                <span class="text-blue-500 text-xs"><i class="fa-solid fa-layer-group"></i></span>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Catalogo
+                    Utility</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="apps-container">
+                <!-- Card Standard Iniettate Qui -->
+            </div>
+            <!-- Nessun Risultato Feedback -->
+            <div id="no-results"
+                class="hidden text-center py-16 bg-slate-900/20 rounded-2xl border border-dashed border-slate-800">
+                <span class="text-3xl text-slate-600 block mb-3"><i class="fa-regular fa-folder-open"></i></span>
+                <p class="text-slate-500 text-sm">Nessuna micro-app corrisponde ai criteri di ricerca selezionati.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer
+        class="max-w-6xl w-full mx-auto px-4 md:px-8 py-6 border-t border-slate-900/80 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 backdrop-blur-sm bg-slate-950/20 z-10">
+        <div class="text-center md:text-left">
+            &copy; 2026 MicroApps Suite &bull; Progettato per ottimizzare la vita quotidiana.
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                Tutti i moduli attivi localmente
+            </span>
+        </div>
+    </footer>
+
+    <!-- LOGICA DI AZIONAMENTO DI SELEZIONE, RICERCA, PREFERITI E FILTRI -->
+    <script>
+        // Array degli oggetti contenenti i dati di ogni micro-app.
+        const elencoApps = [
+            {
+                titolo: "Interesse Composto",
+                descrizione: "Simula la crescita del tuo capitale nel tempo con grafici interattivi in tempo reale.",
+                categoria: "Finanza",
+                icona: "📈",
+                coloreClasse: "from-blue-500/10 to-indigo-500/5 hover:border-blue-500/40",
+                badgeColore: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+                url: "./01-interesse-composto/index.html"
+            },
+            {
+                titolo: "Micro-Planner 3-Task",
+                descrizione: "Elimina l'ansia da to-do list. Focalizzati solo sulle 3 priorità assolute di oggi.",
+                categoria: "Produttività",
+                icona: "🎯",
+                coloreClasse: "from-amber-500/10 to-orange-500/5 hover:border-amber-500/40",
+                badgeColore: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+                url: "./02-planner-3task/index.html"
+            },
+            {
+                titolo: "Media Universitaria",
+                descrizione: "Calcola la tua media ponderata e simula i voti futuri per scoprire il voto di laurea.",
+                categoria: "Studio",
+                icona: "🎓",
+                coloreClasse: "from-indigo-500/10 to-purple-500/5 hover:border-indigo-500/40",
+                badgeColore: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+                url: "./03-media-universitaria/index.html"
+            },
+            {
+                titolo: "Wi-Fi QR Code",
+                descrizione: "Genera un codice QR per far connettere i tuoi ospiti alla rete di casa all'istante senza password.",
+                categoria: "Tech",
+                icona: "📶",
+                coloreClasse: "from-emerald-500/10 to-teal-500/5 hover:border-emerald-500/40",
+                badgeColore: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+                url: "./04-wifi-qrcode/index.html"
+            },
+            {
+                titolo: "Idratatore Custom",
+                descrizione: "Imposta la capienza personalizzata di bicchieri o borracce e traccia l'acqua esatta che bevi.",
+                categoria: "Salute",
+                icona: "💧",
+                coloreClasse: "from-cyan-500/10 to-blue-500/5 hover:border-cyan-500/40",
+                badgeColore: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+                url: "./05-idratatore/index.html"
+            },
+            {
+                titolo: "Timer Pomodoro",
+                descrizione: "Gestisci i cicli di focus e pausa. Il conto alla rovescia compare direttamente nella scheda del browser.",
+                categoria: "Produttività",
+                icona: "⏱️",
+                coloreClasse: "from-rose-500/10 to-red-500/5 hover:border-rose-500/40",
+                badgeColore: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+                url: "./06-pomodoro/index.html"
+            },
+            {
+                titolo: "LinkBox Temporaneo",
+                descrizione: "Incolla e archivia al volo i link che vuoi leggere più tardi. Estrae in automatico la sorgente ed evita il disordine.",
+                categoria: "Utility",
+                icona: "🗃️",
+                coloreClasse: "from-cyan-500/10 to-teal-500/5 hover:border-cyan-500/40",
+                badgeColore: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+                url: "./07-linkbox/index.html"
+            },
+            {
+                titolo: "Bento Gym Timer",
+                descrizione: "Seleziona al volo il tuo tempo di recupero tra le serie. Include un contatore minimale per tracciare i set.",
+                categoria: "Sport",
+                icona: "🏋️‍♂️",
+                coloreClasse: "from-amber-500/10 to-yellow-500/5 hover:border-amber-500/40",
+                badgeColore: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+                url: "./08-gym-timer/index.html"
+            },
+            {
+                titolo: "Scratchpad Volatile",
+                descrizione: "Una bento-grid di 4 blocchi note indipendenti ad auto-salvataggio. Ideale per gestire appunti temporanei o codici al volo.",
+                categoria: "Utility",
+                icona: "📋",
+                coloreClasse: "from-cyan-500/10 to-indigo-500/5 hover:border-cyan-500/40",
+                badgeColore: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+                url: "./09-scratchpad/index.html"
+            },
+            {
+                titolo: "AutoCompiler",
+                descrizione: "Una bento-grid di risposte rapide e dati frequenti da copiare in un clic. Supporta i campi dinamici inserendo le quadre.",
+                categoria: "Automazione",
+                icona: "⚡",
+                coloreClasse: "from-amber-500/10 to-yellow-500/5 hover:border-amber-500/40",
+                badgeColore: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+                url: "./10-autocompiler/index.html"
+            },
+            {
+                titolo: "Time-Blocking",
+                descrizione: "Inserisci i tuoi impegni e le durate. L'app incastra tutto in ordine cronologico automatico creando la tua timeline giornaliera.",
+                categoria: "Produttività",
+                icona: "📅",
+                coloreClasse: "from-violet-500/10 to-purple-500/5 hover:border-violet-500/40",
+                badgeColore: "bg-violet-500/10 text-violet-400 border-violet-500/20",
+                url: "./11-timeblocking/index.html"
+            },
+            {
+                titolo: "Time-To-Save",
+                descrizione: "Inserisci un obiettivo di acquisto e scopri quanti mesi e giorni di attesa risparmi tagliando le micro-spese superflue.",
+                categoria: "Finanza",
+                icona: "💰",
+                coloreClasse: "from-emerald-500/10 to-teal-500/5 hover:border-emerald-500/40",
+                badgeColore: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+                url: "./12-timetosave/index.html"
+            },
+            {
+                titolo: "SmartShopping",
+                descrizione: "Digita o incolla i prodotti della spesa alla rinfusa. L'app li smista da sola nei rispettivi reparti del supermercato.",
+                categoria: "Automazione",
+                icona: "🛒",
+                coloreClasse: "from-lime-500/10 to-emerald-500/5 hover:border-lime-500/40",
+                badgeColore: "bg-lime-500/10 text-lime-400 border-lime-500/20",
+                url: "./13-smartshopping/index.html"
+            },
+            {
+                titolo: "AIPrompter",
+                descrizione: "Seleziona ruolo, formato e vincoli attraverso blocchi interattivi per generare all'istante prompt ingegnerizzati perfetti per LLM.",
+                categoria: "Produttività",
+                icona: "⚡",
+                coloreClasse: "from-cyan-500/10 to-blue-500/5 hover:border-cyan-500/40",
+                badgeColore: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+                url: "./14-aiprompter/index.html"
+            },
+            {
+                titolo: "Valigia Zero Peso",
+                descrizione: "Inserisci meta, meteo e tipo di attività. L'algoritmo calcola il bagaglio minimo perfetto azzerando il peso morto.",
+                categoria: "Utility",
+                icona: "🧳",
+                coloreClasse: "from-emerald-500/10 to-teal-500/5 hover:border-emerald-500/40",
+                badgeColore: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+                url: "./15-valigia-zero-peso/index.html"
+            },
+            {
+                titolo: "Radar Scadenze Logistico",
+                descrizione: "Inserisci compiti, esami o scadenze personali e imposta un cuscinetto temporale per sapere esattamente quando iniziare a muoverti.",
+                categoria: "Produttività",
+                icona: "⏱️",
+                coloreClasse: "from-violet-500/10 to-fuchsia-500/5 hover:border-violet-500/40",
+                badgeColore: "bg-violet-500/10 text-violet-400 border-violet-500/20",
+                url: "./16-radar-scadenze/index.html"
+            },
+            {
+                titolo: "Trascrittore Vocale Istantaneo",
+                descrizione: "Sbobina lezioni, riunioni o note vocali in tempo reale. Algoritmo di riconoscimento locale integrato nel browser per garantire privacy assoluta.",
+                categoria: "Produttività",
+                icona: "🎙️",
+                coloreClasse: "from-red-500/10 to-orange-500/5 hover:border-orange-500/40",
+                badgeColore: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+                url: "./17-trascrittore-audio/index.html"
+            },
+            {
+                titolo: "Matrix del Tempo Adaptive Timer",
+                descrizione: "Genera cicli personalizzati di focus e pausa calcolati sul tuo stato di stanchezza reale e sul tipo di studio o lavoro. Include funzioni anti-interruzione.",
+                categoria: "Produttività",
+                icona: "⏱️",
+                coloreClasse: "from-indigo-500/10 to-purple-500/5 hover:border-indigo-500/40",
+                badgeColore: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+                url: "./18-matrix-tempo/index.html"
+            },
+            {
+                titolo: "QuickCite Bibliography Compiler",
+                descrizione: "Genera istantaneamente citazioni formali nei formati accademici APA, Harvard e Vancouver per tesi e saggi. Organizza l'elenco finale in ordine alfabetico.",
+                categoria: "Studio / Lavoro",
+                icona: "📚",
+                coloreClasse: "from-amber-500/10 to-yellow-500/5 hover:border-amber-500/40",
+                badgeColore: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+                url: "./19-compattatore-bibliografia/index.html"
+            },
+            {
+                titolo: "Crypto & Stock Simple Tracker",
+                descrizione: "Visualizza i tuoi ticker azionari e crypto preferiti in una griglia essenziale senza rumore visivo. Prezzi in font gigante e variazioni live a colpo d'occhio.",
+                categoria: "Finanza",
+                icona: "💰",
+                coloreClasse: "from-emerald-500/10 to-blue-500/5 hover:border-emerald-500/40",
+                badgeColore: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+                url: "./20-crypto-tracker/index.html"
+            },
+            {
+                titolo: "Multi-Link Workspace Launcher",
+                descrizione: "Estrae in automatico ogni URL da testi, mail o chat disordinate. Salva i link in cassetti di progetto e li riapre tutti insieme nel browser con un solo clic.",
+                categoria: "Automazione",
+                icona: "🤖",
+                coloreClasse: "from-cyan-500/10 to-purple-500/5 hover:border-cyan-500/40",
+                badgeColore: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+                url: "./21-workspace-launcher/index.html"
+            },
+            {
+                titolo: "EquiSplit - Divisore Spese",
+                descrizione: "Gestisci le spese di gruppo e calcola i pareggi ottimali dei debiti per viaggi, cene o convivenza, interamente offline.",
+                categoria: "Finanza",
+                icona: "📊",
+                coloreClasse: "from-emerald-500/10 to-teal-500/5 hover:border-emerald-500/40",
+                badgeColore: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+                url: "./22-divisore-spese/index.html"
+            }
+        ];
+
+        // Variabili di Stato Globali
+        let preferiti = JSON.parse(localStorage.getItem('microapps_preferiti')) || [];
+        let categoriaAttiva = 'All';
+        let queryRicerca = '';
+
+        // Riferimenti DOM
+        const container = document.getElementById('apps-container');
+        const favsGrid = document.getElementById('favs-grid');
+        const favsSection = document.getElementById('favorites-section');
+        const filtersContainer = document.getElementById('filters-container');
+        const searchInput = document.getElementById('search-input');
+        const noResults = document.getElementById('no-results');
+        const countTotalSpan = document.getElementById('total-apps-count');
+        const countFavsSpan = document.getElementById('favs-count');
+
+        // Genera la lista delle categorie uniche
+        function ottieniCategorie() {
+            const categorie = new Set();
+            elencoApps.forEach(app => categorie.add(app.categoria));
+            return ['All', ...Array.from(categorie)];
+        }
+
+        // Renderizza i filtri in stile bento capsule
+        function renderizzaFiltri() {
+            filtersContainer.innerHTML = '';
+            const categorie = ottieniCategorie();
+
+            categorie.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.innerText = cat;
+
+                if (categoriaAttiva === cat) {
+                    btn.className = "px-4 py-1.5 text-xs font-bold bg-blue-500 text-slate-950 rounded-lg cursor-pointer transition-all";
+                } else {
+                    btn.className = "px-4 py-1.5 text-xs font-medium text-slate-400 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer hover:border-slate-700 hover:text-slate-200 transition-all";
+                }
+
+                btn.addEventListener('click', () => {
+                    categoriaAttiva = cat;
+                    renderizzaFiltri();
+                    renderizzaTutto();
+                });
+
+                filtersContainer.appendChild(btn);
+            });
+        }
+
+        // Funzione helper per creare l'HTML di una singola card
+        function creaCardHTML(app, isFavGrid = false) {
+            const isFavorite = preferiti.includes(app.titolo);
+            const stellaClasse = isFavorite ? 'text-amber-400 fa-solid' : 'text-slate-600 hover:text-amber-400 fa-regular';
+            const stellaTitolo = isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti';
+
+            return `
+                <div class="glass-card border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between h-full relative group hover:border-slate-700/60 transition-all duration-300">
+                    
+                    <!-- Bottone Preferiti (Star Icon) -->
+                    <button onclick="togglePreferito(event, '${app.titolo}')" class="absolute top-6 right-6 p-1.5 bg-slate-950/60 border border-slate-800/80 rounded-xl cursor-pointer hover:scale-105 transition-all z-20" title="${stellaTitolo}">
+                        <i class="${stellaClasse} fa-star text-sm"></i>
+                    </button>
+
+                    <!-- Link Intero alla Card per la navigazione -->
+                    <a href="${app.url}" class="block relative h-full flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="text-3xl bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 group-hover:scale-105 transition-transform duration-300">
+                                ${app.icona}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 mb-2 rounded-full border ${app.badgeColore}">
+                                ${app.categoria}
+                            </span>
+                            <h3 class="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                                ${app.titolo}
+                            </h3>
+                            <p class="text-slate-400 text-xs leading-relaxed mb-6">
+                                ${app.descrizione}
+                            </p>
+                        </div>
+
+                        <div class="text-[11px] font-bold text-slate-500 group-hover:text-blue-400 flex items-center gap-1 transition-colors mt-auto">
+                            Apri applicazione <span class="transform group-hover:translate-x-1 transition-transform duration-300">&rarr;</span>
+                        </div>
+                    </a>
+                </div>
+            `;
+        }
+
+        // Toggle della preferenza con salvataggio automatico localmente
+        window.togglePreferito = function (event, titoloApp) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (preferiti.includes(titoloApp)) {
+                preferiti = preferiti.filter(item => item !== titoloApp);
+            } else {
+                preferiti.push(titoloApp);
+            }
+
+            localStorage.setItem('microapps_preferiti', JSON.stringify(preferiti));
+            renderizzaTutto();
+        }
+
+        // Funzione principale di rendering asincrono e filtraggio dei dati
+        function renderizzaTutto() {
+            container.innerHTML = '';
+            favsGrid.innerHTML = '';
+
+            // Filtra l'array complessivo
+            const appFiltrate = elencoApps.filter(app => {
+                const rispettaCategoria = (categoriaAttiva === 'All' || app.categoria === categoriaAttiva);
+                const rispettaRicerca = app.titolo.toLowerCase().includes(queryRicerca.toLowerCase()) ||
+                    app.descrizione.toLowerCase().includes(queryRicerca.toLowerCase()) ||
+                    app.categoria.toLowerCase().includes(queryRicerca.toLowerCase());
+                return rispettaCategoria && rispettaRicerca;
+            });
+
+            // Gestisce la sezione Preferiti
+            const appPreferite = elencoApps.filter(app => preferiti.includes(app.titolo));
+
+            if (appPreferite.length > 0) {
+                favsSection.classList.remove('hidden');
+                appPreferite.forEach(app => {
+                    const colDiv = document.createElement('div');
+                    colDiv.innerHTML = creaCardHTML(app, true);
+                    favsGrid.appendChild(colDiv.firstElementChild);
+                });
+            } else {
+                favsSection.classList.add('hidden');
+            }
+
+            // Popola il catalogo standard
+            if (appFiltrate.length > 0) {
+                noResults.classList.add('hidden');
+                appFiltrate.forEach(app => {
+                    const colDiv = document.createElement('div');
+                    colDiv.innerHTML = creaCardHTML(app, false);
+                    container.appendChild(colDiv.firstElementChild);
+                });
+            } else {
+                noResults.classList.remove('hidden');
+            }
+
+            // Aggiorna le statistiche numeriche in tempo reale
+            countTotalSpan.innerText = elencoApps.length;
+            countFavsSpan.innerText = appPreferite.length;
+        }
+
+        // Configura il tracciamento dei tasti sulla ricerca in tempo reale
+        searchInput.addEventListener('input', (e) => {
+            queryRicerca = e.target.value;
+            renderizzaTutto();
+        });
+
+        // Inizializzazione al caricamento
+        renderizzaFiltri();
+        renderizzaTutto();
+
+        // Registrazione del Service Worker per la PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo (Hub):', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker (Hub):', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

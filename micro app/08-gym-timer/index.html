@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏋️‍♂️ BentoTimer | Gym Recovery</title>
+    <!-- Tailwind CSS per il design -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Animazione flash quando il timer scade */
+        @keyframes flash {
+
+            0%,
+            100% {
+                background-color: #1e293b;
+            }
+
+            50% {
+                background-color: #ef4444;
+            }
+        }
+
+        .timer-end-anim {
+            animation: flash 0.5s ease-in-out 3;
+        }
+    </style>
+</head>
+
+<body id="body-layout"
+    class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div
+        class="max-w-md w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8 flex flex-col justify-between relative overflow-hidden">
+
+        <!-- HEADER CON CONTATORE SERIE -->
+        <div class="flex justify-between items-center mb-6 border-b border-slate-700/40 pb-4">
+            <div>
+                <div class="flex items-center gap-1.5 mb-0.5">
+                    <span class="text-lg">🏋️‍♂️</span>
+                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-amber-400">Gym Utility</h1>
+                </div>
+                <h2 class="text-xl font-black text-white">BentoTimer</h2>
+            </div>
+
+            <!-- CONTATORE SERIE (MINIMALE E COMODO) -->
+            <div class="bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-700/60 flex items-center gap-3">
+                <div class="text-left">
+                    <p class="text-[9px] font-bold uppercase text-slate-500 tracking-wider">Serie</p>
+                    <p id="serie-count" class="text-xl font-black text-amber-400 leading-tight">0</p>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <button id="serie-up"
+                        class="text-xs bg-slate-800 hover:bg-slate-700 w-5 h-5 rounded flex items-center justify-center font-bold text-white cursor-pointer">+</button>
+                    <button id="serie-down"
+                        class="text-xs bg-slate-800 hover:bg-slate-700 w-5 h-5 rounded flex items-center justify-center font-bold text-slate-400 cursor-pointer">-</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DISPLAY CONTRO ALLA ROVESCIA GIGANTE -->
+        <div class="text-center mb-6 select-none py-4 bg-slate-900/30 rounded-2xl border border-slate-700/20 relative">
+            <div id="timer-display"
+                class="text-7xl md:text-8xl font-black font-mono tracking-tight text-white drop-shadow-sm">
+                00:00
+            </div>
+            <p id="timer-status" class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Seleziona
+                un recupero</p>
+        </div>
+
+        <!-- CONTROLLI PRESET (STILE BENTO) -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+            <button data-time="60"
+                class="btn-preset bg-slate-900/60 hover:bg-amber-500 hover:text-slate-950 border border-slate-700/60 rounded-xl py-3 flex flex-col items-center justify-center gap-0.5 font-black text-sm transition-all cursor-pointer active:scale-95 text-white">
+                60s
+                <span class="text-[9px] font-semibold opacity-60 tracking-wide uppercase">Ipertrofia</span>
+            </button>
+            <button data-time="90"
+                class="btn-preset bg-slate-900/60 hover:bg-amber-500 hover:text-slate-950 border border-slate-700/60 rounded-xl py-3 flex flex-col items-center justify-center gap-0.5 font-black text-sm transition-all cursor-pointer active:scale-95 text-white">
+                90s
+                <span class="text-[9px] font-semibold opacity-60 tracking-wide uppercase">Classico</span>
+            </button>
+            <button data-time="120"
+                class="btn-preset bg-slate-900/60 hover:bg-amber-500 hover:text-slate-950 border border-slate-700/60 rounded-xl py-3 flex flex-col items-center justify-center gap-0.5 font-black text-sm transition-all cursor-pointer active:scale-95 text-white">
+                120s
+                <span class="text-[9px] font-semibold opacity-60 tracking-wide uppercase">Forza</span>
+            </button>
+        </div>
+
+        <!-- CONTROLLI AVANZATI E AGGIUSTAMENTI -->
+        <div class="grid grid-cols-4 gap-2 mb-4">
+            <button id="btn-minus-15"
+                class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs py-2 rounded-xl border border-slate-600 cursor-pointer active:scale-95">-15s</button>
+            <button id="btn-play-pause"
+                class="col-span-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider py-2.5 rounded-xl transition-colors cursor-pointer shadow-lg shadow-amber-500/10">Pausa</button>
+            <button id="btn-plus-15"
+                class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs py-2 rounded-xl border border-slate-600 cursor-pointer active:scale-95">+15s</button>
+        </div>
+
+        <!-- TASTO RESET / RESET SERIE -->
+        <div class="flex gap-2 border-t border-slate-700/40 pt-4 text-[10px]">
+            <button id="btn-reset-timer"
+                class="flex-1 bg-slate-900/40 hover:bg-slate-900 text-slate-500 hover:text-slate-300 font-bold py-2 rounded-lg transition-colors cursor-pointer">
+                Annulla Timer
+            </button>
+            <button id="btn-reset-serie"
+                class="flex-1 bg-slate-900/40 hover:bg-rose-950/20 text-slate-500 hover:text-rose-400 font-bold py-2 rounded-lg transition-colors cursor-pointer">
+                Reset Serie (0)
+            </button>
+        </div>
+
+    </div>
+
+    <!-- LOGICA DI FUNZIONAMENTO -->
+    <script>
+        let tempoTotale = 0; // in secondi
+        let timerId = null;
+        let isPaused = true;
+        let contatoreSerie = 0;
+
+        // Elementi DOM
+        const bodyLayout = document.getElementById('body-layout');
+        const display = document.getElementById('timer-display');
+        const statusText = document.getElementById('timer-status');
+        const serieDisplay = document.getElementById('serie-count');
+
+        const btnPlayPause = document.getElementById('btn-play-pause');
+        const btnResetTimer = document.getElementById('btn-reset-timer');
+        const btnResetSerie = document.getElementById('btn-reset-serie');
+        const btnPlus15 = document.getElementById('btn-plus-15');
+        const btnMinus15 = document.getElementById('btn-minus-15');
+        const btnSerieUp = document.getElementById('serie-up');
+        const btnSerieDown = document.getElementById('serie-down');
+        const presets = document.querySelectorAll('.btn-preset');
+
+        // Generatore audio nativo sicuro per il bip di fine serie
+        function faBip() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+
+                function eseguiSuono(delay, frequenza) {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(frequenza, ctx.currentTime + delay);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.2);
+                    osc.start(ctx.currentTime + delay);
+                    osc.stop(ctx.currentTime + delay + 0.2);
+                }
+                // Due bip consecutivi
+                eseguiSuono(0, 700);
+                eseguiSuono(0.25, 700);
+            } catch (e) {
+                console.warn("Audio bloccato");
+            }
+        }
+
+        // Formatta i secondi in MM:SS
+        function aggiornaDisplay() {
+            const min = Math.floor(tempoTotale / 60);
+            const sec = tempoTotale % 60;
+            display.innerText = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        }
+
+        // Gestisce l'avanzamento dei secondi
+        function avviaCicloTimer() {
+            if (timerId) clearInterval(timerId);
+
+            isPaused = false;
+            btnPlayPause.innerText = "Pausa";
+            btnPlayPause.className = "col-span-2 bg-slate-700 hover:bg-slate-600 text-white font-black text-xs uppercase tracking-wider py-2.5 rounded-xl transition-colors cursor-pointer";
+            statusText.innerText = "Recupero in corso...";
+            statusText.className = "text-[10px] font-bold uppercase tracking-widest text-amber-400";
+
+            timerId = setInterval(() => {
+                if (tempoTotale > 0) {
+                    tempoTotale--;
+                    aggiornaDisplay();
+                } else {
+                    // TIMER SCADUTO
+                    clearInterval(timerId);
+                    timerId = null;
+                    isPaused = true;
+                    faBip();
+
+                    // Trigger animazione flash sullo sfondo
+                    bodyLayout.classList.add('timer-end-anim');
+                    statusText.innerText = "RECUPERO COMPLETATO!";
+                    statusText.className = "text-[10px] font-bold uppercase tracking-widest text-emerald-400 animate-pulse";
+                    btnPlayPause.innerText = "Avvia";
+                    btnPlayPause.className = "col-span-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider py-2.5 rounded-xl transition-colors cursor-pointer";
+
+                    setTimeout(() => {
+                        bodyLayout.classList.remove('timer-end-anim');
+                    }, 1500);
+                }
+            }, 1000);
+        }
+
+        // Gestione dei tre bottoni preset (60, 90, 120)
+        presets.forEach(bottone => {
+            bottone.addEventListener('click', () => {
+                bodyLayout.classList.remove('timer-end-anim');
+                tempoTotale = parseInt(bottone.getAttribute('data-time'));
+                aggiornaDisplay();
+                avviaCicloTimer();
+            });
+        });
+
+        // Tasto Play / Pausa intermedio
+        btnPlayPause.addEventListener('click', () => {
+            if (tempoTotale <= 0) return;
+
+            if (!isPaused) {
+                // Metti in pausa
+                clearInterval(timerId);
+                timerId = null;
+                isPaused = true;
+                btnPlayPause.innerText = "Riprendi";
+                btnPlayPause.className = "col-span-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider py-2.5 rounded-xl transition-colors cursor-pointer";
+                statusText.innerText = "Timer in pausa";
+                statusText.className = "text-[10px] font-bold uppercase tracking-widest text-slate-500";
+            } else {
+                // Riprendi
+                avviaCicloTimer();
+            }
+        });
+
+        // Aggiungi 15 secondi
+        btnPlus15.addEventListener('click', () => {
+            tempoTotale += 15;
+            aggiornaDisplay();
+        });
+
+        // Sottrai 15 secondi
+        btnMinus15.addEventListener('click', () => {
+            if (tempoTotale > 15) {
+                tempoTotale -= 15;
+            } else {
+                tempoTotale = 0;
+            }
+            aggiornaDisplay();
+        });
+
+        // Resetta il timer manualmente
+        btnResetTimer.addEventListener('click', () => {
+            if (timerId) clearInterval(timerId);
+            timerId = null;
+            tempoTotale = 0;
+            isPaused = true;
+            aggiornaDisplay();
+            bodyLayout.classList.remove('timer-end-anim');
+            btnPlayPause.innerText = "Inizia";
+            btnPlayPause.className = "col-span-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider py-2.5 rounded-xl transition-colors cursor-pointer";
+            statusText.innerText = "Seleziona un recupero";
+            statusText.className = "text-[10px] font-bold uppercase tracking-widest text-slate-500";
+        });
+
+        // LOGICA CONTATORE SERIE
+        btnSerieUp.addEventListener('click', () => {
+            contatoreSerie++;
+            serieDisplay.innerText = contatoreSerie;
+            localStorage.setItem('gym_custom_serie', contatoreSerie);
+        });
+
+        btnSerieDown.addEventListener('click', () => {
+            if (contatoreSerie > 0) {
+                contatoreSerie--;
+                serieDisplay.innerText = contatoreSerie;
+                localStorage.setItem('gym_custom_serie', contatoreSerie);
+            }
+        });
+
+        btnResetSerie.addEventListener('click', () => {
+            if (confirm("Vuoi azzerare il contatore delle serie eseguite?")) {
+                contatoreSerie = 0;
+                serieDisplay.innerText = contatoreSerie;
+                localStorage.setItem('gym_custom_serie', 0);
+            }
+        });
+
+        // Recupera serie storiche se presenti
+        const serieSalvate = localStorage.getItem('gym_custom_serie');
+        if (serieSalvate) {
+            contatoreSerie = parseInt(serieSalvate);
+            serieDisplay.innerText = contatoreSerie;
+        }
+
+        aggiornaDisplay();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

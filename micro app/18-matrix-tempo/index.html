@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⏱️ Matrix del Tempo Adaptive Timer | MicroApps Suite</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
+
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div
+        class="max-w-5xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <div id="setup-panel"
+            class="lg:col-span-4 space-y-5 border-b lg:border-b-0 lg:border-r border-slate-700/40 pb-6 lg:pb-0 lg:pr-6">
+            <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span class="text-xl">⚡</span>
+                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Adaptive Deep Work</h1>
+                </div>
+                <h2 class="text-2xl font-black text-white">Matrix del Tempo</h2>
+                <p class="text-slate-400 text-xs mt-1">Ottimizza la tua attenzione. Il tempo residuo compare
+                    direttamente sul titolo della scheda del browser.</p>
+            </div>
+
+            <div class="space-y-4 pt-2">
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">🔋 Livello
+                        Energia Attuale</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setEnergia('bassa')" id="btn-e-bassa"
+                            class="bg-slate-950 border border-slate-700 rounded-xl py-2 text-xs text-slate-300 font-bold hover:border-indigo-500 cursor-pointer transition-all">Scarico</button>
+                        <button onclick="setEnergia('media')" id="btn-e-media"
+                            class="bg-indigo-600/20 border border-indigo-500 rounded-xl py-2 text-xs text-indigo-400 font-bold cursor-pointer transition-all">Bilanciato</button>
+                        <button onclick="setEnergia('alta')" id="btn-e-alta"
+                            class="bg-slate-950 border border-slate-700 rounded-xl py-2 text-xs text-slate-300 font-bold hover:border-indigo-500 cursor-pointer transition-all">Carico</button>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📝 Tipo di
+                        Attività</label>
+                    <select id="task-type"
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-400 cursor-pointer">
+                        <option value="studio">🎓 Studio Teorico / Memorizzazione</option>
+                        <option value="scrittura">💻 Scrittura / Programmazione / Logica</option>
+                        <option value="ripetitivo">⚙️ Task Ripetitivi / Email / Revisione</option>
+                    </select>
+                </div>
+
+                <button onclick="avviaSessione()"
+                    class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-lg transition-all transform active:scale-[0.98] cursor-pointer pt-3">
+                    🚀 Genera & Avvia Focus
+                </button>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 flex flex-col justify-between min-h-[350px]">
+
+            <div id="timer-active-panel" class="hidden h-full flex flex-col justify-between space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-700/40 pb-3">
+                    <div>
+                        <span id="badge-stato"
+                            class="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">FOCUS</span>
+                        <h3 id="current-task-display" class="text-xs text-slate-400 font-bold mt-1">Studio Teorico</h3>
+                    </div>
+                    <button onclick="resetTimer()"
+                        class="text-[10px] text-slate-500 hover:text-rose-400 font-bold transition-colors cursor-pointer">Interrompi
+                        Sessione ×</button>
+                </div>
+
+                <div class="text-center py-4">
+                    <div id="timer-display"
+                        class="text-7xl md:text-8xl font-mono font-black text-white tracking-tighter select-none">35:00
+                    </div>
+                    <p id="tip-display" class="text-xs text-slate-400 max-w-md mx-auto mt-4 min-h-[32px] italic">Guarda
+                        il titolo della scheda del browser per monitorare il tempo.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <button id="btn-flow-extend" onclick="estendiFlusso()"
+                        class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-md transition-all cursor-pointer">
+                        🔥 Sono nel Flusso (+10 min)
+                    </button>
+                    <button id="btn-pause-toggle" onclick="togglePause()"
+                        class="bg-slate-950 border border-slate-700 hover:border-slate-600 text-slate-300 font-black text-xs uppercase tracking-wider py-3.5 rounded-xl transition-all cursor-pointer">
+                        Pausa Timer
+                    </button>
+                </div>
+            </div>
+
+            <div id="pause-selection-panel"
+                class="hidden h-full flex flex-col items-center justify-center text-center space-y-6 py-8 animate-fade-in">
+                <div class="space-y-2">
+                    <span class="text-5xl animate-bounce inline-block">⏰</span>
+                    <h3 class="text-2xl font-black text-white">Tempo di Focus Scaduto!</h3>
+                    <p class="text-xs text-slate-400 max-w-sm mx-auto">Scegli la durata della tua pausa per ripartire
+                        rigenerato.</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 w-full max-w-md">
+                    <button onclick="scegliPausa(5)"
+                        class="bg-slate-950 border-2 border-emerald-500/40 hover:border-emerald-500 p-4 rounded-2xl transition-all cursor-pointer group">
+                        <span
+                            class="block text-2xl font-black text-emerald-400 group-hover:scale-110 transition-transform">5</span>
+                        <span
+                            class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">Minuti</span>
+                    </button>
+                    <button onclick="scegliPausa(10)"
+                        class="bg-slate-950 border-2 border-teal-500/40 hover:border-teal-500 p-4 rounded-2xl transition-all cursor-pointer group">
+                        <span
+                            class="block text-2xl font-black text-teal-400 group-hover:scale-110 transition-transform">10</span>
+                        <span
+                            class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">Minuti</span>
+                    </button>
+                    <button onclick="scegliPausa(15)"
+                        class="bg-slate-950 border-2 border-cyan-500/40 hover:border-cyan-500 p-4 rounded-2xl transition-all cursor-pointer group">
+                        <span
+                            class="block text-2xl font-black text-cyan-400 group-hover:scale-110 transition-transform">15</span>
+                        <span
+                            class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">Minuti</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="timer-empty-panel"
+                class="flex flex-col items-center justify-center text-center h-full space-y-3 py-12">
+                <span class="text-4xl">🧬</span>
+                <h3 class="text-sm font-bold text-slate-300">Nessun algoritmo attivo</h3>
+                <p class="text-xs text-slate-500 max-w-xs">Seleziona i parametri e avvia il timer per tracciare i tuoi
+                    intervalli.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let energiaCorrente = 'media';
+        let timerId = null;
+        let scudettoStato = {};
+        const TITOLO_BASE = "Matrix del Tempo";
+
+        const tipsMente = {
+            focus: [
+                "Disattiva le notifiche. Il cervello impiega fino a 23 minuti per riprendere il focus dopo una distrazione.",
+                "L'attenzione profonda si attiva dopo i primi 8 minuti.",
+                "Mantieni una postura dritta. Aumenta l'ossigenazione."
+            ],
+            pausa: [
+                "Alzati dalla sedia! Guarda un punto lontano fuori dalla finestra.",
+                "Bevi un bicchiere d'acqua. La disidratazione riduce l'efficienza cognitiva del 10%.",
+                "Evita i social nella pausa. Saturano il cervello invece di riposarlo."
+            ]
+        };
+
+        function setEnergia(tipo) {
+            energiaCorrente = tipo;
+            ['bassa', 'media', 'alta'].forEach(e => {
+                const btn = document.getElementById(`btn-e-${e}`);
+                btn.className = e === tipo ?
+                    "bg-indigo-600/20 border border-indigo-500 rounded-xl py-2 text-xs text-indigo-400 font-bold cursor-pointer transition-all" :
+                    "bg-slate-950 border border-slate-700 rounded-xl py-2 text-xs text-slate-300 font-bold hover:border-indigo-500 cursor-pointer transition-all";
+            });
+        }
+
+        function avviaSessione() {
+            const task = document.getElementById('task-type').value;
+            let minutiFocus = 25;
+
+            if (task === 'studio') {
+                minutiFocus = energiaCorrente === 'bassa' ? 20 : (energiaCorrente === 'alta' ? 45 : 35);
+            } else if (task === 'scrittura') {
+                minutiFocus = energiaCorrente === 'bassa' ? 30 : (energiaCorrente === 'alta' ? 60 : 50);
+            } else if (task === 'ripetitivo') {
+                minutiFocus = energiaCorrente === 'bassa' ? 15 : (energiaCorrente === 'alta' ? 35 : 25);
+            }
+
+            scudettoStato = {
+                scadenzaTimestamp: Date.now() + (minutiFocus * 60 * 1000),
+                modalita: 'focus',
+                isPaused: false,
+                secondiRimanentiSePausa: 0,
+                focusInizialeMinuti: minutiFocus,
+                labelTask: document.getElementById('task-type').options[document.getElementById('task-type').selectedIndex].text
+            };
+
+            salvaStato();
+            renderInterfacciaTimer();
+        }
+
+        function renderInterfacciaTimer() {
+            clearInterval(timerId);
+
+            document.getElementById('timer-empty-panel').classList.add('hidden');
+            document.getElementById('pause-selection-panel').classList.add('hidden');
+            document.getElementById('timer-active-panel').classList.remove('hidden');
+            document.getElementById('btn-pause-toggle').innerText = scudettoStato.isPaused ? "Riprendi Timer" : "Pausa Timer";
+
+            const badge = document.getElementById('badge-stato');
+            const taskDisplay = document.getElementById('current-task-display');
+            const btnExtend = document.getElementById('btn-flow-extend');
+
+            if (scudettoStato.modalita === 'focus') {
+                badge.innerText = "🎯 FOCUS ACTIVE";
+                badge.className = "text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20";
+                taskDisplay.innerText = scudettoStato.labelTask || "Studio / Lavoro";
+                btnExtend.classList.remove('invisible');
+            } else {
+                badge.innerText = "🔋 RECOVERY PAUSE";
+                badge.className = "text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                taskDisplay.innerText = "Scarico cognitivo neuro-ottimizzato";
+                btnExtend.classList.add('invisible');
+            }
+
+            ruotaTip();
+            calcolaEAggiornaDisplay();
+
+            timerId = setInterval(tick, 1000);
+        }
+
+        function tick() {
+            if (scudettoStato.isPaused) return;
+
+            const secondiMancanti = Math.ceil((scudettoStato.scadenzaTimestamp - Date.now()) / 1000);
+
+            if (secondiMancanti > 0) {
+                aggiornaDisplayFormattato(secondiMancanti);
+                if (secondiMancanti % 180 === 0) ruotaTip();
+            } else {
+                clearInterval(timerId);
+                document.title = `⏰ Scaduto! | ${TITOLO_BASE}`;
+                riproduciSuono();
+
+                if (scudettoStato.modalita === 'focus') {
+                    document.getElementById('timer-active-panel').classList.add('hidden');
+                    document.getElementById('pause-selection-panel').classList.remove('hidden');
+                    localStorage.removeItem('matrix_timer_state');
+                } else {
+                    alert("Pausa terminata! Si riparte con il blocco di Focus.");
+                    const fMin = scudettoStato.focusInizialeMinuti || 25;
+                    const label = scudettoStato.labelTask;
+                    scudettoStato = {
+                        scadenzaTimestamp: Date.now() + (fMin * 60 * 1000),
+                        modalita: 'focus',
+                        isPaused: false,
+                        secondiRimanentiSePausa: 0,
+                        focusInizialeMinuti: fMin,
+                        labelTask: label
+                    };
+                    salvaStato();
+                    renderInterfacciaTimer();
+                }
+            }
+        }
+
+        function scegliPausa(minuti) {
+            scudettoStato.scadenzaTimestamp = Date.now() + (minuti * 60 * 1000);
+            scudettoStato.modalita = 'pausa';
+            scudettoStato.isPaused = false;
+            scudettoStato.secondiRimanentiSePausa = 0;
+            salvaStato();
+            renderInterfacciaTimer();
+        }
+
+        function calcolaEAggiornaDisplay() {
+            let secondi = 0;
+            if (scudettoStato.isPaused) {
+                secondi = scudettoStato.secondiRimanentiSePausa;
+            } else {
+                secondi = Math.ceil((scudettoStato.scadenzaTimestamp - Date.now()) / 1000);
+                if (secondi < 0) secondi = 0;
+            }
+            aggiornaDisplayFormattato(secondi);
+        }
+
+        function aggiornaDisplayFormattato(totaleSecondi) {
+            const min = Math.floor(totaleSecondi / 60);
+            const sec = totaleSecondi % 60;
+            const stringaTempo = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+
+            // Aggiorna il contatore interno della pagina
+            document.getElementById('timer-display').innerText = stringaTempo;
+
+            // Aggiorna la barra del titolo della scheda
+            const iconaStato = scudettoStato.modalita === 'focus' ? '🎯' : '🔋';
+            const testoPausa = scudettoStato.isPaused ? ' (Pausa)' : '';
+            document.title = `(${stringaTempo}) ${iconaStato} ${TITOLO_BASE}${testoPausa}`;
+        }
+
+        function togglePause() {
+            if (scudettoStato.isPaused) {
+                scudettoStato.scadenzaTimestamp = Date.now() + (scudettoStato.secondiRimanentiSePausa * 1000);
+                scudettoStato.isPaused = false;
+            } else {
+                const secRimanti = Math.ceil((scudettoStato.scadenzaTimestamp - Date.now()) / 1000);
+                scudettoStato.secondiRimanentiSePausa = secRimanti > 0 ? secRimanti : 0;
+                scudettoStato.isPaused = true;
+            }
+            salvaStato();
+            document.getElementById('btn-pause-toggle').innerText = scudettoStato.isPaused ? "Riprendi Timer" : "Pausa Timer";
+            calcolaEAggiornaDisplay();
+        }
+
+        function estendiFlusso() {
+            if (scudettoStato.modalita !== 'focus') return;
+            if (scudettoStato.isPaused) {
+                scudettoStato.secondiRimanentiSePausa += 10 * 60;
+            } else {
+                scudettoStato.scadenzaTimestamp += 10 * 60 * 1000;
+            }
+            salvaStato();
+            calcolaEAggiornaDisplay();
+            document.getElementById('tip-display').innerText = "🔥 Stato di Deep Work prolungato con successo (+10 min)!";
+        }
+
+        function ruotaTip() {
+            const lista = tipsMente[scudettoStato.modalita] || tipsMente.focus;
+            const casuale = lista[Math.floor(Math.random() * lista.length)];
+            document.getElementById('tip-display').innerText = casuale;
+        }
+
+        function resetTimer() {
+            clearInterval(timerId);
+            localStorage.removeItem('matrix_timer_state');
+            document.title = `⏱️ ${TITOLO_BASE} | MicroApps Suite`;
+            document.getElementById('timer-active-panel').classList.add('hidden');
+            document.getElementById('pause-selection-panel').classList.add('hidden');
+            document.getElementById('timer-empty-panel').classList.remove('hidden');
+        }
+
+        function salvaStato() {
+            localStorage.setItem('matrix_timer_state', JSON.stringify(scudettoStato));
+        }
+
+        function caricaStatoPrecedente() {
+            const locale = localStorage.getItem('matrix_timer_state');
+            if (locale) {
+                scudettoStato = JSON.parse(locale);
+                if (!scudettoStato.isPaused) {
+                    const secMancanti = Math.ceil((scudettoStato.scadenzaTimestamp - Date.now()) / 1000);
+                    if (secMancanti <= 0) {
+                        if (scudettoStato.modalita === 'focus') {
+                            document.getElementById('timer-empty-panel').classList.add('hidden');
+                            document.getElementById('pause-selection-panel').classList.remove('hidden');
+                            localStorage.removeItem('matrix_timer_state');
+                            document.title = `⏰ Scaduto! | ${TITOLO_BASE}`;
+                            return;
+                        } else {
+                            localStorage.removeItem('matrix_timer_state');
+                            document.title = `⏱️ ${TITOLO_BASE} | MicroApps Suite`;
+                            return;
+                        }
+                    }
+                }
+                renderInterfacciaTimer();
+            }
+        }
+
+        function riproduciSuono() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            } catch (e) { }
+        }
+
+        caricaStatoPrecedente();
+    </script>
+</body>
+
+</html>

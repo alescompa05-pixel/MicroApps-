@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ AutoCompiler | Risposte Rapide</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex flex-col justify-between">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div class="max-w-5xl w-full mx-auto bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8">
+
+        <div
+            class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8 border-b border-slate-700/40 pb-4">
+            <div>
+                <div class="flex items-center gap-1.5 mb-0.5">
+                    <span class="text-xl">⚡</span>
+                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-amber-400">MicroAutomation App</h1>
+                </div>
+                <h2 class="text-2xl font-black text-white">AutoCompiler</h2>
+                <p class="text-slate-400 text-xs mt-0.5">Clicca su una mattonella per copiare all'istante il testo. Usa
+                    <code class="bg-slate-900 px-1 py-0.5 rounded text-amber-400 font-mono text-[11px]">[Nome]</code>
+                    per i campi dinamici.</p>
+            </div>
+
+            <button id="btn-toggle-form"
+                class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer">
+                ➕ Nuovo Frammento
+            </button>
+        </div>
+
+        <form id="form-snippet"
+            class="hidden bg-slate-900/60 p-5 rounded-2xl border border-slate-700/60 mb-8 space-y-4 animate-fadeIn">
+            <h3 class="text-xs font-bold uppercase text-amber-400 tracking-wider">Crea un nuovo testo rapido</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-1">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Scorciatoia
+                        / Titolo</label>
+                    <input type="text" id="snip-title" placeholder="Es. ;iban o Saluto" required
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-bold focus:outline-none focus:border-amber-400">
+                </div>
+                <div class="md:col-span-2">
+                    <label
+                        class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Categoria</label>
+                    <input type="text" id="snip-category" placeholder="Es. Finanza, Lavoro, Personale" required
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-semibold focus:outline-none focus:border-amber-400">
+                </div>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Testo Esteso da
+                    copiare</label>
+                <textarea id="snip-text"
+                    placeholder="Scrivi qui il testo lungo. Puoi includere variabili dinamiche racchiuse tra parentesi quadre, ad esempio: Ciao [Nome], ti invio i dettagli..."
+                    required
+                    class="w-full h-24 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 focus:outline-none focus:border-amber-400 resize-none font-sans leading-relaxed"></textarea>
+            </div>
+            <div class="flex gap-2 justify-end">
+                <button type="button" id="btn-annulla"
+                    class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold text-xs uppercase px-4 py-2 rounded-lg transition-colors cursor-pointer">Annulla</button>
+                <button type="submit"
+                    class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider px-5 py-2 rounded-lg transition-colors cursor-pointer">Salva
+                    Riga</button>
+            </div>
+        </form>
+
+        <div id="grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        </div>
+
+    </div>
+
+    <script>
+        // Database iniziale di esempio se il localStorage è vuoto
+        let snippets = [
+            { id: 1, titolo: ";iban", categoria: "Finanza", testo: "IT60X0123456789012345678901" },
+            { id: 2, titolo: ";mail_presentazione", categoria: "Lavoro", testo: "Gentile [Nome Referente],\n\nLe invio la presente per sottoporre alla Sua attenzione il mio profilo per la posizione aperta. Resto a disposizione.\n\nCordiali saluti,\n[Tuo Nome]" },
+            { id: 3, titolo: ";indirizzo", categoria: "Personale", testo: "Via Roma 12, Piano 3, Interno 5, 35100 Padova (PD)" }
+        ];
+
+        const gridContainer = document.getElementById('grid-container');
+        const formSnippet = document.getElementById('form-snippet');
+        const btnToggleForm = document.getElementById('btn-toggle-form');
+        const btnAnnulla = document.getElementById('btn-annulla');
+
+        // Mostra/Nasconde il form di inserimento
+        btnToggleForm.addEventListener('click', () => formSnippet.classList.toggle('hidden'));
+        btnAnnulla.addEventListener('click', () => formSnippet.classList.add('hidden'));
+
+        // Renderizza la bento-grid a schermo
+        function renderGrid() {
+            gridContainer.innerHTML = '';
+
+            snippets.forEach(item => {
+                // Rileva se ci sono dei placeholder dinamici come [Nome] nel testo
+                const haVariabili = /\[.*?\]/.test(item.testo);
+
+                const card = document.createElement('div');
+                card.id = `card-${item.id}`;
+                // Stile bento box reattivo al click
+                card.className = "bg-slate-900/40 border border-slate-700/40 rounded-2xl p-4 flex flex-col justify-between min-h-[120px] hover:border-amber-500/30 transition-all cursor-pointer active:scale-[0.99] relative group";
+
+                // Iniettiamo il contenuto grafico della mattonella
+                card.innerHTML = `
+                    <div onclick="eseguiCopia(${item.id})" class="absolute inset-0 z-10 rounded-2xl"></div>
+                    <div class="relative z-20">
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <span class="text-[9px] font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-900/40 uppercase tracking-wider">${item.categoria}</span>
+                            <button onclick="eliminaSnippet(${item.id})" class="text-slate-600 hover:text-rose-400 text-xs transition-colors p-1 relative z-30" title="Elimina frammento">🗑️</button>
+                        </div>
+                        <h3 class="text-sm font-black text-white font-mono mb-1 group-hover:text-amber-300 transition-colors">${item.titolo}</h3>
+                        <p class="text-xs text-slate-400 line-clamp-2 font-sans leading-relaxed">${item.testo.replace(/\n/g, ' ')}</p>
+                    </div>
+                    <div class="text-[9px] font-bold uppercase tracking-wider text-slate-500 mt-3 flex items-center justify-between relative z-20">
+                        <span>${haVariabili ? '✨ Campi Dinamici' : '📄 Testo Fisso'}</span>
+                        <span class="opacity-0 group-hover:opacity-100 transition-opacity text-amber-400 flex items-center gap-0.5">Copia ⚡</span>
+                    </div>
+                `;
+                gridContainer.appendChild(card);
+            });
+
+            // Sincronizza nel database locale
+            localStorage.setItem('autocompiler_snippets', JSON.stringify(snippets));
+        }
+
+        // Gestore del salvataggio del nuovo snippet
+        formSnippet.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const nuovo = {
+                id: Date.now(),
+                titolo: document.getElementById('snip-title').value.trim(),
+                categoria: document.getElementById('snip-category').value.trim(),
+                testo: document.getElementById('snip-text').value
+            };
+
+            snippets.unshift(nuovo); // Inserisce in cima
+            formSnippet.reset();
+            formSnippet.classList.add('hidden');
+            renderLista();
+            renderGrid();
+        });
+
+        // FUNZIONE CORE DI AUTOMAZIONE: Copia e compila le variabili se presenti
+        function eseguiCopia(id) {
+            const item = snippets.find(s => s.id === id);
+            if (!item) return;
+
+            let testoFinale = item.testo;
+
+            // Trova tutte le parole racchiuse in parentesi quadre [Esempio]
+            const regexVariabili = /\[(.*?)\]/g;
+            let match;
+            let variabiliDaCompilare = [];
+
+            // Raccoglie tutti i campi unici da compilare
+            while ((match = regexVariabili.exec(item.testo)) !== null) {
+                if (!variabiliDaCompilare.includes(match[1])) {
+                    variabiliDaCompilare.push(match[1]);
+                }
+            }
+
+            // Se ci sono variabili, chiediamo l'input all'utente tramite dei prompt sequenziali rapido
+            if (variabiliDaCompilare.length > 0) {
+                let annullato = false;
+
+                for (let campo of variabiliDaCompilare) {
+                    const valoreUtente = prompt(`Compila il campo dinamico:\n👉 ${campo}`);
+
+                    if (valoreUtente === null) {
+                        annullato = true;
+                        break; // Se clicca annulla interrompiamo il processo
+                    }
+
+                    // Sostituisce la variabile globale con il testo digitato dall'utente
+                    // Usiamo un trucco regex per rimpiazzare tutte le istanze di quel blocco [campo]
+                    const escapedCampo = campo.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    testoFinale = testoFinale.replace(new RegExp('\\[' + escapedCampo + '\\]', 'g'), valoreUtente);
+                }
+
+                if (annullato) return; // Blocco se l'utente ha interrotto l'inserimento
+            }
+
+            // Scrittura negli appunti di sistema
+            navigator.clipboard.writeText(testoFinale).then(() => {
+                // Feedback visivo sulla mattonella: flash verde smeraldo temporaneo
+                const card = document.getElementById(`card-${id}`);
+                card.classList.remove('border-slate-700/40');
+                card.classList.add('border-emerald-500', 'bg-emerald-950/20');
+
+                setTimeout(() => {
+                    card.classList.remove('border-emerald-500', 'bg-emerald-950/20');
+                    card.classList.add('border-slate-700/40');
+                }, 800);
+            }).catch(err => {
+                console.error("Errore durante la copia negli appunti", err);
+            });
+        }
+
+        // Elimina una mattonella per ID
+        window.eliminaSnippet = function (id) {
+            if (confirm("Vuoi rimuovere questa risposta rapida dalla griglia?")) {
+                snippets = snippets.filter(s => s.id !== id);
+                renderGrid();
+            }
+        };
+
+        // Inizializzazione e caricamento storico dal browser
+        const datiSalvati = localStorage.getItem('autocompiler_snippets');
+        if (datiSalvati) {
+            snippets = JSON.parse(datiSalvati);
+        }
+
+        renderGrid();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

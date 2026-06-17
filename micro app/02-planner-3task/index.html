@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-Planner 3-Task</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Effetto sbarrato fluido per i task completati */
+        .task-input:checked+input[type="text"] {
+            text-decoration: line-through;
+            color: #94a3b8;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div
+        class="max-w-md w-full bg-slate-800 rounded-2xl shadow-2xl border border-slate-700/50 p-6 md:p-8 relative overflow-hidden">
+
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+
+        <div class="mb-8 relative z-10">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🎯</span>
+                    <h1 class="text-xs font-bold uppercase tracking-widest text-amber-500">MicroFocus App</h1>
+                </div>
+                <span id="current-date"
+                    class="text-xs text-slate-400 font-medium bg-slate-700/50 px-2.5 py-1 rounded-full"></span>
+            </div>
+            <h2 class="text-2xl font-black text-white">Le 3 Priorità di Oggi</h2>
+            <p class="text-slate-400 text-sm mt-1">Niente liste infinite. Scegli solo tre cose. Falle e basta.</p>
+        </div>
+
+        <div class="space-y-4 mb-8 relative z-10">
+
+            <div
+                class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-700/30 hover:border-slate-600/50 transition-colors">
+                <span class="text-sm font-bold text-slate-500">1</span>
+                <input type="checkbox" id="check-1"
+                    class="task-input w-5 h-5 rounded border-slate-600 bg-slate-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-800 cursor-pointer">
+                <input type="text" id="text-1" placeholder="Scrivi la tua prima priorità..."
+                    class="w-full bg-transparent border-none text-white placeholder-slate-500 focus:ring-0 focus:outline-none font-medium">
+            </div>
+
+            <div
+                class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-700/30 hover:border-slate-600/50 transition-colors">
+                <span class="text-sm font-bold text-slate-500">2</span>
+                <input type="checkbox" id="check-2"
+                    class="task-input w-5 h-5 rounded border-slate-600 bg-slate-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-800 cursor-pointer">
+                <input type="text" id="text-2" placeholder="Scrivi la tua seconda priorità..."
+                    class="w-full bg-transparent border-none text-white placeholder-slate-500 focus:ring-0 focus:outline-none font-medium">
+            </div>
+
+            <div
+                class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-700/30 hover:border-slate-600/50 transition-colors">
+                <span class="text-sm font-bold text-slate-500">3</span>
+                <input type="checkbox" id="check-3"
+                    class="task-input w-5 h-5 rounded border-slate-600 bg-slate-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-800 cursor-pointer">
+                <input type="text" id="text-3" placeholder="Scrivi la tua terza priorità..."
+                    class="w-full bg-transparent border-none text-white placeholder-slate-500 focus:ring-0 focus:outline-none font-medium">
+            </div>
+
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-slate-700/50 text-xs">
+            <button id="btn-clear"
+                class="text-slate-400 hover:text-rose-400 font-medium transition-colors flex items-center gap-1">
+                🗑️ Resetta tutto
+            </button>
+            <span class="text-slate-500">I dati si salvano da soli nel browser</span>
+        </div>
+
+    </div>
+
+    <script>
+        // Mostra la data di oggi formattata in italiano
+        const opzioniData = { weekday: 'short', day: 'numeric', month: 'short' };
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('it-IT', opzioniData);
+
+        // Array con gli ID degli elementi per ciclare facilmente
+        const taskIds = ['1', '2', '3'];
+
+        // Funzione per salvare lo stato nel localStorage
+        function salvaDati() {
+            taskIds.forEach(id => {
+                const checkbox = document.getElementById(`check-${id}`);
+                const testo = document.getElementById(`text-${id}`);
+
+                // Salva sia il testo scritto sia se la spunta è attiva o no
+                localStorage.setItem(`task-testo-${id}`, testo.value);
+                localStorage.setItem(`task-check-${id}`, checkbox.checked);
+            });
+        }
+
+        // Funzione per caricare i dati all'apertura della pagina
+        function caricaDati() {
+            taskIds.forEach(id => {
+                const checkbox = document.getElementById(`check-${id}`);
+                const testo = document.getElementById(`text-${id}`);
+
+                const testoSalvato = localStorage.getItem(`task-testo-${id}`);
+                const checkSalvato = localStorage.getItem(`task-check-${id}`);
+
+                if (testoSalvato !== null) {
+                    testo.value = testoSalvato;
+                }
+                if (checkSalvato !== null) {
+                    // Il localStorage salva solo stringhe, quindi convertiamo "true" in booleano true
+                    checkbox.checked = (checkSalvato === 'true');
+                }
+            });
+        }
+
+        // Aggiunge i listener per salvare ogni volta che l'utente scrive o clicca una checkbox
+        taskIds.forEach(id => {
+            const checkbox = document.getElementById(`check-${id}`);
+            const testo = document.getElementById(`text-${id}`);
+
+            // 'input' rileva ogni singola lettera digitata
+            testo.addEventListener('input', salvaDati);
+            // 'change' rileva il click sulla checkbox
+            checkbox.addEventListener('change', salvaDati);
+        });
+
+        // Gestione del tasto reset
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            if (confirm('Vuoi davvero cancellare i 3 task di oggi?')) {
+                taskIds.forEach(id => {
+                    document.getElementById(`check-${id}`).checked = false;
+                    document.getElementById(`text-${id}`).value = '';
+                });
+                localStorage.clear(); // Svuota il local storage
+                salvaDati(); // Riassegna i valori vuoti
+            }
+        });
+
+        // Carica i dati salvati al primo avvio della pagina
+        caricaDati();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

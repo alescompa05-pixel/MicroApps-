@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⏱️ Radar Scadenze Logistico | MicroApps Suite</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
+
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-violet-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div
+        class="max-w-6xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- FORM DI INSERIMENTO (SINISTRA) -->
+        <div
+            class="lg:col-span-4 space-y-5 border-b lg:border-b-0 lg:border-r border-slate-700/40 pb-6 lg:pb-0 lg:pr-6">
+            <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span class="text-xl">⏱️</span>
+                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-violet-400">Anti-Anxiety Buffer</h1>
+                </div>
+                <h2 class="text-2xl font-black text-white">Radar Logistico</h2>
+                <p class="text-slate-400 text-xs mt-1">Non farti rincorrere dalle scadenze. Imposta quanti giorni prima
+                    vuoi attivarti (il cuscinetto) per gestire studio, lavoro e vita in totale controllo.</p>
+            </div>
+
+            <form id="reminder-form" class="space-y-3.5">
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📝 Titolo Evento
+                        / Scadenza</label>
+                    <input type="text" id="event-title" required placeholder="Es. Esame Analisi, Rinnovo Patente..."
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-violet-400">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📁
+                            Ambito</label>
+                        <select id="event-category"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-400 cursor-pointer">
+                            <option value="scuola">🎓 Scuola & Studio</option>
+                            <option value="lavoro">💼 Lavoro / Progetti</option>
+                            <option value="vita">👤 Vita / Ricorrenze</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">📅 Data
+                            Scadenza</label>
+                        <input type="date" id="event-date" required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-violet-400 cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label
+                        class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 flex justify-between">
+                        <span>⏳ Giorni di Cuscinetto (Preavviso)</span>
+                        <span id="buffer-val" class="text-violet-400 font-bold">5 giorni</span>
+                    </label>
+                    <input type="range" id="event-buffer" min="1" max="30" value="5"
+                        class="w-full accent-violet-500 cursor-pointer">
+                    <span class="text-[10px] text-slate-500 block leading-tight">I giorni che ti servono realmente per
+                        prepararti, comprare un regalo o completare il task.</span>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-violet-600 hover:bg-violet-500 text-white font-black text-xs uppercase tracking-wider py-3 rounded-xl shadow-lg transition-all transform active:scale-[0.98] cursor-pointer">
+                    ➕ Inserisci nel Radar
+                </button>
+            </form>
+        </div>
+
+        <!-- DASHBOARD SCADENZE ATTIVE (DESTRA) -->
+        <div class="lg:col-span-8 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">📊 Monitoraggio Attivo delle
+                        Priorità</h3>
+                    <div class="flex gap-2">
+                        <button onclick="filtra('all')"
+                            class="text-[10px] bg-slate-950 px-2 py-1 rounded-md border border-slate-700 text-slate-300 hover:border-violet-400 cursor-pointer">Tutte</button>
+                        <button onclick="filtra('scuola')"
+                            class="text-[10px] bg-slate-950 px-2 py-1 rounded-md border border-slate-700 text-slate-300 hover:border-violet-400 cursor-pointer">🎓
+                            Studio</button>
+                        <button onclick="filtra('lavoro')"
+                            class="text-[10px] bg-slate-950 px-2 py-1 rounded-md border border-slate-700 text-slate-300 hover:border-violet-400 cursor-pointer">💼
+                            Lavoro</button>
+                        <button onclick="filtra('vita')"
+                            class="text-[10px] bg-slate-950 px-2 py-1 rounded-md border border-slate-700 text-slate-300 hover:border-violet-400 cursor-pointer">👤
+                            Vita</button>
+                    </div>
+                </div>
+
+                <div id="radar-container"
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[480px] overflow-y-auto pr-1">
+                    <!-- Card generate dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const form = document.getElementById('reminder-form');
+        const bufferInput = document.getElementById('event-buffer');
+        const bufferVal = document.getElementById('buffer-val');
+        const container = document.getElementById('radar-container');
+
+        let scadenze = JSON.parse(localStorage.getItem('microapps_radar')) || [];
+        let filtroAttivo = 'all';
+
+        bufferInput.addEventListener('input', () => {
+            bufferVal.innerText = `${bufferInput.value} giorn${bufferInput.value == 1 ? 'o' : 'i'}`;
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nuovaScadenza = {
+                id: Date.now(),
+                titolo: document.getElementById('event-title').value,
+                categoria: document.getElementById('event-category').value,
+                data: document.getElementById('event-date').value,
+                cuscinetto: parseInt(bufferInput.value)
+            };
+            scadenze.push(nuovaScadenza);
+            salvaERenderizza();
+            form.reset();
+            bufferVal.innerText = "5 giorni";
+        });
+
+        function cancella(id) {
+            scadenze = scadenze.filter(s => s.id !== id);
+            salvaERenderizza();
+        }
+
+        function filtra(cat) {
+            filtroAttivo = cat;
+            renderizza();
+        }
+
+        function salvaERenderizza() {
+            localStorage.setItem('microapps_radar', JSON.stringify(scadenze));
+            renderizza();
+        }
+
+        function renderizza() {
+            container.innerHTML = '';
+            const oggi = new Date();
+            oggi.setHours(0, 0, 0, 0);
+
+            // Ordina per urgenza (scadenze più vicine per prime)
+            const scadenzeOrdinate = [...scadenze].sort((a, b) => new Date(a.data) - new Date(b.data));
+
+            const filtrate = scadenzeOrdinate.filter(s => filtroAttivo === 'all' || s.categoria === filtroAttivo);
+
+            if (filtrate.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-xs text-slate-500">Nessuna scadenza attiva in questo ambito. Il tuo radar è pulito! ✨</div>`;
+                return;
+            }
+
+            filtrate.forEach(s => {
+                const dataScadenza = new Date(s.data);
+                dataScadenza.setHours(0, 0, 0, 0);
+
+                const diffTempo = dataScadenza - oggi;
+                const giorniMancanti = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+
+                let statoColore = "border-emerald-500/30 bg-emerald-500/5 text-emerald-400";
+                let badgeTesto = "Tranquillo";
+                let istruzioneazione = `Mancano ${giorniMancanti} giorni. Sei fuori dal tempo di cuscinetto.`;
+
+                if (giorniMancanti <= 2) {
+                    statoColore = "border-rose-500/40 bg-rose-500/5 text-rose-400 animate-pulse";
+                    badgeTesto = "🚨 EMERGENZA";
+                    istruzioneazione = "Meno di 48 ore rimaste! Agisci immediatamente.";
+                } else if (giorniMancanti <= s.cuscinetto) {
+                    statoColore = "border-amber-500/40 bg-amber-500/5 text-amber-400";
+                    badgeTesto = "⚠️ IN AZIONE";
+                    istruzioneazione = `Sei dentro il tuo cuscinetto di ${s.cuscinetto} giorni. Inizia a lavorarci!`;
+                }
+
+                if (giorniMancanti < 0) {
+                    statoColore = "border-slate-700 bg-slate-900/40 text-slate-500";
+                    badgeTesto = "Scaduto";
+                    istruzioneazione = `Scaduto da ${Math.abs(giorniMancanti)} giorn${Math.abs(giorniMancanti) == 1 ? 'o' : 'i'}.`;
+                }
+
+                const catSimboli = { scuola: "🎓", lavoro: "💼", vita: "👤" };
+
+                const card = document.createElement('div');
+                card.className = `border rounded-2xl p-4 flex flex-col justify-between transition-all ${statoColore}`;
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-1.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-950/60 border border-slate-800">
+                                ${catSimboli[s.categoria]} ${s.categoria}
+                            </span>
+                            <span class="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded ${statoColore.split(' ')[0]} bg-slate-950/30">
+                                ${badgeTesto}
+                            </span>
+                        </div>
+                        <h4 class="text-sm font-bold text-white tracking-tight mb-1">${s.titolo}</h4>
+                        <p class="text-[11px] opacity-80 leading-snug">${istruzioneazione}</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-700/20 text-[10px]">
+                        <span class="font-mono opacity-60">Scadenza: ${dataScadenza.toLocaleDateString('it-IT')}</span>
+                        <button onclick="cancella(${s.id})" class="text-slate-500 hover:text-rose-400 font-bold transition-colors cursor-pointer">Elimina ×</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        renderizza();
+    </script>
+</body>
+
+</html>

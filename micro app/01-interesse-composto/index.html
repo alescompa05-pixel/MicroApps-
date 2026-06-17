@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Interesse Composto</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Stile personalizzato per gli slider */
+        input[type="range"] {
+            accent-color: #3b82f6;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex items-center justify-center p-4">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div
+        class="max-w-5xl w-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden grid grid-cols-1 md:grid-cols-12">
+
+        <div class="md:col-span-5 bg-slate-900 text-white p-6 md:p-8 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-2 mb-6">
+                    <span class="text-2xl">📈</span>
+                    <h1 class="text-xl font-bold tracking-tight text-blue-400">MicroFinance App</h1>
+                </div>
+                <h2 class="text-2xl font-black mb-2">Interesse Composto</h2>
+                <p class="text-slate-400 text-sm mb-8">Simula la crescita del tuo capitale nel tempo grazie all'effetto
+                    della capitalizzazione.</p>
+
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Capitale
+                                Iniziale</label>
+                            <span class="text-lg font-bold text-blue-400" id="val-iniziale">1.000 €</span>
+                        </div>
+                        <input type="range" id="input-iniziale" min="0" max="50000" step="500" value="1000"
+                            class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Deposito
+                                Mensile</label>
+                            <span class="text-lg font-bold text-blue-400" id="val-mensile">100 €</span>
+                        </div>
+                        <input type="range" id="input-mensile" min="0" max="2000" step="25" value="100"
+                            class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Rendimento
+                                Annuo Stimato</label>
+                            <span class="text-lg font-bold text-blue-400" id="val-tasso">8 %</span>
+                        </div>
+                        <input type="range" id="input-tasso" min="1" max="15" step="0.5" value="8"
+                            class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Anni di
+                                Investimento</label>
+                            <span class="text-lg font-bold text-blue-400" id="val-anni">20 anni</span>
+                        </div>
+                        <input type="range" id="input-anni" min="1" max="40" step="1" value="20"
+                            class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-800 text-xs text-slate-500 text-center md:text-left mt-8 md:mt-0">
+                &larr; Torna alla Dashboard delle Micro App
+            </div>
+        </div>
+
+        <div class="md:col-span-7 p-6 md:p-8 flex flex-col justify-between bg-white">
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Capitale Versato</p>
+                    <p class="text-xl md:text-2xl font-bold text-slate-900" id="risultato-versato">0 €</p>
+                </div>
+                <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
+                    <p class="text-xs font-medium text-blue-600 uppercase tracking-wider mb-1">Interessi Guadagnati</p>
+                    <p class="text-xl md:text-2xl font-bold text-blue-600" id="risultato-interessi">0 €</p>
+                </div>
+            </div>
+
+            <div
+                class="mb-6 p-4 bg-slate-900 rounded-xl text-center md:text-left flex flex-col md:flex-row justify-between items-center">
+                <span class="text-slate-400 font-medium text-sm mb-1 md:mb-0">Valore Finale Stimato:</span>
+                <span class="text-2xl md:text-3xl font-black text-emerald-400" id="risultato-totale">0 €</span>
+            </div>
+
+            <div class="relative w-full h-64 md:h-72">
+                <canvas id="graficoInteresse"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Collegamenti agli elementi HTML
+        const inputIniziale = document.getElementById('input-iniziale');
+        const inputMensile = document.getElementById('input-mensile');
+        const inputTasso = document.getElementById('input-tasso');
+        const inputAnni = document.getElementById('input-anni');
+
+        const valIniziale = document.getElementById('val-iniziale');
+        const valMensile = document.getElementById('val-mensile');
+        const valTasso = document.getElementById('val-tasso');
+        const valAnni = document.getElementById('val-anni');
+
+        const resVersato = document.getElementById('risultato-versato');
+        const resInteressi = document.getElementById('risultato-interessi');
+        const resTotale = document.getElementById('risultato-totale');
+
+        let grafico;
+
+        // Funzione helper per formattare i numeri in Euro
+        function formatEuro(valore) {
+            return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(valore);
+        }
+
+        // Funzione core di calcolo dell'interesse composto
+        function calcolaInteresseComposto() {
+            const capitaleIniziale = parseFloat(inputIniziale.value);
+            const depositoMensile = parseFloat(inputMensile.value);
+            const tassoAnnuo = parseFloat(inputTasso.value) / 100;
+            const anni = parseInt(inputAnni.value);
+
+            // Aggiorna le etichette degli slider
+            valIniziale.innerText = formatEuro(capitaleIniziale);
+            valMensile.innerText = formatEuro(depositoMensile);
+            valTasso.innerText = `${inputTasso.value} %`;
+            valAnni.innerText = `${anni} ${anni === 1 ? 'anno' : 'anni'}`;
+
+            const datiAnni = [];
+            const datiVersato = [];
+            const datiTotale = [];
+
+            let capitaleCorrente = capitaleIniziale;
+            let totaleVersato = capitaleIniziale;
+
+            const tassoMensile = tassoAnnuo / 12;
+
+            // Calcolo anno per anno
+            for (let i = 1; i <= anni; i++) {
+                // Applica l'interesse composto mese per mese all'interno dell'anno
+                for (let mese = 1; mese <= 12; mese++) {
+                    capitaleCorrente += depositoMensile;
+                    totaleVersato += depositoMensile;
+                    capitaleCorrente += capitaleCorrente * tassoMensile;
+                }
+
+                datiAnni.push(`Anno ${i}`);
+                datiVersato.push(Math.round(totaleVersato));
+                datiTotale.push(Math.round(capitaleCorrente));
+            }
+
+            const totaleInteressi = capitaleCorrente - totaleVersato;
+
+            // Aggiorna i testi dei risultati principali
+            resVersato.innerText = formatEuro(totaleVersato);
+            resInteressi.innerText = formatEuro(totaleInteressi);
+            resTotale.innerText = formatEuro(capitaleCorrente);
+
+            // Aggiorna o crea il grafico
+            aggiornaGrafico(datiAnni, datiVersato, datiTotale);
+        }
+
+        // Funzione per gestire la visualizzazione del grafico con Chart.js
+        function aggiornaGrafico(labels, datiVersato, datiTotale) {
+            const ctx = document.getElementById('graficoInteresse').getContext('2d');
+
+            if (grafico) {
+                // Se il grafico esiste già, aggiorna solo i dati per evitare sfarfallii
+                grafico.data.labels = labels;
+                grafico.data.datasets[0].data = datiVersato;
+                grafico.data.datasets[1].data = datiTotale;
+                grafico.update('none'); // 'none' disattiva le animazioni pesanti durante lo sblocco dello slider
+            } else {
+                // Prima inizializzazione del grafico
+                grafico = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Capitale Versato (€)',
+                                data: datiVersato,
+                                borderColor: '#94a3b8',
+                                backgroundColor: 'rgba(148, 163, 184, 0.1)',
+                                fill: true,
+                                tension: 0.2,
+                                pointRadius: 2
+                            },
+                            {
+                                label: 'Valore Totale (€)',
+                                data: datiTotale,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                                fill: true,
+                                tension: 0.2,
+                                pointRadius: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 11 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.dataset.label.split(' ')[0]}: ${formatEuro(context.raw)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                grid: { color: '#f1f5f9' },
+                                ticks: { font: { size: 10 } }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Ascolta i movimenti sugli slider per ricalcolare tutto istantaneamente
+        inputIniziale.addEventListener('input', calcolaInteresseComposto);
+        inputMensile.addEventListener('input', calcolaInteresseComposto);
+        inputTasso.addEventListener('input', calcolaInteresseComposto);
+        inputAnni.addEventListener('input', calcolaInteresseComposto);
+
+        // Primo avvio automatico dell'app
+        calcolaInteresseComposto();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

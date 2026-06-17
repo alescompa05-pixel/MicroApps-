@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📅 Time-Blocking | Pianificatore Giornaliero</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div
+        class="max-w-5xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <div
+            class="lg:col-span-5 space-y-6 border-b lg:border-b-0 lg:border-r border-slate-700/40 pb-6 lg:pb-0 lg:pr-6">
+            <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span class="text-xl">📅</span>
+                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-violet-400">MicroProductivity App
+                    </h1>
+                </div>
+                <h2 class="text-2xl font-black text-white">Time-Blocking</h2>
+                <p class="text-slate-400 text-xs mt-1">Trasforma la tua lista di impegni in un flusso orario
+                    strutturato. Incastra i blocchi e domina la giornata.</p>
+            </div>
+
+            <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-700/40">
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">⏰ A che ora
+                    inizia la tua giornata?</label>
+                <input type="time" id="start-day-time" value="08:00"
+                    class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-violet-400">
+            </div>
+
+            <form id="form-task" class="space-y-3 bg-slate-900/20 p-4 rounded-xl border border-slate-700/30">
+                <h3 class="text-xs font-bold uppercase text-violet-400 tracking-wider">Aggiungi un blocco</h3>
+                <div>
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nome Attività
+                        / Impegno</label>
+                    <input type="text" id="task-name" placeholder="Es. Palestra, Studio Deep Work, Pranzo..." required
+                        class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-400">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Durata (in
+                        minuti)</label>
+                    <input type="number" id="task-duration" placeholder="Es. 30, 60, 90..." min="5" required
+                        class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-400 font-bold">
+                </div>
+                <button type="submit"
+                    class="w-full bg-violet-600 hover:bg-violet-500 text-white font-black text-xs uppercase tracking-wider py-2.5 rounded-lg transition-colors cursor-pointer mt-2">
+                    ➕ Inserisci Blocco
+                </button>
+            </form>
+
+            <div class="space-y-2">
+                <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500">⚡ Inserimento Pause Rapide
+                </h4>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="aggiungiPausa(15)"
+                        class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-2 rounded-xl border border-slate-700 cursor-pointer transition-colors">+15m
+                        Break</button>
+                    <button onclick="aggiungiPausa(30)"
+                        class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-2 rounded-xl border border-slate-700 cursor-pointer transition-colors">+30m
+                        Relax</button>
+                    <button onclick="aggiungiPausa(60)"
+                        class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-2 rounded-xl border border-slate-700 cursor-pointer transition-colors">+1h
+                        Pranzo</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-7 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">La tua Giornata Programmata
+                    </h3>
+                    <button id="btn-clear-all"
+                        class="text-[10px] text-slate-500 hover:text-rose-400 font-bold uppercase tracking-wide transition-colors cursor-pointer">🗑️
+                        Reset Tutto</button>
+                </div>
+
+                <div id="timeline-container" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                </div>
+            </div>
+
+            <div
+                class="border-t border-slate-700/40 pt-4 mt-6 flex justify-between items-center text-[10px] text-slate-500 font-medium">
+                <span>Tempo totale pianificato: <strong id="stat-ore" class="text-slate-300">0h 0m</strong></span>
+                <span>I dati si salvano da soli nel browser</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let blocchiGiorno = [
+            { id: 1, nome: "Routine Mattutina & Caffè", durata: 30, tipo: "standard" },
+            { id: 2, nome: "Studio / Lavoro Focalizzato (Deep Work)", durata: 120, tipo: "standard" },
+            { id: 3, nome: "Pausa / Stretching", durata: 15, tipo: "pausa" },
+            { id: 4, nome: "Gestione Mail & Micro-Task", durata: 60, tipo: "standard" }
+        ];
+
+        const timelineContainer = document.getElementById('timeline-container');
+        const formTask = document.getElementById('form-task');
+        const inputStartTime = document.getElementById('start-day-time');
+        const statOre = document.getElementById('stat-ore');
+
+        // Trasforma una stringa "HH:MM" in minuti totali dall'inizio della giornata
+        function stringaInMinuti(stringaOra) {
+            const [ore, minuti] = stringaOra.split(':').map(Number);
+            return (ore * 60) + minuti;
+        }
+
+        // Trasforma i minuti totali in una stringa pulita "HH:MM"
+        function minutiInStringa(minutiTotali) {
+            // Gestisce il superamento delle 24 ore azzerando il ciclo giorno
+            const minutiNormalizzati = minutiTotali % 1440;
+            const ore = Math.floor(minutiNormalizzati / 60);
+            const minuti = minutiNormalizzati % 60;
+            return `${String(ore).padStart(2, '0')}:${String(minuti).padStart(2, '0')}`;
+        }
+
+        // Funzione core: calcola gli orari a cascata e renderizza la timeline grafica
+        function calcolaERenderizza() {
+            timelineContainer.innerHTML = '';
+
+            let minutiCorrenti = stringaInMinuti(inputStartTime.value);
+            let minutiTotaliSomma = 0;
+
+            if (blocchiGiorno.length === 0) {
+                timelineContainer.innerHTML = `
+                    <div class="text-center py-12 bg-slate-900/20 rounded-2xl border border-dashed border-slate-700/60 text-slate-500 text-xs">
+                        Nessun blocco inserito. Comincia a comporre la tua giornata a sinistra!
+                    </div>
+                `;
+                statOre.innerText = "0h 0m";
+                localStorage.setItem('timeblocking_salvato', JSON.stringify([]));
+                return;
+            }
+
+            blocchiGiorno.forEach((blocco, index) => {
+                const oraInizio = minutiInStringa(minutiCorrenti);
+                minutiCorrenti += blocco.durata;
+                const oraFine = minutiInStringa(minutiCorrenti);
+                minutiTotaliSomma += blocco.durata;
+
+                const card = document.createElement('div');
+
+                // Colori ed estetica differenziati se è un blocco di lavoro o di pausa
+                const isPausa = blocco.tipo === 'pausa';
+                const bgClasse = isPausa
+                    ? "bg-emerald-950/20 border-emerald-900/40 hover:border-emerald-700/50"
+                    : "bg-slate-900/50 border-slate-700/40 hover:border-violet-500/30";
+                const badgeClasse = isPausa ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-violet-500/10 text-violet-400 border-violet-500/20";
+
+                card.className = `${bgClasse} border rounded-xl p-3 flex justify-between items-center gap-4 transition-all group`;
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <div class="font-mono text-xs font-black text-slate-300 bg-slate-950 px-2 py-1.5 rounded-lg border border-slate-800 shadow-inner shrink-0 text-center min-w-[90px]">
+                            ${oraInizio} - ${oraFine}
+                        </div>
+                        <div class="truncate">
+                            <h4 class="text-xs font-bold text-white truncate ${isPausa ? 'italic text-emerald-300' : ''}">${blocco.nome}</h4>
+                            <span class="text-[9px] font-bold border rounded px-1.5 py-0.2 uppercase tracking-wide mt-1 inline-block ${badgeClasse}">${blocco.durata} min</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-1 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity">
+                        <button onclick="spostaSopra(${index})" class="text-slate-400 hover:text-white bg-slate-800 p-1 rounded text-xs font-bold cursor-pointer" title="Sposta su">▲</button>
+                        <button onclick="spostaSotto(${index})" class="text-slate-400 hover:text-white bg-slate-800 p-1 rounded text-xs font-bold cursor-pointer" title="Sposta giù">▼</button>
+                        <button onclick="eliminaBlocco(${blocco.id})" class="text-slate-500 hover:text-rose-400 p-1 rounded text-xs ml-1 cursor-pointer" title="Elimina blocco">🗑️</button>
+                    </div>
+                `;
+
+                timelineContainer.appendChild(card);
+            });
+
+            // Aggiorna le statistiche in ore e minuti
+            const oreStat = Math.floor(minutiTotaliSomma / 60);
+            const minStat = minutiTotaliSomma % 60;
+            statOre.innerText = `${oreStat}h ${minStat}m`;
+
+            // Salva nel localStorage
+            localStorage.setItem('timeblocking_salvato', JSON.stringify(blocchiGiorno));
+            localStorage.setItem('timeblocking_orario_inizio', inputStartTime.value);
+        }
+
+        // Submit del form per aggiungere un blocco personalizzato
+        formTask.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nomeInput = document.getElementById('task-name');
+            const durataInput = document.getElementById('task-duration');
+
+            blocchiGiorno.push({
+                id: Date.now(),
+                nome: nomeInput.value.trim(),
+                durata: parseInt(durataInput.value),
+                tipo: "standard"
+            });
+
+            nomeInput.value = '';
+            durataInput.value = '';
+            calcolaERenderizza();
+        });
+
+        // Funzione iniettata nei bottoni esterni per inserire pause pre-impostate
+        window.aggiungiPausa = function (minuti) {
+            let etichetta = "Pausa / Break";
+            if (minuti === 60) etichetta = "Pausa Pranzo / Relax";
+
+            blocchiGiorno.push({
+                id: Date.now(),
+                nome: etichetta,
+                durata: minuti,
+                tipo: "pausa"
+            });
+            calcolaERenderizza();
+        };
+
+        // Ricalcola tutto se l'utente cambia l'orario di inizio della giornata
+        inputStartTime.addEventListener('input', calcolaERenderizza);
+
+        // FUNZIONI DI SPOSTAMENTO ED ELIMINAZIONE
+        window.eliminaBlocco = function (id) {
+            blocchiGiorno = blocchiGiorno.filter(b => b.id !== id);
+            calcolaERenderizza();
+        };
+
+        window.spostaSopra = function (index) {
+            if (index === 0) return; // È già in cima
+            const temp = blocchiGiorno[index];
+            blocchiGiorno[index] = blocchiGiorno[index - 1];
+            blocchiGiorno[index - 1] = temp;
+            calcolaERenderizza();
+        };
+
+        window.spostaSotto = function (index) {
+            if (index === blocchiGiorno.length - 1) return; // È già in fondo
+            const temp = blocchiGiorno[index];
+            blocchiGiorno[index] = blocchiGiorno[index + 1];
+            blocchiGiorno[index + 1] = temp;
+            calcolaERenderizza();
+        };
+
+        document.getElementById('btn-clear-all').addEventListener('click', () => {
+            if (confirm("Vuoi svuotare interamente l'elenco della giornata?")) {
+                blocchiGiorno = [];
+                calcolaERenderizza();
+            }
+        });
+
+        // Recupero e caricamento dati all'avvio dell'applicazione
+        const datiSalvati = localStorage.getItem('timeblocking_salvato');
+        const orarioSalvato = localStorage.getItem('timeblocking_orario_inizio');
+
+        if (datiSalvati) blocchiGiorno = JSON.parse(datiSalvati);
+        if (orarioSalvato) inputStartTime.value = orarioSalvato;
+
+        calcolaERenderizza();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

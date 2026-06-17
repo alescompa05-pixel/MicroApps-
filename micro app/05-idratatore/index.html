@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idratatore Personalizzabile Quotidiano</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Animazione dell'onda dell'acqua all'interno della bottiglia */
+        @keyframes wave {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .water-wave {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            background: #3b82f6;
+            width: 300%;
+            height: 300%;
+            border-radius: 40%;
+            transform: translateX(-50%);
+            animation: wave 10s infinite linear;
+            transition: top 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div
+        class="max-w-md w-full bg-slate-800 rounded-2xl shadow-2xl border border-slate-700/50 p-6 relative overflow-hidden">
+
+        <div class="mb-6 text-center relative">
+            <button id="btn-toggle-config"
+                class="absolute right-0 top-0 text-slate-400 hover:text-blue-400 text-xl transition-colors cursor-pointer"
+                title="Configura contenitori">
+                ⚙️
+            </button>
+            <div class="flex items-center justify-center gap-2 mb-1">
+                <span class="text-2xl">💧</span>
+                <h1 class="text-xs font-bold uppercase tracking-widest text-blue-400">MicroHealth App</h1>
+            </div>
+            <h2 class="text-2xl font-black text-white">Idratatore Custom</h2>
+            <p class="text-slate-400 text-xs mt-1">Imposta la capienza dei tuoi contenitori e traccia l'acqua esatta.
+            </p>
+        </div>
+
+        <div id="config-panel"
+            class="hidden mb-6 p-4 bg-slate-900/80 rounded-xl border border-slate-700 space-y-3 text-xs animate-fadeIn">
+            <h3 class="font-bold text-blue-400 uppercase tracking-wider text-[10px]">⚙️ Personalizza i tuoi contenitori
+                (ml)</h3>
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="block text-slate-400 mb-1">🥛 Bicchiere</label>
+                    <input type="number" id="cfg-c1" value="250"
+                        class="w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-center font-bold text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">☕ Tazza/Bottiglietta</label>
+                    <input type="number" id="cfg-c2" value="500"
+                        class="w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-center font-bold text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">🧪 Borraccia/Bottiglia</label>
+                    <input type="number" id="cfg-c3" value="750"
+                        class="w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-center font-bold text-white">
+                </div>
+            </div>
+            <div>
+                <label class="block text-slate-400 mb-1">🎯 Obiettivo Giornaliero (ml)</label>
+                <input type="number" id="cfg-obiettivo" value="2000"
+                    class="w-full bg-slate-800 border border-slate-600 rounded p-1.5 font-bold text-white">
+            </div>
+            <button id="btn-salva-config"
+                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-1.5 rounded transition-colors cursor-pointer">
+                Salva Impostazioni
+            </button>
+        </div>
+
+        <div class="flex justify-center mb-6">
+            <div
+                class="relative w-40 h-64 border-4 border-slate-600 rounded-b-3xl rounded-t-xl overflow-hidden bg-slate-900/50 shadow-inner flex items-center justify-center">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-2 bg-slate-600 rounded-t-sm"></div>
+                <div id="water-level" class="water-wave" style="top: 100%;"></div>
+                <div class="relative z-10 text-center select-none">
+                    <span id="percentuale-testo"
+                        class="text-3xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]">0%</span>
+                    <p id="litri-testo"
+                        class="text-xs font-bold text-slate-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] mt-0.5">0 / 2.0
+                        L</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mb-4">
+            <button id="btn-c1"
+                class="bg-slate-700 hover:bg-blue-600 active:scale-95 text-white font-bold py-2.5 px-1 rounded-xl border border-slate-600 transition-all text-[11px] flex flex-col items-center gap-0.5 cursor-pointer">
+                <span class="text-sm">🥛</span> <span id="lbl-c1">+250 ml</span>
+            </button>
+            <button id="btn-c2"
+                class="bg-slate-700 hover:bg-blue-600 active:scale-95 text-white font-bold py-2.5 px-1 rounded-xl border border-slate-600 transition-all text-[11px] flex flex-col items-center gap-0.5 cursor-pointer">
+                <span class="text-sm">☕</span> <span id="lbl-c2">+500 ml</span>
+            </button>
+            <button id="btn-c3"
+                class="bg-slate-700 hover:bg-blue-600 active:scale-95 text-white font-bold py-2.5 px-1 rounded-xl border border-slate-600 transition-all text-[11px] flex flex-col items-center gap-0.5 cursor-pointer">
+                <span class="text-sm">🧪</span> <span id="lbl-c3">+750 ml</span>
+            </button>
+        </div>
+
+        <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-700/50 mb-4 flex gap-2 items-center">
+            <div class="flex-1">
+                <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">Aggiunta Libera
+                    (ml)</label>
+                <input type="number" id="input-manuale" placeholder="Es. 330 o 1500"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white font-bold focus:outline-none focus:border-blue-500">
+            </div>
+            <button id="btn-add-manuale"
+                class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider px-4 py-3 rounded-lg transition-colors mt-3.5 cursor-pointer h-[38px] flex items-center justify-center">
+                + Aggiungi
+            </button>
+        </div>
+
+        <button id="btn-reset"
+            class="w-full bg-slate-900/30 hover:bg-rose-950/20 text-slate-500 hover:text-rose-400 font-semibold text-[11px] py-2 rounded-lg border border-slate-700/30 hover:border-rose-900/30 transition-colors cursor-pointer mb-4">
+            Reset Oggi
+        </button>
+
+        <div class="text-center text-[10px] text-slate-500 border-t border-slate-700/50 pt-3">
+            I dati e i contenitori personalizzati rimangono memorizzati nel browser.
+        </div>
+
+    </div>
+
+    <script>
+        // Configurazione iniziale di default (se non c'è nulla nel localStorage)
+        let config = {
+            c1: 250,
+            c2: 500,
+            c3: 750,
+            obiettivo: 2000
+        };
+        let acquaCorrente = 0;
+
+        // Elementi UI Interfaccia
+        const waterLevel = document.getElementById('water-level');
+        const percentualeTesto = document.getElementById('percentuale-testo');
+        const litriTesto = document.getElementById('litri-testo');
+
+        // Etichette pulsanti
+        const lblC1 = document.getElementById('lbl-c1');
+        const lblC2 = document.getElementById('lbl-c2');
+        const lblC3 = document.getElementById('lbl-c3');
+
+        // Bottoni d'azione
+        const btnC1 = document.getElementById('btn-c1');
+        const btnC2 = document.getElementById('btn-c2');
+        const btnC3 = document.getElementById('btn-c3');
+        const btnReset = document.getElementById('btn-reset');
+        const inputManuale = document.getElementById('input-manuale');
+        const btnAddManuale = document.getElementById('btn-add-manuale');
+
+        // Elementi Pannello Configurazione
+        const configPanel = document.getElementById('config-panel');
+        const btnToggleConfig = document.getElementById('btn-toggle-config');
+        const btnSalvaConfig = document.getElementById('btn-salva-config');
+        const cfgC1 = document.getElementById('cfg-c1');
+        const cfgC2 = document.getElementById('cfg-c2');
+        const cfgC3 = document.getElementById('cfg-c3');
+        const cfgObiettivo = document.getElementById('cfg-obiettivo');
+
+        function ottieniDataOggi() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        // Aggiorna l'animazione della bottiglia e le scritte metriche
+        function aggiornaInterfaccia() {
+            // Aggiorna scritte sui 3 pulsanti preset
+            lblC1.innerText = `+${config.c1} ml`;
+            lblC2.innerText = `+${config.c2} ml`;
+            lblC3.innerText = `+${config.c3} ml`;
+
+            // Calcolo percentuale riempimento
+            let percentuale = Math.round((acquaCorrente / config.obiettivo) * 100);
+            if (percentuale > 100) percentuale = 100;
+
+            // Spostamento fluido dell'onda
+            waterLevel.style.top = `${100 - percentuale}%`;
+
+            // Scritte metriche
+            percentualeTesto.innerText = `${percentuale}%`;
+            litriTesto.innerText = `${(acquaCorrente / 1000).toFixed(2)} / ${(config.obiettivo / 1000).toFixed(1)} L`;
+
+            // Salvataggio nel browser
+            localStorage.setItem('idratazione_custom_quantita', acquaCorrente);
+            localStorage.setItem('idratazione_custom_giorno', ottieniDataOggi());
+        }
+
+        // Carica dati storici e preferenze dei contenitori
+        function caricaTutto() {
+            // 1. Recupera la configurazione dei contenitori personalizzati se esiste
+            const configSalvata = localStorage.getItem('idratazione_custom_config');
+            if (configSalvata) {
+                config = JSON.parse(configSalvata);
+            }
+
+            // Popola i campi del pannello impostazioni con i valori correnti
+            cfgC1.value = config.c1;
+            cfgC2.value = config.c2;
+            cfgC3.value = config.c3;
+            cfgObiettivo.value = config.obiettivo;
+
+            // 2. Recupera i millilitri bevuti oggi (con controllo cambio giorno)
+            const dataSalvata = localStorage.getItem('idratazione_custom_giorno');
+            const dataOggi = ottieniDataOggi();
+
+            if (dataSalvata === dataOggi) {
+                const quantitaSalvata = localStorage.getItem('idratazione_custom_quantita');
+                if (quantitaSalvata) acquaCorrente = parseInt(quantitaSalvata);
+            } else {
+                acquaCorrente = 0;
+            }
+
+            aggiornaInterfaccia();
+        }
+
+        // Mostra/Nasconde il pannello impostazioni ingranaggio
+        btnToggleConfig.addEventListener('click', () => {
+            configPanel.classList.toggle('hidden');
+        });
+
+        // Salva le nuove capienze impostate dall'utente
+        btnSalvaConfig.addEventListener('click', () => {
+            config.c1 = parseInt(cfgC1.value) || 250;
+            config.c2 = parseInt(cfgC2.value) || 500;
+            config.c3 = parseInt(cfgC3.value) || 750;
+            config.obiettivo = parseInt(cfgObiettivo.value) || 2000;
+
+            localStorage.setItem('idratazione_custom_config', JSON.stringify(config));
+            configPanel.classList.add('hidden'); // Chiude il pannello
+            aggiornaInterfaccia();
+        });
+
+        // Eventi click sui pulsanti dei contenitori personalizzati
+        btnC1.addEventListener('click', () => { acquaCorrente += config.c1; aggiornaInterfaccia(); });
+        btnC2.addEventListener('click', () => { acquaCorrente += config.c2; aggiornaInterfaccia(); });
+        btnC3.addEventListener('click', () => { acquaCorrente += config.c3; aggiornaInterfaccia(); });
+
+        // Evento aggiunta quantità manuale libera
+        btnAddManuale.addEventListener('click', () => {
+            const valoreManuale = parseInt(inputManuale.value);
+            if (valoreManuale > 0) {
+                acquaCorrente += valoreManuale;
+                inputManuale.value = ''; // Svuota il campo di testo
+                aggiornaInterfaccia();
+            }
+        });
+
+        // Reset manuale giornaliero
+        btnReset.addEventListener('click', () => {
+            if (confirm('Vuoi azzerare l\'acqua bevuta oggi?')) {
+                acquaCorrente = 0;
+                aggiornaInterfaccia();
+            }
+        });
+
+        // Inizializzazione
+        caricaTutto();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

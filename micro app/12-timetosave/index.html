@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Time-To-Save | Ottimizzatore Risparmio</title>
+    <!-- Tailwind CSS per il design -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-8 px-4 flex items-center justify-center">
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+
+    <div
+        class="max-w-5xl w-full bg-slate-800 rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- PANNELLO INPUT (SINISTRA) -->
+        <div
+            class="lg:col-span-5 space-y-5 border-b lg:border-b-0 lg:border-r border-slate-700/40 pb-6 lg:pb-0 lg:pr-6">
+            <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span class="text-xl">💰</span>
+                    <h1 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">MicroFinance App</h1>
+                </div>
+                <h2 class="text-2xl font-black text-white">Time-To-Save</h2>
+                <p class="text-slate-400 text-xs mt-1">Vedi come i piccoli tagli alle spese inutili accelerano il
+                    raggiungimento dei tuoi traguardi. Meno teoria, più matematica immediata.</p>
+            </div>
+
+            <!-- CONFIGURAZIONE OBIETTIVO -->
+            <div class="space-y-3 bg-slate-900/40 p-4 rounded-2xl border border-slate-700/40">
+                <h3 class="text-xs font-bold uppercase text-emerald-400 tracking-wider">Il tuo Obiettivo</h3>
+                <div>
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Cosa vuoi
+                        comprare / raggiungere?</label>
+                    <input type="text" id="target-name" value="Viaggio in Giappone"
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold focus:outline-none focus:border-emerald-400">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Costo
+                            Totale (€)</label>
+                        <input type="number" id="target-cost" value="2500" min="1"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-black focus:outline-none focus:border-emerald-400">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Risparmio
+                            Mensile Base (€)</label>
+                        <input type="number" id="base-save" value="1500" min="1"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-black focus:outline-none focus:border-emerald-400">
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORM NUOVO MODULO STRATEGIA -->
+            <form id="form-strategy" class="space-y-3 bg-slate-900/20 p-4 rounded-2xl border border-slate-700/30">
+                <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Aggiungi un Micro-Taglio</h3>
+                <div>
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Cosa puoi
+                        tagliare / rinunciare?</label>
+                    <input type="text" id="strat-name" placeholder="Es. Caffè al bar, Abbonamento inutilizzato..."
+                        required
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1">Impatto
+                        Economico Mensile (€)</label>
+                    <input type="number" id="strat-value" placeholder="Es. 30 (1€ al giorno)" min="1" required
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold focus:outline-none focus:border-emerald-400">
+                </div>
+                <button type="submit"
+                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider py-2.5 rounded-xl transition-colors cursor-pointer">
+                    ➕ Inserisci Strategia
+                </button>
+            </form>
+        </div>
+
+        <!-- REPARTO TIMELINE E STRATEGIE ATTIVE (DESTRA) -->
+        <div class="lg:col-span-7 flex flex-col justify-between">
+
+            <!-- DISPLAY RISULTATI GIGANTI -->
+            <div class="bg-slate-950/40 p-6 rounded-2xl border border-slate-700/30 text-center space-y-4 mb-6">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Tempo stimato di attesa
+                    </p>
+                    <div id="output-months" class="text-5xl md:text-6xl font-black text-white tracking-tight my-1">
+                        0 <span class="text-lg text-slate-400 font-bold">Mesi</span>
+                    </div>
+                    <p id="output-comparison" class="text-xs text-emerald-400 font-semibold h-4"><!-- Gestito da JS -->
+                    </p>
+                </div>
+
+                <!-- BARRA DI AVANZAMENTO DELLA VELOCITÀ -->
+                <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/40">
+                    <div id="progress-speed" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+                </div>
+                <div class="flex justify-between text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                    <span>Velocità Base</span>
+                    <span id="output-total-save">Risparmio Attuale: 0€/mese</span>
+                    <span>Velocità Massima</span>
+                </div>
+            </div>
+
+            <!-- LISTA DEI MICRO-TAGLI ATTIVABILI -->
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Seleziona quali sacrifici
+                    vuoi attivare stasera:</h3>
+                <div id="strategies-container"
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">
+                    <!-- Iniettato da JS -->
+                </div>
+            </div>
+
+            <!-- RESET -->
+            <div class="border-t border-slate-700/40 pt-4 mt-6 text-right">
+                <button id="btn-clear-all"
+                    class="text-[10px] text-slate-500 hover:text-rose-400 font-bold uppercase tracking-wide transition-colors cursor-pointer">
+                    🗑️ Ripristina Elenco Iniziale
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LOGICA MATEMATICA REATTIVA -->
+    <script>
+        // Data set di partenza modificabile dall'utente
+        let strategie = [
+            { id: 1, nome: "Meno colazioni / caffè al bar", valore: 40, attivo: false },
+            { id: 2, nome: "Disdetta abbonamenti inutilizzati", valore: 15, attivo: false },
+            { id: 3, nome: "Cene fuori ridotte (-1 a mese)", valore: 60, attivo: false },
+            { id: 4, nome: "Pranzo da casa a lavoro (No schifezze)", valore: 80, attivo: false }
+        ];
+
+        const container = document.getElementById('strategies-container');
+        const formStrategy = document.getElementById('form-strategy');
+
+        const inputCost = document.getElementById('target-cost');
+        const inputBaseSave = document.getElementById('base-save');
+        const inputTargetName = document.getElementById('target-name');
+
+        const outputMonths = document.getElementById('output-months');
+        const outputComparison = document.getElementById('output-comparison');
+        const outputTotalSave = document.getElementById('output-total-save');
+        const progressSpeed = document.getElementById('progress-speed');
+
+        // Calcola la matematica inversa e aggiorna l'interfaccia
+        function ricalcolaTutto() {
+            const costo = parseFloat(inputCost.value) || 0;
+            const risparmioBase = parseFloat(inputBaseSave.value) || 0;
+
+            if (costo <= 0 || risparmioBase <= 0) {
+                outputMonths.innerHTML = `--`;
+                outputComparison.innerText = "Inserisci valori validi per calcolare.";
+                progressSpeed.style.width = `0%`;
+                return;
+            }
+
+            // Calcola il risparmio extra derivato dalle checkbox attive
+            let risparmioExtra = 0;
+            strategie.forEach(s => {
+                if (s.attivo) risparmioExtra += s.valore;
+            });
+
+            const risparmioTotaleMensile = risparmioBase + risparmioExtra;
+
+            // Mesi necessari alla velocità base vs velocità ottimizzata
+            const mesiBase = costo / risparmioBase;
+            const mesiOttimizzati = costo / risparmioTotaleMensile;
+
+            // Formattiamo il display dei mesi arrotondando a una cifra decimale per precisione
+            const mesiArrotondati = mesiOttimizzati.toFixed(1);
+            outputMonths.innerHTML = `${mesiArrotondati} <span class="text-lg text-slate-400 font-bold">Mesi</span>`;
+
+            outputTotalSave.innerText = `Risparmio Attuale: ${risparmioTotaleMensile}€/mese`;
+
+            // Calcolo del tempo risparmiato reale
+            const differenzaMesi = mesiBase - mesiOttimizzati;
+            if (differenzaMesi > 0) {
+                // Calcola quanti giorni effettivi risparmi (approssimando 1 mese = 30 giorni)
+                const giorniRisparmiatiTotali = Math.round(differenzaMesi * 30);
+
+                if (giorniRisparmiatiTotali >= 30) {
+                    const mesiSalvati = Math.floor(giorniRisparmiatiTotali / 30);
+                    const giorniResidui = giorniRisparmiatiTotali % 30;
+                    outputComparison.innerText = `🔥 Acceleri il traguardo di ${mesiSalvati} mes${mesiSalvati > 1 ? 'i' : 'o'} e ${giorniResidui} giorni!`;
+                } else {
+                    outputComparison.innerText = `🔥 Acceleri il traguardo di ${giorniRisparmiatiTotali} giorni prima!`;
+                }
+            } else {
+                outputComparison.innerText = "Attiva qualche micro-taglio sotto per accelerare!";
+            }
+
+            // Muove la barra di avanzamento percentuale (rapporto risparmio totale / risparmio base)
+            const percentualeVelocita = Math.min(((risparmioTotaleMensile - risparmioBase) / risparmioBase) * 100, 100);
+            progressSpeed.style.width = `${percentualeVelocita}%`;
+
+            // Salvataggio automatico configurazione nei dati locali
+            localStorage.setItem('timetosave_strategie', JSON.stringify(strategie));
+            localStorage.setItem('timetosave_costo', costo);
+            localStorage.setItem('timetosave_base', risparmioBase);
+            localStorage.setItem('timetosave_nome', inputTargetName.value);
+        }
+
+        // Renderizza visivamente le mattonelle Bento-style delle strategie
+        function renderStrategie() {
+            container.innerHTML = '';
+
+            strategie.forEach(s => {
+                const card = document.createElement('div');
+                const borderClasse = s.attivo ? 'border-emerald-500 bg-emerald-950/20' : 'border-slate-700/50 bg-slate-900/40';
+
+                card.className = `${borderClasse} border rounded-xl p-3 flex justify-between items-center gap-2 cursor-pointer select-none transition-all hover:scale-[1.01] active:scale-[0.99] relative`;
+
+                card.innerHTML = `
+                    <div onclick="toggleStrategia(${s.id})" class="absolute inset-0 z-10"></div>
+                    <div class="min-w-0 relative z-20">
+                        <h4 class="text-xs font-bold text-white truncate">${s.nome}</h4>
+                        <span class="text-[10px] font-mono font-bold text-emerald-400">+${s.valore}€ <span class="text-[9px] text-slate-500">/ mese</span></span>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0 relative z-30">
+                        <input type="checkbox" ${s.attivo ? 'checked' : ''} onchange="toggleStrategia(${s.id})" class="w-4 h-4 accent-emerald-500 cursor-pointer">
+                        <button onclick="eliminaStrategia(${s.id})" class="text-slate-600 hover:text-rose-400 text-xs p-0.5 transition-colors" title="Rimuovi">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            ricalcolaTutto();
+        }
+
+        // Inverte lo stato attivo/disattivo del taglio spese
+        window.toggleStrategia = function (id) {
+            const index = strategie.findIndex(s => s.id === id);
+            if (index !== -1) {
+                strategie[index].attivo = !strategie[index].attivo;
+                renderStrategie();
+            }
+        };
+
+        // Rimuove un elemento inserito
+        window.eliminaStrategia = function (id) {
+            strategie = strategie.filter(s => s.id !== id);
+            renderStrategie();
+        };
+
+        // Form inserimento nuova strategia personalizzata
+        formStrategy.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputNome = document.getElementById('strat-name');
+            const inputValore = document.getElementById('strat-value');
+
+            strategie.push({
+                id: Date.now(),
+                nome: inputNome.value.trim(),
+                valore: parseInt(inputValore.value),
+                attivo: true // Parte già attiva di default
+            });
+
+            inputNome.value = '';
+            inputValore.value = '';
+            renderStrategie();
+        });
+
+        // Eventi di ascolto per input numerici reattivi al millesimo di secondo
+        [inputCost, inputBaseSave, inputTargetName].forEach(input => {
+            input.addEventListener('input', ricalcolaTutto);
+        });
+
+        // Reset completo
+        document.getElementById('btn-clear-all').addEventListener('click', () => {
+            if (confirm("Vuoi ripristinare le quattro strategie predefinite di risparmio?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        });
+
+        // Caricamento dei dati storici salvati
+        const storicizzato = localStorage.getItem('timetosave_strategie');
+        const costSalvato = localStorage.getItem('timetosave_costo');
+        const baseSalvato = localStorage.getItem('timetosave_base');
+        const nomeSalvato = localStorage.getItem('timetosave_nome');
+
+        if (storicizzato) strategie = JSON.parse(storicizzato);
+        if (costSalvato) inputCost.value = costSalvato;
+        if (baseSalvato) inputBaseSave.value = baseSalvato;
+        if (nomeSalvato) inputTargetName.value = nomeSalvato;
+
+        renderStrategie();
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrato con successo per la sotto-app:', reg.scope))
+                    .catch(err => console.error('Errore registrazione Service Worker sotto-app:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>
