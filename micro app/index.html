@@ -472,7 +472,7 @@
             const stellaTitolo = isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti';
 
             return `
-                <div class="glass-card border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between h-full relative group hover:border-slate-700/60 transition-all duration-300">
+                <div data-app-title="${app.titolo}" class="glass-card border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between h-full relative group hover:border-slate-700/60 transition-all duration-300">
                     
                     <!-- Bottone Preferiti (Star Icon) -->
                     <button onclick="togglePreferito(event, '${app.titolo}')" class="absolute top-6 right-6 p-1.5 bg-slate-950/60 border border-slate-800/80 rounded-xl cursor-pointer hover:scale-105 transition-all z-20" title="${stellaTitolo}">
@@ -481,10 +481,12 @@
 
                     <!-- Link Intero alla Card per la navigazione -->
                     <a href="${app.url}" class="block relative h-full flex flex-col">
-                        <div class="flex justify-between items-start mb-4">
+                        <div class="flex justify-between items-start mb-4 flex-wrap gap-2">
                             <div class="text-3xl bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 group-hover:scale-105 transition-transform duration-300">
                                 ${app.icona}
                             </div>
+                            <!-- Badge Live per Timer Attivo -->
+                            <div class="timer-badge-container hidden flex items-center"></div>
                         </div>
                         
                         <div class="mt-2">
@@ -573,9 +575,101 @@
             renderizzaTutto();
         });
 
+        // Funzione per scorrere i timer attivi ed aggiornare i relativi badge nell'Hub
+        function aggiornaTimerAttivi() {
+            // 1. Pomodoro State
+            const statePomodoro = JSON.parse(localStorage.getItem('pomodoro_timer_state'));
+            let pomodoroStatus = null;
+            if (statePomodoro) {
+                const isPaused = statePomodoro.isPaused;
+                let secMancanti = statePomodoro.tempoRimanente;
+                if (!isPaused) {
+                    secMancanti = Math.ceil((statePomodoro.scadenzaTimestamp - Date.now()) / 1000);
+                }
+                if (secMancanti > 0) {
+                    const min = Math.floor(secMancanti / 60);
+                    const sec = secMancanti % 60;
+                    const tempoFormattato = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+                    const labelStato = statePomodoro.modalitaCorrente === 'focus' ? 'FOCUS' : 'PAUSA';
+                    const coloreClasse = statePomodoro.modalitaCorrente === 'focus' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+                    pomodoroStatus = { tempo: tempoFormattato, label: labelStato, icona: '⏱️', classe: coloreClasse };
+                }
+            }
+
+            // 2. Gym Timer State
+            const stateGym = JSON.parse(localStorage.getItem('gym_timer_state'));
+            let gymStatus = null;
+            if (stateGym) {
+                const isPaused = stateGym.isPaused;
+                let secMancanti = stateGym.tempoTotale;
+                if (!isPaused) {
+                    secMancanti = Math.ceil((stateGym.scadenzaTimestamp - Date.now()) / 1000);
+                }
+                if (secMancanti > 0) {
+                    const min = Math.floor(secMancanti / 60);
+                    const sec = secMancanti % 60;
+                    const tempoFormattato = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+                    const labelStato = isPaused ? 'PAUSA' : 'RECUPERO';
+                    const coloreClasse = isPaused ? 'bg-slate-500/20 text-slate-400 border-slate-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+                    gymStatus = { tempo: tempoFormattato, label: labelStato, icona: '🏋️‍♂️', classe: coloreClasse };
+                }
+            }
+
+            // 3. Matrix del Tempo State
+            const stateMatrix = JSON.parse(localStorage.getItem('matrix_timer_state'));
+            let matrixStatus = null;
+            if (stateMatrix) {
+                const isPaused = stateMatrix.isPaused;
+                let secMancanti = stateMatrix.secondiRimanentiSePausa;
+                if (!isPaused) {
+                    secMancanti = Math.ceil((stateMatrix.scadenzaTimestamp - Date.now()) / 1000);
+                }
+                if (secMancanti > 0) {
+                    const min = Math.floor(secMancanti / 60);
+                    const sec = secMancanti % 60;
+                    const tempoFormattato = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+                    const labelStato = stateMatrix.modalita === 'focus' ? 'DEEP WORK' : 'PAUSA';
+                    const coloreClasse = stateMatrix.modalita === 'focus' ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+                    matrixStatus = { tempo: tempoFormattato, label: labelStato, icona: '⚡', classe: coloreClasse };
+                }
+            }
+
+            // Aggiorna i badge nel DOM per tutte le card caricate
+            const cards = document.querySelectorAll('[data-app-title]');
+            cards.forEach(card => {
+                const titolo = card.getAttribute('data-app-title');
+                const badgeContainer = card.querySelector('.timer-badge-container');
+                if (!badgeContainer) return;
+
+                let status = null;
+                if (titolo === "Timer Pomodoro") status = pomodoroStatus;
+                if (titolo === "Bento Gym Timer") status = gymStatus;
+                if (titolo === "Matrix del Tempo Adaptive Timer" || titolo === "Matrix del Tempo") status = matrixStatus;
+
+                if (status) {
+                    badgeContainer.innerHTML = `
+                        <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${status.classe} shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
+                            <span>${status.icona}</span>
+                            <span>${status.label}</span>
+                            <span class="font-mono border-l pl-1 border-slate-700/60 ml-0.5">${status.tempo}</span>
+                        </span>
+                    `;
+                    badgeContainer.classList.remove('hidden');
+                } else {
+                    badgeContainer.classList.add('hidden');
+                    badgeContainer.innerHTML = '';
+                }
+            });
+        }
+
         // Inizializzazione al caricamento
         renderizzaFiltri();
         renderizzaTutto();
+
+        // Avvio timer live refresh
+        setInterval(aggiornaTimerAttivi, 1000);
+        aggiornaTimerAttivi();
 
         // Registrazione del Service Worker per la PWA
         if ('serviceWorker' in navigator) {

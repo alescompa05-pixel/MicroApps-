@@ -162,6 +162,55 @@
         const btnSerieDown = document.getElementById('serie-down');
         const presets = document.querySelectorAll('.btn-preset');
 
+        function salvaStato() {
+            const state = {
+                tempoTotale: tempoTotale,
+                isPaused: isPaused,
+                scadenzaTimestamp: isPaused ? 0 : Date.now() + (tempoTotale * 1000),
+                contatoreSerie: contatoreSerie
+            };
+            localStorage.setItem('gym_timer_state', JSON.stringify(state));
+        }
+
+        function caricaStato() {
+            const salvato = localStorage.getItem('gym_timer_state');
+            if (salvato) {
+                const state = JSON.parse(salvato);
+                contatoreSerie = state.contatoreSerie || 0;
+                serieDisplay.innerText = contatoreSerie;
+                isPaused = state.isPaused;
+                
+                if (isPaused) {
+                    tempoTotale = state.tempoTotale;
+                    if (tempoTotale > 0) {
+                        btnPlayPause.innerText = "Riprendi";
+                        statusText.innerText = "Timer in pausa";
+                        statusText.className = "text-[10px] font-bold uppercase tracking-widest text-slate-500";
+                    }
+                } else {
+                    const secMancanti = Math.ceil((state.scadenzaTimestamp - Date.now()) / 1000);
+                    if (secMancanti > 0) {
+                        tempoTotale = secMancanti;
+                        avviaCicloTimer();
+                    } else {
+                        tempoTotale = 0;
+                        isPaused = true;
+                        statusText.innerText = "RECUPERO COMPLETATO!";
+                        statusText.className = "text-[10px] font-bold uppercase tracking-widest text-emerald-400 animate-pulse";
+                        btnPlayPause.innerText = "Avvia";
+                        btnPlayPause.className = "col-span-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider py-2.5 rounded-xl transition-colors cursor-pointer";
+                    }
+                }
+            } else {
+                const serieSalvate = localStorage.getItem('gym_custom_serie');
+                if (serieSalvate) {
+                    contatoreSerie = parseInt(serieSalvate);
+                    serieDisplay.innerText = contatoreSerie;
+                }
+            }
+            aggiornaDisplay();
+        }
+
         // Generatore audio nativo sicuro per il bip di fine serie
         function faBip() {
             try {
@@ -214,6 +263,7 @@
                     clearInterval(timerId);
                     timerId = null;
                     isPaused = true;
+                    salvaStato();
                     faBip();
 
                     // Trigger animazione flash sullo sfondo
@@ -228,6 +278,7 @@
                     }, 1500);
                 }
             }, 1000);
+            salvaStato();
         }
 
         // Gestione dei tre bottoni preset (60, 90, 120)
@@ -253,6 +304,7 @@
                 btnPlayPause.className = "col-span-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider py-2.5 rounded-xl transition-colors cursor-pointer";
                 statusText.innerText = "Timer in pausa";
                 statusText.className = "text-[10px] font-bold uppercase tracking-widest text-slate-500";
+                salvaStato();
             } else {
                 // Riprendi
                 avviaCicloTimer();
@@ -263,6 +315,7 @@
         btnPlus15.addEventListener('click', () => {
             tempoTotale += 15;
             aggiornaDisplay();
+            salvaStato();
         });
 
         // Sottrai 15 secondi
@@ -273,6 +326,7 @@
                 tempoTotale = 0;
             }
             aggiornaDisplay();
+            salvaStato();
         });
 
         // Resetta il timer manualmente
@@ -287,20 +341,21 @@
             btnPlayPause.className = "col-span-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider py-2.5 rounded-xl transition-colors cursor-pointer";
             statusText.innerText = "Seleziona un recupero";
             statusText.className = "text-[10px] font-bold uppercase tracking-widest text-slate-500";
+            salvaStato();
         });
 
         // LOGICA CONTATORE SERIE
         btnSerieUp.addEventListener('click', () => {
             contatoreSerie++;
             serieDisplay.innerText = contatoreSerie;
-            localStorage.setItem('gym_custom_serie', contatoreSerie);
+            salvaStato();
         });
 
         btnSerieDown.addEventListener('click', () => {
             if (contatoreSerie > 0) {
                 contatoreSerie--;
                 serieDisplay.innerText = contatoreSerie;
-                localStorage.setItem('gym_custom_serie', contatoreSerie);
+                salvaStato();
             }
         });
 
@@ -308,18 +363,12 @@
             if (confirm("Vuoi azzerare il contatore delle serie eseguite?")) {
                 contatoreSerie = 0;
                 serieDisplay.innerText = contatoreSerie;
-                localStorage.setItem('gym_custom_serie', 0);
+                salvaStato();
             }
         });
 
-        // Recupera serie storiche se presenti
-        const serieSalvate = localStorage.getItem('gym_custom_serie');
-        if (serieSalvate) {
-            contatoreSerie = parseInt(serieSalvate);
-            serieDisplay.innerText = contatoreSerie;
-        }
-
-        aggiornaDisplay();
+        // Recupera ed inizializza lo stato
+        caricaStato();
     </script>
 
     <!-- Registrazione Service Worker -->
