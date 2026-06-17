@@ -712,6 +712,12 @@
             }
         };
 
+        // Azione del Widget: Spunta Task Planner
+        window.spuntaPlannerWidget = function(id, checked) {
+            localStorage.setItem(`task-check-${id}`, checked);
+            aggiornaWidgetInterattivi();
+        };
+
         // Gestione del Modal QR Code Wi-Fi Ospiti
         window.mostraWifiQRModal = function(ssid, pass, type) {
             document.getElementById('wifi-qr-ssid').innerText = `Rete: ${ssid}`;
@@ -805,6 +811,22 @@
             // ----------------------------------------------------
             // 2. GESTIONE STATO APPLICAZIONI WIDGET
             // ----------------------------------------------------
+
+            // 3-Task Planner
+            const plannerTasks = [];
+            let plannerActive = false;
+            for (let id = 1; id <= 3; id++) {
+                const testo = (localStorage.getItem(`task-testo-${id}`) || '').trim();
+                const check = localStorage.getItem(`task-check-${id}`) === 'true';
+                if (testo !== '') {
+                    plannerActive = true;
+                }
+                plannerTasks.push({ id, testo, check });
+            }
+            let plannerStatus = null;
+            if (plannerActive) {
+                plannerStatus = { list: plannerTasks };
+            }
 
             // Acqua (Idratatore Custom)
             const configAcqua = JSON.parse(localStorage.getItem('idratazione_custom_config') || '{"c1":250,"c2":500,"obiettivo":2000}');
@@ -949,6 +971,32 @@
             // 2.5 RACCOLTA WIDGET ATTIVI PER SEZIONE DI TESTA
             // ----------------------------------------------------
             const activeWidgetsData = [];
+
+            // 0. Micro-Planner 3-Task
+            if (plannerStatus) {
+                activeWidgetsData.push({
+                    titolo: "Micro-Planner 3-Task",
+                    icona: "🎯",
+                    url: "./02-planner-3task/index.html",
+                    html: `
+                        <div class="space-y-1.5">
+                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">🎯 3 Priorità di oggi:</div>
+                            <ul class="space-y-1 text-[11px]">
+                                ${plannerStatus.list.map(task => {
+                                    if (task.testo === '') return '';
+                                    const textStyle = task.check ? 'text-slate-500 line-through' : 'text-slate-300 font-semibold';
+                                    return `
+                                        <li class="flex items-center gap-1.5">
+                                            <input type="checkbox" onchange="spuntaPlannerWidget(${task.id}, this.checked)" ${task.check ? 'checked' : ''} class="w-3.5 h-3.5 rounded border-slate-800 accent-blue-500 cursor-pointer">
+                                            <span class="truncate ${textStyle}">${task.testo}</span>
+                                        </li>
+                                    `;
+                                }).join('')}
+                            </ul>
+                        </div>
+                    `
+                });
+            }
 
             // 1. Idratatore Custom
             if (acquaStatus && acquaStatus.quantita > 0) {
@@ -1284,7 +1332,26 @@
                     let htmlWidget = '';
                     let showWidget = false;
 
-                    if (titolo === "Idratatore Custom") {
+                    if (titolo === "Micro-Planner 3-Task" && plannerStatus) {
+                        showWidget = true;
+                        htmlWidget = `
+                            <div class="space-y-1.5">
+                                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">🎯 3 Priorità di oggi:</div>
+                                <ul class="space-y-1 text-[11px]">
+                                    ${plannerStatus.list.map(task => {
+                                        if (task.testo === '') return '';
+                                        const textStyle = task.check ? 'text-slate-500 line-through' : 'text-slate-300 font-semibold';
+                                        return `
+                                            <li class="flex items-center gap-1.5">
+                                                <input type="checkbox" onchange="spuntaPlannerWidget(${task.id}, this.checked)" ${task.check ? 'checked' : ''} class="w-3.5 h-3.5 rounded border-slate-800 accent-blue-500 cursor-pointer">
+                                                <span class="truncate ${textStyle}">${task.testo}</span>
+                                            </li>
+                                        `;
+                                    }).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    } else if (titolo === "Idratatore Custom") {
                         showWidget = true;
                         htmlWidget = `
                             <div class="space-y-2">
