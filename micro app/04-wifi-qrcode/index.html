@@ -3,11 +3,34 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Generatore QR Code Wi-Fi</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
+        /* Ottimizzazioni Mobile: disabilita tap-highlight, zoom automatici su input e zoom da doppio tocco */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        button, a, input, select, textarea {
+            touch-action: manipulation;
+        }
+        
+        button, a {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+
         /* Stile speciale per la stampa del badge */
         @media print {
             body * {
