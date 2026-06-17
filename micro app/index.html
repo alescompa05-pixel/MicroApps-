@@ -481,18 +481,20 @@
 
                     <!-- Link Intero alla Card per la navigazione -->
                     <a href="${app.url}" class="block relative h-full flex flex-col">
-                        <div class="flex justify-between items-start mb-4 flex-wrap gap-2">
+                        <div class="flex justify-between items-start mb-4">
                             <div class="text-3xl bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 group-hover:scale-105 transition-transform duration-300">
                                 ${app.icona}
                             </div>
-                            <!-- Badge Live per Timer Attivo -->
-                            <div class="timer-badge-container hidden flex items-center"></div>
                         </div>
                         
                         <div class="mt-2">
-                            <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 mb-2 rounded-full border ${app.badgeColore}">
-                                ${app.categoria}
-                            </span>
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${app.badgeColore}">
+                                    ${app.categoria}
+                                </span>
+                                <!-- Badge Live per Timer Attivo -->
+                                <div class="timer-badge-container hidden flex items-center"></div>
+                            </div>
                             <h3 class="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                                 ${app.titolo}
                             </h3>
