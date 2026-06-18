@@ -1296,15 +1296,22 @@
             let pomodoroStatus = null;
             if (pomodoroExpired) {
                 pomodoroStatus = { tempo: "00:00", label: "SCADUTO", icona: "🍅", classe: "bg-red-500/20 text-red-400 border-red-500/30", expired: true };
-            } else if (statePomodoro && !statePomodoro.isPaused) {
-                let secMancanti = Math.ceil((statePomodoro.scadenzaTimestamp - Date.now()) / 1000);
+            } else if (statePomodoro) {
+                const isPaused = statePomodoro.isPaused;
+                let secMancanti = statePomodoro.tempoRimanente;
+                if (!isPaused) {
+                    secMancanti = Math.ceil((statePomodoro.scadenzaTimestamp - Date.now()) / 1000);
+                }
                 if (secMancanti > 0) {
                     const min = Math.floor(secMancanti / 60);
                     const sec = secMancanti % 60;
                     const tempoFormattato = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-                    const labelStato = statePomodoro.modalitaCorrente === 'focus' ? 'FOCUS' : 'PAUSA';
-                    const coloreClasse = statePomodoro.modalitaCorrente === 'focus' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-                    pomodoroStatus = { tempo: tempoFormattato, label: labelStato, icona: '⏱️', classe: coloreClasse, expired: false };
+                    const labelStato = isPaused ? 'PAUSA' : (statePomodoro.modalitaCorrente === 'focus' ? 'FOCUS' : 'PAUSA');
+                    const coloreClasse = isPaused ? 'bg-slate-500/20 text-slate-400 border-slate-500/30' : 
+                                         (statePomodoro.modalitaCorrente === 'focus' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30');
+                    pomodoroStatus = { tempo: tempoFormattato, label: labelStato, icona: '⏱️', classe: coloreClasse, expired: false, isPaused: isPaused };
+                } else if (secMancanti <= 0 && !isPaused) {
+                    pomodoroStatus = { tempo: "00:00", label: "SCADUTO", icona: "🍅", classe: "bg-red-500/20 text-red-400 border-red-500/30", expired: true };
                 }
             }
 
