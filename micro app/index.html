@@ -266,7 +266,7 @@
     <footer
         class="max-w-6xl w-full mx-auto px-4 md:px-8 py-6 border-t border-slate-900/80 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 backdrop-blur-sm bg-slate-950/20 z-10">
         <div class="text-center md:text-left">
-            &copy; 2026 MicroApps Suite &bull; Progettato per ottimizzare la vita quotidiana.
+            &copy; 2026 MicroApps Suite &bull; Progettato per ottimizzare la vita quotidiana. &bull; <button onclick="mostraPrivacyModal()" class="underline hover:text-slate-300 cursor-pointer">Privacy & Note Legali</button>
         </div>
         <div class="flex items-center gap-4">
             <span class="flex items-center gap-2">
@@ -840,6 +840,15 @@
 
         window.closeGenericoQRModal = function() {
             document.getElementById('generico-qr-modal').classList.add('hidden');
+        };
+
+        // Gestione del Modal Privacy & Note Legali
+        window.mostraPrivacyModal = function() {
+            document.getElementById('privacy-modal').classList.remove('hidden');
+        };
+
+        window.closePrivacyModal = function() {
+            document.getElementById('privacy-modal').classList.add('hidden');
         };
 
         // Funzione per scorrere i timer attivi ed i widget interattivi dell'Hub
@@ -1706,6 +1715,45 @@
                 <div id="generico-qr-code-target"></div>
             </div>
             <p class="text-[9px] text-slate-400 leading-tight">Scansiona questo codice QR con il tuo telefono per aprirne il contenuto.</p>
+        </div>
+    </div>
+
+    <!-- Modal Privacy & Note Legali -->
+    <div id="privacy-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closePrivacyModal()">
+        <div class="bg-slate-900 border border-slate-850 p-6 rounded-2xl max-w-lg w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh]" onclick="event.stopPropagation()">
+            <button onclick="closePrivacyModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+            <div class="flex items-center gap-2 text-violet-400">
+                <span class="text-xl">⚖️</span>
+                <span class="text-xs font-black uppercase tracking-widest font-mono-custom">Privacy & Condizioni d'Uso</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Informativa sulla Privacy & GDPR (Suite Offline Locale)</h3>
+            
+            <div class="text-xs text-slate-350 space-y-3 leading-relaxed text-left">
+                <p>
+                    <strong>1. Trattamento dei Dati Locali (100% Client-Side)</strong><br>
+                    Questa applicazione e tutte le sue micro-app collegate sono progettate per essere eseguite <strong>interamente nel browser dell'utente</strong>. Nessun dato inserito (liste della spesa, scadenze, idee personali, transazioni finanziarie, password o dati di configurazione) viene inviato, salvato o trasmesso a server esterni o terze parti.
+                </p>
+                <p>
+                    <strong>2. Uso del LocalStorage</strong><br>
+                    Tutti i dati vengono memorizzati localmente sul dispositivo dell'utente tramite la tecnologia <code>localStorage</code> del browser. L'utente ha il controllo totale su questi dati e può eliminarli in qualsiasi momento svuotando la cache del browser o utilizzando le impostazioni di ripristino/elimina integrate.
+                </p>
+                <p>
+                    <strong>3. Notifiche Locali</strong><br>
+                    Le notifiche push/avvisi del timer utilizzano le Web Notification API native del browser dell'utente. Vengono generate localmente sul dispositivo e non richiedono alcuna comunicazione con server remoti. I permessi per le notifiche possono essere revocati in qualsiasi momento tramite le impostazioni del browser.
+                </p>
+                <p>
+                    <strong>4. Cookie e Tracciamento</strong><br>
+                    La suite <strong>non utilizza cookie di tracciamento</strong>, codice analitico di terze parti (come Google Analytics o Facebook Pixel), né pubblicità mirata che raccoglie dati personali.
+                </p>
+                <p>
+                    <strong>5. Limitazione di Responsabilità</strong><br>
+                    L'applicazione è fornita "così com'è" senza garanzie di alcun tipo. L'autore non è responsabile per la perdita accidentale di dati causata dalla cancellazione spontanea della memoria del browser o da anomalie del dispositivo.
+                </p>
+            </div>
+            
+            <button onclick="closePrivacyModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer">
+                Ho Capito & Chiudi
+            </button>
         </div>
     </div>
 </body>
