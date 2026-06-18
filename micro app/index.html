@@ -481,6 +481,24 @@
                 coloreClasse: "from-emerald-500/10 to-teal-500/5 hover:border-emerald-500/40",
                 badgeColore: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
                 url: "./22-divisore-spese/index.html"
+            },
+            {
+                titolo: "Organizzatore di Idee",
+                descrizione: "Cattura, categorizza e ordina i tuoi progetti, pensieri ed intuizioni in un archivio locale intelligente.",
+                categoria: "Produttività",
+                icona: "💡",
+                coloreClasse: "from-indigo-500/10 to-violet-500/5 hover:border-indigo-500/40",
+                badgeColore: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+                url: "./23-organizzatore-idee/index.html"
+            },
+            {
+                titolo: "Generatore QR Code",
+                descrizione: "Crea QR code personalizzati per link, testi, email e contatti. Salva più formati e mostrali nel widget dell'hub.",
+                categoria: "Tech",
+                icona: "🔲",
+                coloreClasse: "from-blue-500/10 to-cyan-500/5 hover:border-blue-500/40",
+                badgeColore: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+                url: "./24-generatore-qrcode/index.html"
             }
         ];
 
@@ -801,6 +819,29 @@
             document.getElementById('wifi-qr-modal').classList.add('hidden');
         };
 
+        // Gestione del Modal QR Code Generico
+        window.mostraGenericoQRModal = function(nome, contenuto, fg, bg) {
+            document.getElementById('generico-qr-title').innerText = nome;
+            document.getElementById('generico-qr-preview-bg').style.backgroundColor = bg;
+            const qrContainer = document.getElementById('generico-qr-code-target');
+            qrContainer.innerHTML = '';
+            
+            new QRCode(qrContainer, {
+                text: contenuto,
+                width: 150,
+                height: 150,
+                colorDark: fg,
+                colorLight: bg,
+                correctLevel: QRCode.CorrectLevel.M
+            });
+            
+            document.getElementById('generico-qr-modal').classList.remove('hidden');
+        };
+
+        window.closeGenericoQRModal = function() {
+            document.getElementById('generico-qr-modal').classList.add('hidden');
+        };
+
         // Funzione per scorrere i timer attivi ed i widget interattivi dell'Hub
         function aggiornaWidgetInterattivi() {
             // ----------------------------------------------------
@@ -898,6 +939,17 @@
             let wifiStatus = null;
             if (ssidWifi) {
                 wifiStatus = { ssid: ssidWifi, pass: passWifi, type: typeWifi };
+            }
+
+            // Generatore QR Code Predefinito
+            const defaultQrName = localStorage.getItem('generatore_qrcode_default_name');
+            const defaultQrContent = localStorage.getItem('generatore_qrcode_default_content');
+            const defaultQrFg = localStorage.getItem('generatore_qrcode_default_fg') || '#0f172a';
+            const defaultQrBg = localStorage.getItem('generatore_qrcode_default_bg') || '#ffffff';
+            const defaultQrType = localStorage.getItem('generatore_qrcode_default_type') || 'url';
+            let customQrStatus = null;
+            if (defaultQrName && defaultQrContent) {
+                customQrStatus = { nome: defaultQrName, contenuto: defaultQrContent, fg: defaultQrFg, bg: defaultQrBg, tipo: defaultQrType };
             }
 
             // Time Blocking
@@ -1085,6 +1137,23 @@
                             <div class="text-[10px] font-bold text-slate-400 truncate">Rete: <span class="text-emerald-400 font-mono">${wifiStatus.ssid}</span></div>
                             <button onclick="mostraWifiQRModal('${wifiStatus.ssid.replace(/'/g, "\\'")}', '${wifiStatus.pass.replace(/'/g, "\\'")}', '${wifiStatus.type}')" class="w-full bg-emerald-600/10 hover:bg-emerald-600/20 active:scale-95 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer flex items-center justify-center gap-1">
                                 🔑 Mostra QR Ospiti
+                            </button>
+                        </div>
+                    `
+                });
+            }
+
+            // 2b. Generatore QR Code Predefinito
+            if (customQrStatus) {
+                activeWidgetsData.push({
+                    titolo: "Generatore QR Code",
+                    icona: "🔲",
+                    url: "./24-generatore-qrcode/index.html",
+                    html: `
+                        <div class="space-y-1.5">
+                            <div class="text-[10px] font-bold text-slate-400 truncate">QR: <span class="text-blue-400 font-mono">${customQrStatus.nome}</span></div>
+                            <button onclick="mostraGenericoQRModal('${customQrStatus.nome.replace(/'/g, "\\'")}', '${customQrStatus.contenuto.replace(/'/g, "\\'")}', '${customQrStatus.fg}', '${customQrStatus.bg}')" class="w-full bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer flex items-center justify-center gap-1">
+                                🔲 Mostra QR Code
                             </button>
                         </div>
                     `
@@ -1430,6 +1499,16 @@
                                 </button>
                             </div>
                         `;
+                    } else if (titolo === "Generatore QR Code" && customQrStatus) {
+                        showWidget = true;
+                        htmlWidget = `
+                            <div class="space-y-1.5">
+                                <div class="text-[10px] font-bold text-slate-400 truncate">QR: <span class="text-blue-400 font-mono">${customQrStatus.nome}</span></div>
+                                <button onclick="mostraGenericoQRModal('${customQrStatus.nome.replace(/'/g, "\\'")}', '${customQrStatus.contenuto.replace(/'/g, "\\'")}', '${customQrStatus.fg}', '${customQrStatus.bg}')" class="w-full bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer flex items-center justify-center gap-1">
+                                    🔲 Mostra QR Code
+                                </button>
+                            </div>
+                        `;
                     } else if (titolo === "Time-Blocking" && timeStatus) {
                         showWidget = true;
                         const now = new Date();
@@ -1611,6 +1690,22 @@
                 <div id="wifi-qr-code-target"></div>
             </div>
             <p class="text-[9px] text-slate-400 leading-tight">Inquadra il QR Code con la fotocamera per connetterti automaticamente.</p>
+        </div>
+    </div>
+
+    <!-- Modal overlay per Generatore QR Code -->
+    <div id="generico-qr-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closeGenericoQRModal()">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-xs w-full text-center relative space-y-4 shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="closeGenericoQRModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+            <div class="flex items-center justify-center gap-1.5 text-blue-400">
+                <span class="text-lg">🔲</span>
+                <span class="text-xs font-black uppercase tracking-widest">QR Code Personalizzato</span>
+            </div>
+            <h3 id="generico-qr-title" class="text-sm font-bold text-white truncate w-full">Nome QR</h3>
+            <div id="generico-qr-preview-bg" class="bg-white p-3 rounded-xl flex items-center justify-center mx-auto border border-slate-800 shadow-inner" style="width: 174px; height: 174px;">
+                <div id="generico-qr-code-target"></div>
+            </div>
+            <p class="text-[9px] text-slate-400 leading-tight">Scansiona questo codice QR con il tuo telefono per aprirne il contenuto.</p>
         </div>
     </div>
 </body>

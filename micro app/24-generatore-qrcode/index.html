@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🔲 Generatore QR Code | MicroApps Suite</title>
+    <!-- Tailwind CSS v4 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Font Awesome per icone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- QRCodeJS per generare i QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+        button, a, input, select, textarea { touch-action: manipulation; }
+        button, a { user-select: none; -webkit-user-select: none; }
+        input, select, textarea { font-size: 16px !important; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .profile-card {
+            transition: all 0.2s ease;
+        }
+        .profile-card:hover {
+            border-color: rgba(59, 130, 246, 0.4) !important;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area {
+                position: absolute; left: 50%; top: 40%;
+                transform: translate(-50%, -50%) scale(1.4);
+                border: none !important; box-shadow: none !important;
+                background: white !important;
+                color: black !important;
+            }
+            #print-area canvas, #print-area img {
+                margin: auto !important;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+    <link rel="stylesheet" href="../mobile.css">
+    <style>
+        @supports (padding: max(0px)) {
+            body { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center p-4 py-16 relative overflow-x-hidden">
+
+    <!-- Sfondo Geometrico Dinamico -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-25"></div>
+        <div class="absolute -top-40 -left-40 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[130px]"></div>
+        <div class="absolute -bottom-40 right-10 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[130px]"></div>
+    </div>
+
+    <!-- Torna all'Hub Floating Button -->
+    <a href="../index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/50 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-lg backdrop-blur-md no-print">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Torna all'Hub</span>
+    </a>
+
+    <div class="max-w-5xl w-full space-y-5 no-print">
+
+        <!-- CARD PRINCIPALE -->
+        <div class="bg-slate-900/60 rounded-2xl shadow-2xl border border-slate-800/80 overflow-hidden grid grid-cols-1 md:grid-cols-12 backdrop-blur-md">
+
+            <!-- PANNELLO SINISTRA: INPUT FORM & PERSONALIZZAZIONE (6/12) -->
+            <div class="md:col-span-6 p-6 md:p-8 flex flex-col gap-5 border-b md:border-b-0 md:border-r border-slate-800/80">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-2xl bg-blue-500/10 text-blue-400 p-2 rounded-xl border border-blue-500/20">🔲</span>
+                        <h1 class="text-xs font-bold uppercase tracking-widest text-blue-400 font-mono">MicroTech App</h1>
+                    </div>
+                    <h2 class="text-2xl font-black text-white mb-1">Generatore QR Code</h2>
+                    <p class="text-slate-400 text-xs">Crea codici QR personalizzati per qualsiasi link, testo o contatto. Scegli i tuoi colori, salva più profili e impostane uno predefinito per il widget dell'Hub.</p>
+                </div>
+
+                <!-- SELECT FORMATO TRAMITE TAB PIÙ MODERNI -->
+                <div>
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">📥 Tipo di Contenuto</label>
+                    <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-950 rounded-xl border border-slate-850">
+                        <button onclick="selezionaTipo('url')" id="tab-url" class="py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg active:scale-95 transition-all cursor-pointer text-center bg-blue-600 text-slate-950">🌐 Link</button>
+                        <button onclick="selezionaTipo('text')" id="tab-text" class="py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg active:scale-95 transition-all cursor-pointer text-center text-slate-400 hover:text-slate-200">📝 Testo</button>
+                        <button onclick="selezionaTipo('email')" id="tab-email" class="py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg active:scale-95 transition-all cursor-pointer text-center text-slate-400 hover:text-slate-200">✉️ Email</button>
+                        <button onclick="selezionaTipo('whatsapp')" id="tab-whatsapp" class="py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg active:scale-95 transition-all cursor-pointer text-center text-slate-400 hover:text-slate-200">💬 WA</button>
+                        <button onclick="selezionaTipo('tel')" id="tab-tel" class="py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg active:scale-95 transition-all cursor-pointer text-center text-slate-400 hover:text-slate-200">📞 Tel</button>
+                        <button onclick="selezionaTipo('sms')" id="tab-sms" class="py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg active:scale-95 transition-all cursor-pointer text-center text-slate-400 hover:text-slate-200">📱 SMS</button>
+                    </div>
+                </div>
+
+                <!-- INPUT DINAMICI -->
+                <div class="space-y-4">
+                    <!-- NOME PROFILO -->
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">🏷️ Nome identificativo</label>
+                        <input type="text" id="profile-name" placeholder="Es. Mio Sito, LinkedIn, WhatsApp..."
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium">
+                    </div>
+
+                    <!-- CAMPI SPECIFICI -->
+                    <!-- 1. URL -->
+                    <div id="group-url" class="input-group">
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Indirizzo Web (URL)</label>
+                        <input type="text" id="input-url" placeholder="https://esempio.com"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium">
+                    </div>
+
+                    <!-- 2. Testo Libero -->
+                    <div id="group-text" class="input-group hidden">
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Testo del QR Code</label>
+                        <textarea id="input-text" rows="3" placeholder="Scrivi qui il testo da decodificare..."
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium"></textarea>
+                    </div>
+
+                    <!-- 3. Email -->
+                    <div id="group-email" class="input-group hidden space-y-3">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Destinatario</label>
+                            <input type="email" id="input-email-to" placeholder="info@esempio.com"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Oggetto</label>
+                            <input type="text" id="input-email-subject" placeholder="Oggetto del messaggio"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Corpo del Messaggio</label>
+                            <textarea id="input-email-body" rows="2" placeholder="Testo precompilato..."
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 4. WhatsApp -->
+                    <div id="group-whatsapp" class="input-group hidden space-y-3">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Numero (con prefisso internazionale, senza +)</label>
+                            <input type="text" id="input-whatsapp-num" placeholder="393331234567"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Messaggio Precompilato</label>
+                            <textarea id="input-whatsapp-msg" rows="2" placeholder="Ciao! Ti contatto da..."
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 5. Telefono -->
+                    <div id="group-tel" class="input-group hidden">
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Numero di Telefono</label>
+                        <input type="text" id="input-tel" placeholder="Es. +39 333 1234567"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium">
+                    </div>
+
+                    <!-- 6. SMS -->
+                    <div id="group-sms" class="input-group hidden space-y-3">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Numero di Telefono</label>
+                            <input type="text" id="input-sms-num" placeholder="Es. 3331234567"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Messaggio SMS</label>
+                            <textarea id="input-sms-msg" rows="2" placeholder="Scrivi qui il messaggio..."
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 font-medium"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PERSONALIZZAZIONE COLORI & ERRORI -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-3">
+                    <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">🎨 Personalizza Aspetto</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[9px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Colore Scuro</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" id="fg-color" value="#0f172a" class="w-9 h-9 border border-slate-800 bg-transparent rounded-lg cursor-pointer">
+                                <span id="fg-color-val" class="font-mono text-[10px] text-slate-400">#0F172A</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Colore Sfondo</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" id="bg-color" value="#ffffff" class="w-9 h-9 border border-slate-800 bg-transparent rounded-lg cursor-pointer">
+                                <span id="bg-color-val" class="font-mono text-[10px] text-slate-400">#FFFFFF</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Livello Correzione Errore</label>
+                        <select id="error-level" class="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-slate-350 focus:outline-none">
+                            <option value="L">L - Basso (7% recupero - Consigliato per link semplici)</option>
+                            <option value="M" selected>M - Medio (15% recupero - Standard)</option>
+                            <option value="Q">Q - Alto (25% recupero)</option>
+                            <option value="H">H - Massimo (30% recupero - Consigliato per colori personalizzati)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SALVA PROFILO BUTTON -->
+                <button id="btn-save-profile" class="w-full bg-blue-700 hover:bg-blue-600 text-white font-black text-xs uppercase tracking-wider py-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2">
+                    💾 Salva Profilo QR
+                </button>
+            </div>
+
+            <!-- PANNELLO DESTRA: ANTEPRIMA & ARCHIVIO PROFILI (6/12) -->
+            <div class="md:col-span-6 bg-slate-950/40 p-6 md:p-8 flex flex-col items-center justify-start gap-6">
+                
+                <!-- CARD ANTEPRIMA (STAMPABILE) -->
+                <div id="print-area" class="bg-white text-slate-900 p-6 rounded-2xl shadow-xl border border-slate-200 flex flex-col items-center text-center max-w-[280px] w-full">
+                    <span id="qr-card-heading" class="text-xs font-black uppercase tracking-widest text-blue-600 mb-1">Scansiona il QR Code</span>
+                    <p id="badge-name" class="text-sm font-bold text-slate-500 mb-4 truncate w-full">Anteprima...</p>
+
+                    <!-- QR CONTAINER -->
+                    <div id="qrcode-preview-bg" class="bg-white p-3 rounded-xl border border-slate-100 flex items-center justify-center mb-4 min-h-[174px] min-w-[174px]">
+                        <div id="qrcode-container"></div>
+                    </div>
+
+                    <p class="text-[9px] text-slate-400 font-medium leading-tight">Usa la fotocamera del tuo smartphone per inquadrare il codice ed aprirne il contenuto.</p>
+                </div>
+
+                <!-- AZIONI RAPIDE SULL'ANTEPRIMA -->
+                <div class="w-full max-w-[280px] flex gap-2">
+                    <button onclick="downloadQR()" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] text-white font-bold uppercase tracking-wider py-2 rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1">
+                        📥 Scarica PNG
+                    </button>
+                    <button onclick="window.print()" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] text-white font-bold uppercase tracking-wider py-2 rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1">
+                        🖨️ Stampa
+                    </button>
+                </div>
+
+                <!-- LISTA PROFILI SALVATI -->
+                <div class="w-full border-t border-slate-850 pt-5 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">📂 QR Code Salvati</h3>
+                        <span id="profiles-count" class="text-[10px] text-slate-500">0 salvati</span>
+                    </div>
+                    <div id="profiles-list" class="grid grid-cols-1 gap-2.5 max-h-[250px] overflow-y-auto pr-1">
+                        <!-- Iniettato da JS -->
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LOGICA DI FUNZIONAMENTO -->
+    <script>
+        // Stato Globale
+        let qrcodes = JSON.parse(localStorage.getItem('microapps_qrcodes')) || [];
+        let tipoSelezionato = 'url';
+
+        // Elementi DOM
+        const profileName = document.getElementById('profile-name');
+        const fgColor = document.getElementById('fg-color');
+        const bgColor = document.getElementById('bg-color');
+        const fgColorVal = document.getElementById('fg-color-val');
+        const bgColorVal = document.getElementById('bg-color-val');
+        const errorLevel = document.getElementById('error-level');
+        const badgeName = document.getElementById('badge-name');
+        const qrContainer = document.getElementById('qrcode-container');
+        const qrPreviewBg = document.getElementById('qrcode-preview-bg');
+        const qrCardHeading = document.getElementById('qr-card-heading');
+        const profilesList = document.getElementById('profiles-list');
+        const profilesCount = document.getElementById('profiles-count');
+        const btnSaveProfile = document.getElementById('btn-save-profile');
+
+        // Campi Input specifici
+        const fields = {
+            url: document.getElementById('input-url'),
+            text: document.getElementById('input-text'),
+            emailTo: document.getElementById('input-email-to'),
+            emailSub: document.getElementById('input-email-subject'),
+            emailBody: document.getElementById('input-email-body'),
+            waNum: document.getElementById('input-whatsapp-num'),
+            waMsg: document.getElementById('input-whatsapp-msg'),
+            tel: document.getElementById('input-tel'),
+            smsNum: document.getElementById('input-sms-num'),
+            smsMsg: document.getElementById('input-sms-msg')
+        };
+
+        // Gestione Tab
+        window.selezionaTipo = function(tipo) {
+            tipoSelezionato = tipo;
+            
+            // Aggiorna classi bottoni tab
+            const tabs = ['url', 'text', 'email', 'whatsapp', 'tel', 'sms'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tipo) {
+                    btn.className = "py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg active:scale-95 transition-all cursor-pointer text-center bg-blue-600 text-slate-950";
+                } else {
+                    btn.className = "py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg active:scale-95 transition-all cursor-pointer text-center text-slate-400 hover:text-slate-200";
+                }
+            });
+
+            // Mostra/Nascondi gruppi input
+            tabs.forEach(t => {
+                const group = document.getElementById(`group-${t}`);
+                if (t === tipo) {
+                    group.classList.remove('hidden');
+                } else {
+                    group.classList.add('hidden');
+                }
+            });
+
+            rigeneraQR();
+        }
+
+        // Recupera la stringa finale per il QR code
+        function calcolaStringaQR() {
+            if (tipoSelezionato === 'url') {
+                let val = fields.url.value.trim();
+                if (val && !val.match(/^[a-zA-Z]+:\/\//)) {
+                    // Se non ha schema, lo consideriamo https
+                    val = 'https://' + val;
+                }
+                return val;
+            }
+            if (tipoSelezionato === 'text') {
+                return fields.text.value;
+            }
+            if (tipoSelezionato === 'email') {
+                const to = fields.emailTo.value.trim();
+                const sub = encodeURIComponent(fields.emailSub.value.trim());
+                const body = encodeURIComponent(fields.emailBody.value.trim());
+                if (!to) return '';
+                return `mailto:${to}?subject=${sub}&body=${body}`;
+            }
+            if (tipoSelezionato === 'whatsapp') {
+                const num = fields.waNum.value.trim().replace(/\+/g, '').replace(/\s+/g, '');
+                const msg = encodeURIComponent(fields.waMsg.value.trim());
+                if (!num) return '';
+                return `https://wa.me/${num}${msg ? '?text=' + msg : ''}`;
+            }
+            if (tipoSelezionato === 'tel') {
+                const num = fields.tel.value.trim().replace(/\s+/g, '');
+                if (!num) return '';
+                return `tel:${num}`;
+            }
+            if (tipoSelezionato === 'sms') {
+                const num = fields.smsNum.value.trim().replace(/\s+/g, '');
+                const msg = encodeURIComponent(fields.smsMsg.value.trim());
+                if (!num) return '';
+                return `sms:${num}?body=${msg}`;
+            }
+            return '';
+        }
+
+        // Rigenerazione QR in tempo reale
+        window.rigeneraQR = function() {
+            qrContainer.innerHTML = '';
+            const testomessaggio = calcolaStringaQR();
+            const name = profileName.value.trim();
+            badgeName.innerText = name || "Inserisci dati...";
+
+            // Titolo della card basato sul tipo
+            const mappaTitoliCard = {
+                url: "🌐 Apri Link Web",
+                text: "📝 Leggi Messaggio",
+                email: "✉️ Invia Email",
+                whatsapp: "💬 Avvia WhatsApp",
+                tel: "📞 Chiama Numero",
+                sms: "📱 Invia SMS"
+            };
+            qrCardHeading.innerText = mappaTitoliCard[tipoSelezionato] || "Scansiona QR Code";
+
+            // Aggiorna scritte esadecimali colori
+            fgColorVal.innerText = fgColor.value.toUpperCase();
+            bgColorVal.innerText = bgColor.value.toUpperCase();
+
+            // Rende lo sfondo dell'anteprima dello stesso colore selezionato
+            qrPreviewBg.style.backgroundColor = bgColor.value;
+
+            if (!testomessaggio) {
+                qrContainer.innerHTML = `<div class="text-slate-400 text-[10px] italic py-8">Inserisci dati per generare...</div>`;
+                return;
+            }
+
+            let errLevel = QRCode.CorrectLevel.M;
+            if (errorLevel.value === 'L') errLevel = QRCode.CorrectLevel.L;
+            if (errorLevel.value === 'Q') errLevel = QRCode.CorrectLevel.Q;
+            if (errorLevel.value === 'H') errLevel = QRCode.CorrectLevel.H;
+
+            try {
+                new QRCode(qrContainer, {
+                    text: testomessaggio,
+                    width: 150,
+                    height: 150,
+                    colorDark: fgColor.value,
+                    colorLight: bgColor.value,
+                    correctLevel: errLevel
+                });
+            } catch (err) {
+                qrContainer.innerHTML = `<div class="text-rose-500 text-[9px] font-bold">Errore di generazione: dati troppo lunghi per il livello selezionato.</div>`;
+            }
+        }
+
+        // Ascolta modifiche degli input per rigenerare in real-time
+        profileName.addEventListener('input', rigeneraQR);
+        fgColor.addEventListener('input', rigeneraQR);
+        bgColor.addEventListener('input', rigeneraQR);
+        errorLevel.addEventListener('change', rigeneraQR);
+
+        Object.keys(fields).forEach(key => {
+            fields[key].addEventListener('input', rigeneraQR);
+        });
+
+        // Copia il contenuto testuale del QR
+        window.copiaContenutoQR = function(contenuto, btn) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(contenuto).then(() => visualizzaFeedbackCopia(btn)).catch(() => backupCopiaTextarea(contenuto, btn));
+            } else {
+                backupCopiaTextarea(contenuto, btn);
+            }
+        };
+
+        function backupCopiaTextarea(testo, element) {
+            const textarea = document.createElement('textarea');
+            textarea.value = testo;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                visualizzaFeedbackCopia(element);
+            } catch(e) {}
+            document.body.removeChild(textarea);
+        }
+
+        function visualizzaFeedbackCopia(btn) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = `✅`;
+            setTimeout(() => {
+                btn.innerHTML = orig;
+            }, 1000);
+        }
+
+        // Scarica come immagine PNG
+        window.downloadQR = function() {
+            const canvas = qrContainer.querySelector("canvas");
+            const img = qrContainer.querySelector("img");
+            let dataUrl = "";
+            
+            if (canvas) {
+                dataUrl = canvas.toDataURL("image/png");
+            } else if (img) {
+                dataUrl = img.src;
+            }
+            
+            if (dataUrl && dataUrl.startsWith("data:image")) {
+                const a = document.createElement("a");
+                a.href = dataUrl;
+                const name = profileName.value.trim() || "qrcode";
+                a.download = `${name.toLowerCase().replace(/\s+/g, "_")}_qr.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                alert("QR Code non ancora generato o non valido.");
+            }
+        };
+
+        // Salva profilo QR
+        btnSaveProfile.addEventListener('click', () => {
+            const name = profileName.value.trim();
+            const contenuto = calcolaStringaQR();
+
+            if (!name) {
+                alert("Per favore, inserisci un nome identificativo.");
+                return;
+            }
+            if (!contenuto) {
+                alert("Per favore, inserisci il contenuto da codificare.");
+                return;
+            }
+
+            // Raccogli valori specifici dei campi a seconda del tipo per ricaricarli dopo
+            const formValues = {};
+            if (tipoSelezionato === 'url') formValues.url = fields.url.value;
+            if (tipoSelezionato === 'text') formValues.text = fields.text.value;
+            if (tipoSelezionato === 'email') {
+                formValues.emailTo = fields.emailTo.value;
+                formValues.emailSub = fields.emailSub.value;
+                formValues.emailBody = fields.emailBody.value;
+            }
+            if (tipoSelezionato === 'whatsapp') {
+                formValues.waNum = fields.waNum.value;
+                formValues.waMsg = fields.waMsg.value;
+            }
+            if (tipoSelezionato === 'tel') formValues.tel = fields.tel.value;
+            if (tipoSelezionato === 'sms') {
+                formValues.smsNum = fields.smsNum.value;
+                formValues.smsMsg = fields.smsMsg.value;
+            }
+
+            const nuovoQR = {
+                id: Date.now(),
+                nome: name,
+                tipo: tipoSelezionato,
+                contenuto: contenuto,
+                coloreScuro: fgColor.value,
+                coloreChiaro: bgColor.value,
+                livelloErrore: errorLevel.value,
+                isDefault: qrcodes.length === 0, // Primo inserito diventa predefinito
+                formValues: formValues
+            };
+
+            qrcodes.unshift(nuovoQR);
+            salvaDatiESincronizza();
+            azzeraCampi();
+        });
+
+        function azzeraCampi() {
+            profileName.value = '';
+            Object.keys(fields).forEach(key => fields[key].value = '');
+            fgColor.value = '#0f172a';
+            bgColor.value = '#ffffff';
+            errorLevel.value = 'M';
+            rigeneraQR();
+        }
+
+        // Salva ed aggiorna
+        function salvaDatiESincronizza() {
+            localStorage.setItem('microapps_qrcodes', JSON.stringify(qrcodes));
+            
+            // Trova default ed aggiorna chiavi widget per l'Hub
+            const def = qrcodes.find(q => q.isDefault);
+            if (def) {
+                localStorage.setItem('generatore_qrcode_default_name', def.nome);
+                localStorage.setItem('generatore_qrcode_default_content', def.contenuto);
+                localStorage.setItem('generatore_qrcode_default_fg', def.coloreScuro);
+                localStorage.setItem('generatore_qrcode_default_bg', def.coloreChiaro);
+                localStorage.setItem('generatore_qrcode_default_type', def.tipo);
+            } else {
+                localStorage.removeItem('generatore_qrcode_default_name');
+                localStorage.removeItem('generatore_qrcode_default_content');
+                localStorage.removeItem('generatore_qrcode_default_fg');
+                localStorage.removeItem('generatore_qrcode_default_bg');
+                localStorage.removeItem('generatore_qrcode_default_type');
+            }
+
+            renderizzaProfili();
+        }
+
+        // Imposta come default per Widget
+        window.impostaDefaultQR = function(id) {
+            qrcodes = qrcodes.map(q => {
+                return { ...q, isDefault: q.id === id };
+            });
+            salvaDatiESincronizza();
+        };
+
+        // Elimina profilo QR
+        window.eliminaQR = function(id) {
+            if (confirm("Vuoi davvero eliminare questo profilo QR?")) {
+                const wasDefault = qrcodes.find(q => q.id === id)?.isDefault;
+                qrcodes = qrcodes.filter(q => q.id !== id);
+                
+                // Se abbiamo eliminato il default ed abbiamo altri profili, assegna il primo come default
+                if (wasDefault && qrcodes.length > 0) {
+                    qrcodes[0].isDefault = true;
+                }
+                
+                salvaDatiESincronizza();
+            }
+        };
+
+        // Carica profilo QR nei campi
+        window.caricaProfiloQR = function(id) {
+            const target = qrcodes.find(q => q.id === id);
+            if (!target) return;
+
+            profileName.value = target.nome;
+            tipoSelezionato = target.tipo;
+            fgColor.value = target.coloreScuro || '#0f172a';
+            bgColor.value = target.coloreChiaro || '#ffffff';
+            errorLevel.value = target.livelloErrore || 'M';
+
+            // Resetta tutti
+            Object.keys(fields).forEach(key => fields[key].value = '');
+
+            // Ricarica valori salvati nel form
+            if (target.formValues) {
+                if (target.tipo === 'url' && target.formValues.url) fields.url.value = target.formValues.url;
+                if (target.tipo === 'text' && target.formValues.text) fields.text.value = target.formValues.text;
+                if (target.tipo === 'email') {
+                    if (target.formValues.emailTo) fields.emailTo.value = target.formValues.emailTo;
+                    if (target.formValues.emailSub) fields.emailSub.value = target.formValues.emailSub;
+                    if (target.formValues.emailBody) fields.emailBody.value = target.formValues.emailBody;
+                }
+                if (target.tipo === 'whatsapp') {
+                    if (target.formValues.waNum) fields.waNum.value = target.formValues.waNum;
+                    if (target.formValues.waMsg) fields.waMsg.value = target.formValues.waMsg;
+                }
+                if (target.tipo === 'tel' && target.formValues.tel) fields.tel.value = target.formValues.tel;
+                if (target.tipo === 'sms') {
+                    if (target.formValues.smsNum) fields.smsNum.value = target.formValues.smsNum;
+                    if (target.formValues.smsMsg) fields.smsMsg.value = target.formValues.smsMsg;
+                }
+            } else {
+                // Fallback nel caso sia vecchio salvataggio semplice senza formValues
+                if (target.tipo === 'url') fields.url.value = target.contenuto;
+                if (target.tipo === 'text') fields.text.value = target.contenuto;
+            }
+
+            selezionaTipo(target.tipo);
+        };
+
+        // Renderizza lista profili
+        function renderizzaProfili() {
+            profilesList.innerHTML = '';
+            profilesCount.innerText = `${qrcodes.length} salvati`;
+
+            if (qrcodes.length === 0) {
+                profilesList.innerHTML = `<div class="text-center text-slate-600 italic text-xs py-6">Nessun codice salvato. Crea un QR sopra e clicca "Salva Profilo".</div>`;
+                return;
+            }
+
+            const mappaIcone = {
+                url: "🌐",
+                text: "📝",
+                email: "✉️",
+                whatsapp: "💬",
+                tel: "📞",
+                sms: "📱"
+            };
+
+            qrcodes.forEach(q => {
+                const isDef = q.isDefault;
+                const defClasse = isDef ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-slate-950 text-slate-500 border-slate-800 hover:border-slate-700 hover:text-slate-300";
+                const iconaStato = isDef ? "★ Predefinito" : "☆ Imposta Predefinito";
+
+                const card = document.createElement('div');
+                card.className = `profile-card bg-slate-900 border ${isDef ? 'border-blue-500/40' : 'border-slate-800/80'} p-3.5 rounded-xl flex items-center justify-between gap-3 cursor-pointer`;
+                card.setAttribute('onclick', `caricaProfiloQR(${q.id})`);
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        <div class="text-lg bg-slate-950 p-2 rounded-lg border border-slate-850 shrink-0">
+                            ${mappaIcone[q.tipo] || "🔲"}
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="text-xs font-bold text-white truncate">${q.nome}</h4>
+                            <p class="text-[9px] text-slate-550 truncate font-mono">${q.contenuto}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 shrink-0" onclick="event.stopPropagation()">
+                        <!-- Bottone default -->
+                        <button onclick="impostaDefaultQR(${q.id})" class="text-[9px] px-2 py-1.5 rounded-lg border font-bold transition-all cursor-pointer ${defClasse}">
+                            ${iconaStato}
+                        </button>
+                        <!-- Copia rapida -->
+                        <button onclick="copiaContenutoQR('${q.contenuto.replace(/'/g, "\\'")}', this)" class="p-1.5 bg-slate-950 border border-slate-800 hover:text-white rounded-lg transition-all active:scale-95 text-slate-400 cursor-pointer" title="Copia contenuto">
+                            📋
+                        </button>
+                        <!-- Elimina -->
+                        <button onclick="eliminaQR(${q.id})" class="p-1.5 bg-slate-950 border border-slate-800 hover:bg-rose-950/20 hover:border-rose-900 text-rose-500 rounded-lg transition-all active:scale-95 cursor-pointer" title="Elimina">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+
+                profilesList.appendChild(card);
+            });
+        }
+
+        // Inizializzazione
+        selezionaTipo('url');
+        renderizzaProfili();
+    </script>
+
+</body>
+
+</html>
