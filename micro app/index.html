@@ -30,17 +30,23 @@
         * {
             -webkit-tap-highlight-color: transparent;
         }
-        
-        html, body {
+
+        html,
+        body {
             touch-action: manipulation;
             -webkit-text-size-adjust: 100%;
         }
-        
-        button, a, input, select, textarea {
+
+        button,
+        a,
+        input,
+        select,
+        textarea {
             touch-action: manipulation;
         }
-        
-        button, a {
+
+        button,
+        a {
             user-select: none;
             -webkit-user-select: none;
         }
@@ -94,33 +100,48 @@
         }
 
         @keyframes flash-red {
-            0%, 100% {
+
+            0%,
+            100% {
                 background-color: rgba(220, 38, 38, 0.15) !important;
                 border-color: rgba(239, 68, 68, 0.3) !important;
                 box-shadow: 0 0 0px rgba(239, 68, 68, 0);
             }
+
             50% {
                 background-color: rgba(220, 38, 38, 0.45) !important;
                 border-color: rgba(239, 68, 68, 0.8) !important;
                 box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
             }
         }
+
         .animate-flash-red {
             animation: flash-red 1.2s infinite ease-in-out !important;
         }
 
         /* Griglia 2 colonne da 480px */
         @media (min-width: 480px) and (max-width: 639px) {
-            #apps-container, #favs-grid, #active-widgets-grid {
+
+            #apps-container,
+            #favs-grid,
+            #active-widgets-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
             }
         }
 
         /* Card più compatta su mobile stretto */
         @media (max-width: 479px) {
-            .glass-card { padding: 14px !important; }
-            .glass-card h3 { font-size: 14px !important; }
-            .glass-card p { font-size: 11px !important; }
+            .glass-card {
+                padding: 14px !important;
+            }
+
+            .glass-card h3 {
+                font-size: 14px !important;
+            }
+
+            .glass-card p {
+                font-size: 11px !important;
+            }
         }
 
         /* Filtri scroll orizzontale su mobile */
@@ -190,7 +211,7 @@
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div>
                     <h2 class="text-3xl md:text-6xl font-extrabold text-white tracking-tight leading-none">
-                        Micro<span class="text-blue-500">Apps</span> Suite
+                        Micro<span class="text-blue-500">Apps</span>
                     </h2>
                     <p class="text-slate-400 text-sm mt-2 max-w-xl leading-relaxed">
                         Collezione curata di strumenti intelligenti e pronti all'uso per ottimizzare finanze, studio,
@@ -211,37 +232,25 @@
                         <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Preferiti</span>
                     </div>
                     <div class="w-px bg-slate-800 h-8"></div>
-                    <button onclick="mostraSettingsModal()" class="text-slate-400 hover:text-white text-lg p-1.5 hover:bg-slate-800/60 rounded-xl transition-all cursor-pointer shadow-sm select-none" title="Impostazioni Hub">
-                        <i class="fa-solid fa-cog animate-[spin_8s_linear_infinite] hover:animate-[spin_2s_linear_infinite]"></i>
+                    <button onclick="mostraSettingsModal()"
+                        class="text-slate-400 hover:text-white text-lg p-1.5 hover:bg-slate-800/60 rounded-xl transition-all cursor-pointer shadow-sm select-none"
+                        title="Impostazioni Hub">
+                        <i
+                            class="fa-solid fa-cog animate-[spin_8s_linear_infinite] hover:animate-[spin_2s_linear_infinite]"></i>
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- Barra di Controllo: Ricerca & Filtri (Bento Style) -->
-        <section
-            class="mb-8 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-3 md:p-6 backdrop-blur-md space-y-3">
-            <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
-                <!-- Ricerca Integrata -->
-                <div class="relative w-full md:w-80">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </span>
-                    <input type="text" id="search-input" placeholder="Cerca utilità..."
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-base md:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all">
-                </div>
-                <!-- Filtri Categoria -->
-                <div class="flex gap-2 w-full md:w-auto justify-start md:justify-end overflow-x-auto pb-1 snap-x snap-mandatory" id="filters-container" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;">
-                    <!-- Generato Dinamicamente da JS -->
-                </div>
-            </div>
-        </section>
+
 
         <!-- Sezione Scorciatoie Rapide Launchpad -->
-        <section id="shortcuts-section" class="mb-8 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 md:p-6 backdrop-blur-md hidden animate-fade-in">
+        <section id="shortcuts-section"
+            class="mb-8 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 md:p-6 backdrop-blur-md hidden animate-fade-in">
             <div class="flex items-center gap-2 mb-4">
                 <span class="text-blue-500 text-sm"><i class="fa-solid fa-rocket animate-pulse"></i></span>
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Accesso Rapido</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Accesso Rapido
+                </h3>
             </div>
             <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-3.5" id="shortcuts-grid">
                 <!-- Injected Dynamically by JS -->
@@ -252,7 +261,8 @@
         <section id="active-widgets-section" class="mb-10 hidden">
             <div class="flex items-center gap-2 mb-6">
                 <span class="text-violet-500 text-sm"><i class="fa-solid fa-gauge-high"></i></span>
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Widget Attivi & Monitoraggio</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Widget Attivi &
+                    Monitoraggio</h3>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="active-widgets-grid">
                 <!-- Widget Attivi Iniettati Qui -->
@@ -274,20 +284,53 @@
         </section>
 
         <!-- Sezione Griglia Principale delle App -->
-        <section>
-            <div class="flex items-center gap-2 mb-6">
-                <span class="text-blue-500 text-xs"><i class="fa-solid fa-layer-group"></i></span>
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Catalogo
-                    Utility</h3>
+        <section class="mb-10">
+            <div class="flex items-center justify-between mb-6 border-b border-slate-800/40 pb-4">
+                <div class="flex items-center gap-2.5 cursor-pointer select-none" onclick="toggleCatalog()">
+                    <span class="text-blue-500 text-sm"><i id="catalog-toggle-icon"
+                            class="fa-solid fa-chevron-down transition-transform duration-300"></i></span>
+                    <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Catalogo
+                        Utility</h3>
+                </div>
+                <button onclick="toggleCatalog()" id="btn-toggle-catalog"
+                    class="text-[10px] font-extrabold px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-sm select-none">
+                    <span id="btn-toggle-catalog-text">Nascondi Catalogo</span>
+                </button>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="apps-container">
-                <!-- Card Standard Iniettate Qui -->
-            </div>
-            <!-- Nessun Risultato Feedback -->
-            <div id="no-results"
-                class="hidden text-center py-16 bg-slate-900/20 rounded-2xl border border-dashed border-slate-800">
-                <span class="text-3xl text-slate-600 block mb-3"><i class="fa-regular fa-folder-open"></i></span>
-                <p class="text-slate-500 text-sm">Nessuna micro-app corrisponde ai criteri di ricerca selezionati.</p>
+
+            <div id="catalog-collapsible-wrapper" class="overflow-hidden space-y-6">
+                <!-- Barra di Controllo: Ricerca & Filtri (Bento Style) -->
+                <div
+                    class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-3 md:p-6 backdrop-blur-md space-y-3">
+                    <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                        <!-- Ricerca Integrata -->
+                        <div class="relative w-full md:w-80">
+                            <span
+                                class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                            </span>
+                            <input type="text" id="search-input" placeholder="Cerca utilità..."
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-base md:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all">
+                        </div>
+                        <!-- Filtri Categoria -->
+                        <div class="flex gap-2 w-full md:w-auto justify-start md:justify-end overflow-x-auto pb-1 snap-x snap-mandatory"
+                            id="filters-container" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+                            <!-- Generato Dinamicamente da JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Griglia Principale delle App -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="apps-container">
+                    <!-- Card Standard Iniettate Qui -->
+                </div>
+                <!-- Nessun Risultato Feedback -->
+                <div id="no-results"
+                    class="hidden text-center py-16 bg-slate-900/20 rounded-2xl border border-dashed border-slate-800">
+                    <span class="text-3xl text-slate-600 block mb-3"><i class="fa-regular fa-folder-open"></i></span>
+                    <p class="text-slate-500 text-sm">Nessuna micro-app corrisponde ai criteri di ricerca selezionati.
+                    </p>
+                </div>
             </div>
         </section>
 
@@ -297,7 +340,9 @@
     <footer
         class="max-w-6xl w-full mx-auto px-4 md:px-8 py-6 border-t border-slate-900/80 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 backdrop-blur-sm bg-slate-950/20 z-10">
         <div class="text-center md:text-left">
-            &copy; 2026 MicroApps Suite &bull; Progettato per ottimizzare la vita quotidiana. &bull; <button onclick="mostraPrivacyModal()" class="underline hover:text-slate-300 cursor-pointer">Privacy & Note Legali</button>
+            &copy; 2026 MicroApps Suite &bull; Progettato per ottimizzare la vita quotidiana. &bull; <button
+                onclick="mostraPrivacyModal()" class="underline hover:text-slate-300 cursor-pointer">Privacy & Note
+                Legali</button>
         </div>
         <div class="flex items-center gap-4">
             <span class="flex items-center gap-2">
@@ -558,18 +603,36 @@
             shortcuts: elencoApps.map(app => app.titolo)
         };
 
-        let hubSettings = JSON.parse(localStorage.getItem('hub_settings')) || DEFAULT_SETTINGS;
+        let hubSettings = JSON.parse(localStorage.getItem('hub_settings')) || {};
 
-        // Assicura retro-compatibilità con chiavi mancanti
-        if (!hubSettings.widgets) hubSettings.widgets = DEFAULT_SETTINGS.widgets;
-        if (!hubSettings.shortcuts) hubSettings.shortcuts = DEFAULT_SETTINGS.shortcuts;
-        if (hubSettings.notifications_enabled === undefined) hubSettings.notifications_enabled = DEFAULT_SETTINGS.notifications_enabled;
+        // Assicura retro-compatibilità con chiavi mancanti e merge profondo per i widget
+        if (!hubSettings.widgets) {
+            hubSettings.widgets = {};
+        }
+        for (const key in DEFAULT_SETTINGS.widgets) {
+            if (!hubSettings.widgets[key]) {
+                hubSettings.widgets[key] = { ...DEFAULT_SETTINGS.widgets[key] };
+            } else {
+                if (hubSettings.widgets[key].visible === undefined) {
+                    hubSettings.widgets[key].visible = DEFAULT_SETTINGS.widgets[key].visible;
+                }
+                if (hubSettings.widgets[key].size === undefined) {
+                    hubSettings.widgets[key].size = DEFAULT_SETTINGS.widgets[key].size;
+                }
+            }
+        }
+        if (!hubSettings.shortcuts) {
+            hubSettings.shortcuts = [...DEFAULT_SETTINGS.shortcuts];
+        }
+        if (hubSettings.notifications_enabled === undefined) {
+            hubSettings.notifications_enabled = DEFAULT_SETTINGS.notifications_enabled;
+        }
 
         function salvaImpostazioni() {
             localStorage.setItem('hub_settings', JSON.stringify(hubSettings));
             localStorage.setItem('hub_notifications_enabled', hubSettings.notifications_enabled ? 'true' : 'false');
         }
-        
+
         salvaImpostazioni();
 
         function renderizzaScorciatoie() {
@@ -602,7 +665,7 @@
             });
         }
 
-        window.mostraSettingsModal = function() {
+        window.mostraSettingsModal = function () {
             document.getElementById('setting-notify-toggle').checked = hubSettings.notifications_enabled;
 
             const widgetsList = document.getElementById('settings-widgets-list');
@@ -646,11 +709,11 @@
             document.getElementById('settings-modal').classList.remove('hidden');
         };
 
-        window.chiudiSettingsModal = function() {
+        window.chiudiSettingsModal = function () {
             document.getElementById('settings-modal').classList.add('hidden');
         };
 
-        window.switchSettingsTab = function(tabId) {
+        window.switchSettingsTab = function (tabId) {
             document.getElementById('tab-widgets').classList.add('hidden');
             document.getElementById('tab-shortcuts').classList.add('hidden');
             document.getElementById(tabId).classList.remove('hidden');
@@ -667,7 +730,7 @@
             }
         };
 
-        window.salvaSettingsDaForm = function() {
+        window.salvaSettingsDaForm = function () {
             hubSettings.notifications_enabled = document.getElementById('setting-notify-toggle').checked;
 
             for (const name in hubSettings.widgets) {
@@ -703,6 +766,8 @@
         const noResults = document.getElementById('no-results');
         const countTotalSpan = document.getElementById('total-apps-count');
         const countFavsSpan = document.getElementById('favs-count');
+        const activeWidgetsGrid = document.getElementById('active-widgets-grid');
+        const activeWidgetsSection = document.getElementById('active-widgets-section');
 
         // Genera la lista delle categorie uniche
         function ottieniCategorie() {
@@ -873,7 +938,7 @@
             return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         }
 
-        window.copiaSnippetDaHub = function(event, id) {
+        window.copiaSnippetDaHub = function (event, id) {
             event.stopPropagation();
             const snippets = JSON.parse(localStorage.getItem('autocompiler_snippets') || '[]');
             const item = snippets.find(s => s.id === id);
@@ -945,7 +1010,7 @@
         }
 
         // Azione del Widget: Aggiungi Acqua
-        window.aggiungiAcquaWidget = function(ml) {
+        window.aggiungiAcquaWidget = function (ml) {
             const dataOggi = new Date().toISOString().split('T')[0];
             const dataSalvata = localStorage.getItem('idratazione_custom_giorno');
             let acqua = 0;
@@ -959,7 +1024,7 @@
         };
 
         // Azione del Widget: Spunta Prodotto Spesa
-        window.spuntaProdottoWidget = function(id) {
+        window.spuntaProdottoWidget = function (id) {
             const list = JSON.parse(localStorage.getItem('smartshopping_lista') || '[]');
             const idx = list.findIndex(item => item.id === id);
             if (idx !== -1) {
@@ -970,17 +1035,159 @@
         };
 
         // Azione del Widget: Spunta Task Planner
-        window.spuntaPlannerWidget = function(id, checked) {
+        window.spuntaPlannerWidget = function (id, checked) {
             localStorage.setItem(`task-check-${id}`, checked);
             aggiornaWidgetInterattivi();
         };
 
+        // Azione del Widget: Aggiungi Task Planner
+        window.aggiungiPlannerWidget = function (event) {
+            if (event.key === 'Enter') {
+                const val = event.target.value.trim();
+                if (val) {
+                    for (let id = 1; id <= 3; id++) {
+                        if (!localStorage.getItem(`task-testo-${id}`)) {
+                            localStorage.setItem(`task-testo-${id}`, val);
+                            localStorage.setItem(`task-check-${id}`, 'false');
+                            break;
+                        }
+                    }
+                    event.target.value = '';
+                    aggiornaWidgetInterattivi();
+                }
+            }
+        };
+
+        // Azione del Widget: Aggiungi Prodotto Spesa
+        window.aggiungiShoppingWidget = function (event) {
+            if (event.key === 'Enter') {
+                const val = event.target.value.trim();
+                if (val) {
+                    const list = JSON.parse(localStorage.getItem('smartshopping_lista') || '[]');
+                    list.push({
+                        id: Date.now(),
+                        nome: val,
+                        spuntato: false
+                    });
+                    localStorage.setItem('smartshopping_lista', JSON.stringify(list));
+                    event.target.value = '';
+                    aggiornaWidgetInterattivi();
+                }
+            }
+        };
+
+        // Azione del Widget: Toggle/Reset Pomodoro
+        window.togglePomodoroWidget = function () {
+            const state = JSON.parse(localStorage.getItem('pomodoro_timer_state'));
+            if (state) {
+                state.isPaused = !state.isPaused;
+                if (state.isPaused) {
+                    let secMancanti = Math.ceil((state.scadenzaTimestamp - Date.now()) / 1000);
+                    state.tempoRimanente = Math.max(0, secMancanti);
+                    state.scadenzaTimestamp = 0;
+                } else {
+                    state.scadenzaTimestamp = Date.now() + (state.tempoRimanente * 1000);
+                }
+                localStorage.setItem('pomodoro_timer_state', JSON.stringify(state));
+                localStorage.removeItem('pomodoro_timer_expired');
+                aggiornaWidgetInterattivi();
+            }
+        };
+        window.resetPomodoroWidget = function () {
+            const state = JSON.parse(localStorage.getItem('pomodoro_timer_state'));
+            if (state) {
+                state.isPaused = true;
+                let defaultSec = 25 * 60;
+                if (state.modalitaCorrente === 'short') defaultSec = 5 * 60;
+                else if (state.modalitaCorrente === 'long') defaultSec = 15 * 60;
+                state.tempoRimanente = defaultSec;
+                state.scadenzaTimestamp = 0;
+                localStorage.setItem('pomodoro_timer_state', JSON.stringify(state));
+                localStorage.removeItem('pomodoro_timer_expired');
+                aggiornaWidgetInterattivi();
+            }
+        };
+
+        // Azione del Widget: Toggle/Reset Gym
+        window.toggleGymWidget = function () {
+            const state = JSON.parse(localStorage.getItem('gym_timer_state'));
+            if (state) {
+                state.isPaused = !state.isPaused;
+                if (state.isPaused) {
+                    let secMancanti = Math.ceil((state.scadenzaTimestamp - Date.now()) / 1000);
+                    state.tempoTotale = Math.max(0, secMancanti);
+                    state.scadenzaTimestamp = 0;
+                } else {
+                    state.scadenzaTimestamp = Date.now() + (state.tempoTotale * 1000);
+                }
+                localStorage.setItem('gym_timer_state', JSON.stringify(state));
+                localStorage.removeItem('gym_timer_expired');
+                aggiornaWidgetInterattivi();
+            }
+        };
+        window.resetGymWidget = function () {
+            const state = JSON.parse(localStorage.getItem('gym_timer_state'));
+            if (state) {
+                state.isPaused = true;
+                state.tempoTotale = 60; // default 60s
+                state.scadenzaTimestamp = 0;
+                localStorage.setItem('gym_timer_state', JSON.stringify(state));
+                localStorage.removeItem('gym_timer_expired');
+                aggiornaWidgetInterattivi();
+            }
+        };
+
+        // Azione del Widget: Toggle/Reset Matrix
+        window.toggleMatrixWidget = function () {
+            const state = JSON.parse(localStorage.getItem('matrix_timer_state'));
+            if (state) {
+                state.isPaused = !state.isPaused;
+                if (state.isPaused) {
+                    let secMancanti = Math.ceil((state.scadenzaTimestamp - Date.now()) / 1000);
+                    state.secondiRimanentiSePausa = Math.max(0, secMancanti);
+                    state.scadenzaTimestamp = 0;
+                } else {
+                    state.scadenzaTimestamp = Date.now() + (state.secondiRimanentiSePausa * 1000);
+                }
+                localStorage.setItem('matrix_timer_state', JSON.stringify(state));
+                localStorage.removeItem('matrix_timer_expired');
+                aggiornaWidgetInterattivi();
+            }
+        };
+        window.resetMatrixWidget = function () {
+            const state = JSON.parse(localStorage.getItem('matrix_timer_state'));
+            if (state) {
+                state.isPaused = true;
+                const fMin = state.focusInizialeMinuti || 25;
+                state.secondiRimanentiSePausa = fMin * 60;
+                state.scadenzaTimestamp = 0;
+                localStorage.setItem('matrix_timer_state', JSON.stringify(state));
+                localStorage.removeItem('matrix_timer_expired');
+                aggiornaWidgetInterattivi();
+            }
+        };
+
+        // Azione del Widget: Mostra/Nascondi Password Wifi
+        window.toggleWifiPasswordVisibility = function (buttonId, passwordId) {
+            const pwdElem = document.getElementById(passwordId);
+            const btnElem = document.getElementById(buttonId);
+            if (pwdElem && btnElem) {
+                if (pwdElem.innerText === '••••••••') {
+                    pwdElem.innerText = pwdElem.getAttribute('data-real-pass') || '';
+                    btnElem.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+                } else {
+                    pwdElem.innerText = '••••••••';
+                    btnElem.innerHTML = '<i class="fa-solid fa-eye"></i>';
+                }
+            }
+        };
+
         // Gestione del Modal QR Code Wi-Fi Ospiti
-        window.mostraWifiQRModal = function(ssid, pass, type) {
+        window.mostraWifiQRModal = function (ssid, pass, type) {
             document.getElementById('wifi-qr-ssid').innerText = `Rete: ${ssid}`;
             const qrContainer = document.getElementById('wifi-qr-code-target');
             qrContainer.innerHTML = '';
-            
+
             // WIFI:S:NomeRete;T:WPA;P:PasswordRete;;
             let stringa = `WIFI:S:${ssid};`;
             if (type !== 'nopass') {
@@ -989,7 +1196,7 @@
                 stringa += `T:nopass;P:;`;
             }
             stringa += ';';
-            
+
             new QRCode(qrContainer, {
                 text: stringa,
                 width: 150,
@@ -998,21 +1205,21 @@
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.M
             });
-            
+
             document.getElementById('wifi-qr-modal').classList.remove('hidden');
         };
 
-        window.closeWifiQRModal = function() {
+        window.closeWifiQRModal = function () {
             document.getElementById('wifi-qr-modal').classList.add('hidden');
         };
 
         // Gestione del Modal QR Code Generico
-        window.mostraGenericoQRModal = function(nome, contenuto, fg, bg) {
+        window.mostraGenericoQRModal = function (nome, contenuto, fg, bg) {
             document.getElementById('generico-qr-title').innerText = nome;
             document.getElementById('generico-qr-preview-bg').style.backgroundColor = bg;
             const qrContainer = document.getElementById('generico-qr-code-target');
             qrContainer.innerHTML = '';
-            
+
             new QRCode(qrContainer, {
                 text: contenuto,
                 width: 150,
@@ -1021,21 +1228,60 @@
                 colorLight: bg,
                 correctLevel: QRCode.CorrectLevel.M
             });
-            
+
             document.getElementById('generico-qr-modal').classList.remove('hidden');
         };
 
-        window.closeGenericoQRModal = function() {
+        window.closeGenericoQRModal = function () {
             document.getElementById('generico-qr-modal').classList.add('hidden');
         };
 
         // Gestione del Modal Privacy & Note Legali
-        window.mostraPrivacyModal = function() {
+        window.mostraPrivacyModal = function () {
             document.getElementById('privacy-modal').classList.remove('hidden');
         };
 
-        window.closePrivacyModal = function() {
+        window.closePrivacyModal = function () {
             document.getElementById('privacy-modal').classList.add('hidden');
+        };
+
+        // Gestione del Catalogo a Scomparsa
+        let catalogCollapsed = localStorage.getItem('hub_catalog_collapsed') === 'true';
+
+        window.toggleCatalog = function () {
+            catalogCollapsed = !catalogCollapsed;
+            localStorage.setItem('hub_catalog_collapsed', catalogCollapsed ? 'true' : 'false');
+            aggiornaStatoVisualizzazioneCatalogo(true);
+        };
+
+        window.aggiornaStatoVisualizzazioneCatalogo = function (animate = false) {
+            const wrapper = document.getElementById('catalog-collapsible-wrapper');
+            const icon = document.getElementById('catalog-toggle-icon');
+            const btnText = document.getElementById('btn-toggle-catalog-text');
+
+            if (!wrapper || !icon || !btnText) return;
+
+            if (animate) {
+                wrapper.style.transition = 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease';
+                icon.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            } else {
+                wrapper.style.transition = 'none';
+                icon.style.transition = 'none';
+            }
+
+            if (catalogCollapsed) {
+                wrapper.style.maxHeight = '0px';
+                wrapper.style.opacity = '0';
+                wrapper.style.pointerEvents = 'none';
+                icon.style.transform = 'rotate(-90deg)';
+                btnText.innerText = 'Mostra Catalogo';
+            } else {
+                wrapper.style.maxHeight = '8000px';
+                wrapper.style.opacity = '1';
+                wrapper.style.pointerEvents = 'auto';
+                icon.style.transform = 'rotate(0deg)';
+                btnText.innerText = 'Nascondi Catalogo';
+            }
         };
 
         // Funzione per scorrere i timer attivi ed i widget interattivi dell'Hub
@@ -1043,7 +1289,7 @@
             // ----------------------------------------------------
             // 1. GESTIONE STATO TIMER (Pomodoro, Gym, Matrix)
             // ----------------------------------------------------
-            
+
             // Pomodoro State
             const statePomodoro = JSON.parse(localStorage.getItem('pomodoro_timer_state'));
             const pomodoroExpired = localStorage.getItem('pomodoro_timer_expired') === 'true';
@@ -1169,7 +1415,7 @@
                 const now = new Date();
                 const currentMin = now.getHours() * 60 + now.getMinutes();
                 let blockMin = stringaInMinuti(oraInizio);
-                
+
                 const tasksConOrario = stateTime.map(b => {
                     const start = blockMin;
                     const end = blockMin + b.durata;
@@ -1185,7 +1431,7 @@
                         labelOrario: `${minutiInStringa(start)} - ${minutiInStringa(end)}`
                     };
                 });
-                
+
                 timeStatus = {
                     tasks: tasksConOrario,
                     totale: stateTime.length
@@ -1212,12 +1458,12 @@
             let radarStatus = null;
             if (stateRadar.length > 0) {
                 const today = new Date();
-                today.setHours(0,0,0,0);
+                today.setHours(0, 0, 0, 0);
                 const list = stateRadar.map(s => {
                     const d = new Date(s.data);
-                    d.setHours(0,0,0,0);
-                    return { ...s, giorni: Math.ceil((d - today)/(1000*60*60*24)) };
-                }).sort((a,b) => a.giorni - b.giorni);
+                    d.setHours(0, 0, 0, 0);
+                    return { ...s, giorni: Math.ceil((d - today) / (1000 * 60 * 60 * 24)) };
+                }).sort((a, b) => a.giorni - b.giorni);
                 const urgent = list[0];
                 let classColor = "border-slate-800 text-slate-400 bg-slate-950/20";
                 let sign = `${urgent.giorni} gg`;
@@ -1257,8 +1503,8 @@
                     if (val > 0.005) creditors.push({ name, amount: val });
                     else if (val < -0.005) debtors.push({ name, amount: Math.abs(val) });
                 }
-                debtors.sort((a,b)=>b.amount-a.amount);
-                creditors.sort((a,b)=>b.amount-a.amount);
+                debtors.sort((a, b) => b.amount - a.amount);
+                creditors.sort((a, b) => b.amount - a.amount);
                 let transfers = [];
                 let d = 0, c = 0;
                 while (d < debtors.length && c < creditors.length) {
@@ -1300,37 +1546,50 @@
                     `;
                 } else if (size === 'grande') {
                     widgetHtml = `
-                        <div class="space-y-2">
-                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">🎯 3 Priorità di oggi:</div>
-                            <ul class="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                                <span>🎯 Priorità del Giorno</span>
+                                <span class="text-blue-400 font-mono">${plannerStatus.list.filter(t => t.check).length}/${plannerStatus.list.filter(t => t.testo !== '').length}</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                                 ${plannerStatus.list.map(task => {
-                                    if (task.testo === '') return '';
-                                    const textStyle = task.check ? 'text-slate-500 line-through' : 'text-slate-300 font-semibold';
-                                    return `
-                                        <li class="flex items-center gap-1.5 p-2 bg-slate-950/50 border border-slate-900 rounded-xl">
-                                            <input type="checkbox" onchange="spuntaPlannerWidget(${task.id}, this.checked)" ${task.check ? 'checked' : ''} class="w-3.5 h-3.5 rounded border-slate-850 accent-blue-500 cursor-pointer shrink-0">
-                                            <span class="truncate ${textStyle}">${task.testo}</span>
-                                        </li>
+                        if (task.testo === '') return `
+                                        <div class="border border-dashed border-slate-800 p-2 rounded-xl flex items-center justify-center text-[10px] text-slate-500 italic min-h-[40px]">
+                                            Vuoto
+                                        </div>
                                     `;
-                                }).join('')}
-                            </ul>
+                        const bgClass = task.check ? 'bg-slate-900/40 border-slate-950 text-slate-550 line-through' : 'bg-slate-900 border-slate-800 text-slate-200';
+                        return `
+                                        <label class="border p-2 rounded-xl flex items-center gap-2 text-[11px] cursor-pointer transition-all ${bgClass} min-h-[40px] hover:border-slate-700">
+                                            <input type="checkbox" onchange="spuntaPlannerWidget(${task.id}, this.checked)" ${task.check ? 'checked' : ''} class="w-3.5 h-3.5 rounded border-slate-850 accent-blue-500 cursor-pointer shrink-0">
+                                            <span class="truncate font-semibold">${task.testo}</span>
+                                        </label>
+                                    `;
+                    }).join('')}
+                            </div>
+                            ${plannerStatus.list.some(t => t.testo === '') ? `
+                                <div class="mt-1 flex items-center bg-slate-950/80 rounded-xl px-2 py-1.5 border border-slate-800/60">
+                                    <span class="text-[10px] text-slate-500 mr-2 shrink-0">Aggiungi:</span>
+                                    <input type="text" placeholder="Scrivi e premi Invio..." onkeydown="aggiungiPlannerWidget(event)" class="w-full bg-transparent text-[11px] text-slate-250 focus:outline-none placeholder-slate-600">
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                 } else {
                     widgetHtml = `
-                        <div class="space-y-1.5">
+                        <div class="space-y-2">
                             <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">🎯 3 Priorità di oggi:</div>
-                            <ul class="space-y-1 text-[11px]">
+                            <ul class="space-y-1.5 text-[11px]">
                                 ${plannerStatus.list.map(task => {
-                                    if (task.testo === '') return '';
-                                    const textStyle = task.check ? 'text-slate-500 line-through' : 'text-slate-300 font-semibold';
-                                    return `
+                        if (task.testo === '') return '';
+                        const textStyle = task.check ? 'text-slate-500 line-through' : 'text-slate-300 font-semibold';
+                        return `
                                         <li class="flex items-center gap-1.5">
                                             <input type="checkbox" onchange="spuntaPlannerWidget(${task.id}, this.checked)" ${task.check ? 'checked' : ''} class="w-3.5 h-3.5 rounded border-slate-800 accent-blue-500 cursor-pointer">
                                             <span class="truncate ${textStyle}">${task.testo}</span>
                                         </li>
                                     `;
-                                }).join('')}
+                    }).join('')}
                             </ul>
                         </div>
                     `;
@@ -1345,31 +1604,33 @@
             }
 
             // 1. Idratatore Custom
-            if (acquaStatus && acquaStatus.quantita > 0 && hubSettings.widgets["Idratatore Custom"].visible) {
+            if (acquaStatus && acquaStatus.quantita >= 0 && hubSettings.widgets["Idratatore Custom"].visible) {
                 const size = hubSettings.widgets["Idratatore Custom"].size;
                 let widgetHtml = '';
                 if (size === 'piccolo') {
                     widgetHtml = `
                         <div class="text-[11px] font-semibold text-slate-355 flex justify-between items-center py-1">
                             <span>💧 Idratazione:</span>
-                            <span class="font-mono text-blue-400 font-bold">${acquaStatus.quantita}/${acquaStatus.obiettivo} ml (${acquaStatus.pct}%)</span>
+                            <span class="font-mono text-blue-400 font-bold shrink-0">${acquaStatus.quantita}/${acquaStatus.obiettivo} ml (${acquaStatus.pct}%)</span>
                         </div>
                     `;
                 } else if (size === 'grande') {
                     widgetHtml = `
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                            <div class="md:col-span-7 space-y-1.5">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+                            <div class="md:col-span-7 space-y-2">
                                 <div class="flex justify-between items-center text-[10px]">
                                     <span class="font-bold text-slate-300">💧 Idratazione</span>
                                     <span class="font-mono font-bold text-blue-400">${acquaStatus.quantita} / ${acquaStatus.obiettivo} ml (${acquaStatus.pct}%)</span>
                                 </div>
-                                <div class="w-full bg-slate-905 rounded-full h-1 border border-slate-900 overflow-hidden">
-                                    <div class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: ${acquaStatus.pct}%"></div>
+                                <div class="w-full bg-slate-900 rounded-full h-2 border border-slate-800 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full transition-all duration-500" style="width: ${acquaStatus.pct}%"></div>
                                 </div>
                             </div>
-                            <div class="md:col-span-5 flex gap-2">
-                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c1})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1.5 rounded transition-all cursor-pointer">🥛 +${acquaStatus.c1}ml</button>
-                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c2})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1.5 rounded transition-all cursor-pointer">☕ +${acquaStatus.c2}ml</button>
+                            <div class="md:col-span-5 grid grid-cols-2 gap-1">
+                                <button onclick="aggiungiAcquaWidget(100)" class="bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded-lg transition-all cursor-pointer text-center">+100ml</button>
+                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c1})" class="bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded-lg transition-all cursor-pointer text-center">+${acquaStatus.c1}ml</button>
+                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c2})" class="bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded-lg transition-all cursor-pointer text-center">+${acquaStatus.c2}ml</button>
+                                <button onclick="aggiungiAcquaWidget(${-acquaStatus.quantita})" class="bg-red-500/5 hover:bg-red-500/15 border border-red-500/20 text-red-400 text-[9px] font-bold py-1 rounded-lg transition-all cursor-pointer text-center">Reset 🔄</button>
                             </div>
                         </div>
                     `;
@@ -1384,8 +1645,8 @@
                                 <div class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: ${acquaStatus.pct}%"></div>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c1})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer">🥛 +${acquaStatus.c1}ml</button>
-                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c2})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer">☕ +${acquaStatus.c2}ml</button>
+                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c1})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded-lg transition-all cursor-pointer text-center">🥛 +${acquaStatus.c1}ml</button>
+                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c2})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded-lg transition-all cursor-pointer text-center">☕ +${acquaStatus.c2}ml</button>
                             </div>
                         </div>
                     `;
@@ -1410,12 +1671,38 @@
                             <button onclick="mostraWifiQRModal('${wifiStatus.ssid.replace(/'/g, "\\'")}', '${wifiStatus.pass.replace(/'/g, "\\'")}', '${wifiStatus.type}')" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all cursor-pointer shrink-0">QR 🔑</button>
                         </div>
                     `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+                            <div class="md:col-span-7 space-y-2 text-left">
+                                <div class="text-[11px] font-bold text-slate-300 truncate">Rete: <span class="text-emerald-400 font-mono">${wifiStatus.ssid}</span></div>
+                                <div class="bg-slate-950 px-2 py-1.5 border border-slate-900 rounded-xl flex items-center justify-between">
+                                    <span id="wifi-widget-pass-g" data-real-pass="${wifiStatus.pass}" class="font-mono text-emerald-400 text-[10px]">••••••••</span>
+                                    <button id="btn-wifi-widget-toggle-pass-g" onclick="toggleWifiPasswordVisibility('btn-wifi-widget-toggle-pass-g', 'wifi-widget-pass-g')" class="text-slate-500 hover:text-slate-300 p-1 text-[10px] cursor-pointer"><i class="fa-solid fa-eye"></i></button>
+                                </div>
+                                <div class="text-[9px] text-slate-505 italic leading-snug">Inquadra per connetterti direttamente.</div>
+                            </div>
+                            <div class="md:col-span-5 flex justify-center">
+                                <div id="wifi-qr-inline-target" class="flex items-center justify-center p-1.5 bg-white rounded-2xl w-[95px] h-[95px] shadow-lg"></div>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     widgetHtml = `
-                        <div class="space-y-1.5">
-                            <div class="text-[10px] font-bold text-slate-400 truncate">Rete: <span class="text-emerald-400 font-mono">${wifiStatus.ssid}</span></div>
-                            <button onclick="mostraWifiQRModal('${wifiStatus.ssid.replace(/'/g, "\\'")}', '${wifiStatus.pass.replace(/'/g, "\\'")}', '${wifiStatus.type}')" class="w-full bg-emerald-600/10 hover:bg-emerald-600/20 active:scale-95 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer flex items-center justify-center gap-1">
-                                🔑 Mostra QR Ospiti
+                        <div class="space-y-2">
+                            <div class="text-[10px] font-bold text-slate-400 flex items-center justify-between">
+                                <span class="truncate">Rete: <strong class="text-slate-200 font-mono">${wifiStatus.ssid}</strong></span>
+                                <span class="text-[9px] font-medium text-slate-550 uppercase">${wifiStatus.type}</span>
+                            </div>
+                            <div class="flex items-center justify-between bg-slate-950 px-2 py-1 border border-slate-900 rounded-xl">
+                                <span id="wifi-widget-pass" data-real-pass="${wifiStatus.pass}" class="font-mono text-emerald-400 text-[10px]">••••••••</span>
+                                <div class="flex gap-1 shrink-0">
+                                    <button id="btn-wifi-widget-toggle-pass" onclick="toggleWifiPasswordVisibility('btn-wifi-widget-toggle-pass', 'wifi-widget-pass')" class="text-slate-500 hover:text-slate-300 p-1 text-[10px] cursor-pointer"><i class="fa-solid fa-eye"></i></button>
+                                    <button onclick="copiaRobustaClip('${wifiStatus.pass.replace(/'/g, "\\'")}', this)" class="text-slate-500 hover:text-slate-300 p-1 text-[10px] cursor-pointer">📋</button>
+                                </div>
+                            </div>
+                            <button onclick="mostraWifiQRModal('${wifiStatus.ssid.replace(/'/g, "\\'")}', '${wifiStatus.pass.replace(/'/g, "\\'")}', '${wifiStatus.type}')" class="w-full bg-emerald-600/10 hover:bg-emerald-600/20 active:scale-95 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold py-1 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1">
+                                🔑 Mostra QR Code
                             </button>
                         </div>
                     `;
@@ -1440,11 +1727,27 @@
                             <button onclick="mostraGenericoQRModal('${customQrStatus.nome.replace(/'/g, "\\'")}', '${customQrStatus.contenuto.replace(/'/g, "\\'")}', '${customQrStatus.fg}', '${customQrStatus.bg}')" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-blue-500/30 text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all cursor-pointer shrink-0">QR 🔲</button>
                         </div>
                     `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+                            <div class="md:col-span-7 space-y-2 text-left">
+                                <div class="text-[11px] font-bold text-slate-300 truncate">QR: <span class="text-blue-400 font-mono">${customQrStatus.nome}</span></div>
+                                <div class="bg-slate-950 px-2 py-1.5 border border-slate-900 rounded-xl overflow-x-auto">
+                                    <span class="font-mono text-slate-400 text-[9px] break-all">${customQrStatus.contenuto}</span>
+                                </div>
+                                <div class="text-[9px] text-slate-505 italic leading-snug">Inquadra per copiare il contenuto.</div>
+                            </div>
+                            <div class="md:col-span-5 flex justify-center">
+                                <div id="generico-qr-inline-target" class="flex items-center justify-center p-1.5 bg-white rounded-2xl w-[95px] h-[95px] shadow-lg"></div>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     widgetHtml = `
-                        <div class="space-y-1.5">
+                        <div class="space-y-2">
                             <div class="text-[10px] font-bold text-slate-400 truncate">QR: <span class="text-blue-400 font-mono">${customQrStatus.nome}</span></div>
-                            <button onclick="mostraGenericoQRModal('${customQrStatus.nome.replace(/'/g, "\\'")}', '${customQrStatus.contenuto.replace(/'/g, "\\'")}', '${customQrStatus.fg}', '${customQrStatus.bg}')" class="w-full bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer flex items-center justify-center gap-1">
+                            <div class="text-[9px] text-slate-500 truncate bg-slate-950 p-1 rounded border border-slate-900 font-mono">${customQrStatus.contenuto}</div>
+                            <button onclick="mostraGenericoQRModal('${customQrStatus.nome.replace(/'/g, "\\'")}', '${customQrStatus.contenuto.replace(/'/g, "\\'")}', '${customQrStatus.fg}', '${customQrStatus.bg}')" class="w-full bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1">
                                 🔲 Mostra QR Code
                             </button>
                         </div>
@@ -1499,44 +1802,54 @@
                 if (size === 'piccolo') {
                     const activeBlock = tasksConOrario.find(t => t.isActive);
                     widgetHtml = `
-                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
-                            <span class="truncate mr-2">📅 Ora: ${activeBlock ? activeBlock.nome : 'Pausa'}</span>
+                        <div class="text-[11px] font-semibold text-slate-355 flex justify-between items-center py-1">
+                            <span class="truncate mr-2">📅 In corso: ${activeBlock ? activeBlock.nome : 'Pausa'}</span>
                             <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border border-slate-800 bg-slate-900/60 text-slate-400 shrink-0">${activeBlock ? activeBlock.labelOrario : '--:--'}</span>
                         </div>
                     `;
                 } else if (size === 'grande') {
                     widgetHtml = `
-                        <div class="space-y-1.5">
-                            <div class="flex justify-between items-center text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-[9px] font-extrabold text-slate-505 uppercase tracking-wider">
                                 <span>Timeline:</span>
-                                ${isGiornataFinita ? '<span class="text-emerald-500 font-bold">Giornata conclusa 🎉</span>' : ''}
+                                ${isGiornataFinita ? '<span class="text-emerald-500 font-bold">Conclusa 🎉</span>' : ''}
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                                 ${tasksToShow.map(task => {
-                                    const isPast = currentMin >= task.end;
-                                    let bgBlock = 'bg-slate-900 border-slate-800/80 text-slate-400';
-                                    let badgeBlock = 'bg-slate-950 text-slate-500 border-slate-800';
-                                    let dotHtml = '';
+                        const isPast = currentMin >= task.end;
+                        let bgBlock = 'bg-slate-900 border-slate-800/80 text-slate-450';
+                        let badgeBlock = 'bg-slate-950 text-slate-500 border-slate-800';
+                        let dotHtml = '';
+                        let progressHtml = '';
 
-                                    if (task.isActive) {
-                                        bgBlock = 'bg-violet-950/20 border-violet-500/35 text-violet-200 ring-1 ring-violet-500/10';
-                                        badgeBlock = 'bg-violet-500/15 text-violet-300 border-violet-500/20';
-                                        dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping mr-1.5 shrink-0"></span>';
-                                    } else if (isPast) {
-                                        bgBlock = 'bg-slate-900/40 border-slate-950 text-slate-500/80 line-through';
-                                        badgeBlock = 'bg-slate-950/20 text-slate-600 border-slate-950';
-                                    }
+                        if (task.isActive) {
+                            bgBlock = 'bg-violet-950/20 border-violet-500/35 text-violet-250 ring-1 ring-violet-500/10';
+                            badgeBlock = 'bg-violet-500/15 text-violet-300 border-violet-500/20';
+                            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping mr-1.5 shrink-0"></span>';
+                            const totalBlockMin = task.end - task.start;
+                            const elapsedMin = currentMin - task.start;
+                            const pct = Math.min(100, Math.max(0, Math.round((elapsedMin / totalBlockMin) * 100)));
+                            progressHtml = `
+                                            <div class="w-full bg-slate-950 rounded-full h-1 mt-1 overflow-hidden">
+                                                <div class="bg-violet-500 h-full transition-all duration-500" style="width: ${pct}%"></div>
+                                            </div>
+                                        `;
+                        } else if (isPast) {
+                            bgBlock = 'bg-slate-900/40 border-slate-955 text-slate-550 line-through';
+                            badgeBlock = 'bg-slate-955/20 text-slate-600 border-slate-955';
+                        }
 
-                                    return `
-                                        <div class="border p-2 rounded-xl flex flex-col justify-between text-[11px] gap-2 ${bgBlock}">
+                        return `
+                                        <div class="border p-2 rounded-xl flex flex-col justify-between text-[11px] gap-1.5 ${bgBlock}">
                                             <div class="flex items-center min-w-0">
                                                 ${dotHtml}
                                                 <span class="truncate font-semibold text-left">${task.nome}</span>
                                             </div>
+                                            ${progressHtml}
                                             <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border text-center ${badgeBlock}">${task.labelOrario}</span>
                                         </div>
                                     `;
-                                }).join('')}
+                    }).join('')}
                             </div>
                         </div>
                     `;
@@ -1549,21 +1862,21 @@
                             </div>
                             <div class="space-y-1">
                                 ${tasksToShow.map(task => {
-                                    const isPast = currentMin >= task.end;
-                                    let bgBlock = 'bg-slate-900 border-slate-800/80 text-slate-400';
-                                    let badgeBlock = 'bg-slate-950 text-slate-500 border-slate-800';
-                                    let dotHtml = '';
+                        const isPast = currentMin >= task.end;
+                        let bgBlock = 'bg-slate-900 border-slate-800/80 text-slate-400';
+                        let badgeBlock = 'bg-slate-950 text-slate-500 border-slate-800';
+                        let dotHtml = '';
 
-                                    if (task.isActive) {
-                                        bgBlock = 'bg-violet-950/20 border-violet-500/35 text-violet-200 ring-1 ring-violet-500/10';
-                                        badgeBlock = 'bg-violet-500/15 text-violet-300 border-violet-500/20';
-                                        dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping mr-1.5 shrink-0"></span>';
-                                    } else if (isPast) {
-                                        bgBlock = 'bg-slate-900/40 border-slate-950 text-slate-500/80 line-through';
-                                        badgeBlock = 'bg-slate-950/20 text-slate-600 border-slate-950';
-                                    }
+                        if (task.isActive) {
+                            bgBlock = 'bg-violet-955/20 border-violet-500/35 text-violet-200 ring-1 ring-violet-500/10';
+                            badgeBlock = 'bg-violet-505/15 text-violet-300 border-violet-500/20';
+                            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping mr-1.5 shrink-0"></span>';
+                        } else if (isPast) {
+                            bgBlock = 'bg-slate-900/40 border-slate-950 text-slate-500/80 line-through';
+                            badgeBlock = 'bg-slate-950/20 text-slate-600 border-slate-950';
+                        }
 
-                                    return `
+                        return `
                                         <div class="border p-1.5 rounded-xl flex items-center justify-between text-[11px] gap-2 ${bgBlock}">
                                             <div class="flex items-center min-w-0 flex-1">
                                                 ${dotHtml}
@@ -1572,7 +1885,7 @@
                                             <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border shrink-0 ${badgeBlock}">${task.labelOrario}</span>
                                         </div>
                                     `;
-                                }).join('')}
+                    }).join('')}
                             </div>
                         </div>
                     `;
@@ -1594,22 +1907,34 @@
                     widgetHtml = `
                         <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
                             <span>🛒 Lista:</span>
-                            <span class="font-mono text-lime-400 font-bold">${shoppingStatus.count} rimanenti</span>
+                            <span class="font-mono text-lime-400 font-bold">${shoppingStatus.count} prodotti rimanenti</span>
                         </div>
                     `;
                 } else if (size === 'grande') {
                     const items = stateShopping.filter(item => !item.spuntato);
                     widgetHtml = `
-                        <div class="space-y-1.5">
-                            <div class="text-[9px] font-bold text-slate-400">🛒 Da acquistare (${shoppingStatus.count}):</div>
-                            <ul class="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
+                        <div class="space-y-2.5">
+                            <div class="flex justify-between items-center text-[10px] font-bold text-slate-405 uppercase tracking-wider">
+                                <span>🛒 Lista Spesa</span>
+                                <span class="text-lime-400 font-mono">${shoppingStatus.count} rimanenti</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                                 ${items.slice(0, 6).map(item => `
-                                    <li class="flex items-center gap-1.5 p-1.5 bg-slate-950/40 border border-slate-900 rounded-xl">
+                                    <label class="border border-slate-800 bg-slate-900/60 p-2 rounded-xl flex items-center gap-2 text-[11px] cursor-pointer hover:border-slate-700 transition-colors">
                                         <input type="checkbox" onchange="spuntaProdottoWidget(${item.id})" class="w-3.5 h-3.5 rounded border-slate-850 accent-lime-500 cursor-pointer shrink-0">
-                                        <span class="truncate text-slate-300 font-semibold">${item.nome}</span>
-                                    </li>
+                                        <span class="truncate text-slate-205 font-semibold text-left">${item.nome}</span>
+                                    </label>
                                 `).join('')}
-                            </ul>
+                                ${items.length === 0 ? `
+                                    <div class="col-span-3 border border-dashed border-slate-800 p-2 rounded-xl flex items-center justify-center text-[10px] text-slate-500 italic">
+                                        Lista vuota
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="mt-1 flex items-center bg-slate-950/80 rounded-xl px-2 py-1.5 border border-slate-800/60">
+                                <span class="text-[10px] text-slate-505 mr-2 shrink-0">Compra:</span>
+                                <input type="text" placeholder="Aggiungi prodotto e premi Invio..." onkeydown="aggiungiShoppingWidget(event)" class="w-full bg-transparent text-[11px] text-slate-250 focus:outline-none placeholder-slate-600">
+                            </div>
                         </div>
                     `;
                 } else {
@@ -1617,11 +1942,11 @@
                     if (shoppingStatus.count > 0) {
                         shopInnerHtml = `
                             <div class="space-y-1.5">
-                                <div class="text-[9px] font-bold text-slate-400">🛒 Da acquistare (${shoppingStatus.count}):</div>
+                                <div class="text-[9px] font-bold text-slate-405 uppercase tracking-wider">🛒 Da acquistare (${shoppingStatus.count}):</div>
                                 <ul class="space-y-1 text-[11px]">
                                     ${shoppingStatus.list.map(item => `
                                         <li class="flex items-center gap-1.5">
-                                            <input type="checkbox" onchange="spuntaProdottoWidget(${item.id})" class="w-3.5 h-3.5 rounded border-slate-800 accent-lime-500 cursor-pointer">
+                                            <input type="checkbox" onchange="spuntaProdottoWidget(${item.id})" class="w-3.5 h-3.5 rounded border-slate-805 accent-lime-500 cursor-pointer">
                                             <span class="truncate text-slate-300 font-semibold">${item.nome}</span>
                                         </li>
                                     `).join('')}
@@ -1657,6 +1982,48 @@
                             <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border ${radarStatus.classColor} shrink-0">${radarStatus.sign}</span>
                         </div>
                     `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="space-y-2 text-left">
+                            <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">⏰ Prossime Scadenze:</div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                ${(() => {
+                            const stateRadar = JSON.parse(localStorage.getItem('microapps_radar') || '[]');
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const sorted = stateRadar.map(s => {
+                                const d = new Date(s.data);
+                                d.setHours(0, 0, 0, 0);
+                                return { ...s, giorni: Math.ceil((d - today) / (1000 * 60 * 60 * 24)) };
+                            }).sort((a, b) => a.giorni - b.giorni).slice(0, 3);
+
+                            return sorted.map(item => {
+                                let badgeColor = "border-slate-800 text-slate-400 bg-slate-950/20";
+                                let sign = `${item.giorni} gg`;
+                                if (item.giorni < 0) {
+                                    badgeColor = "border-slate-900 text-slate-500 bg-slate-950/40";
+                                    sign = `Scaduta`;
+                                } else if (item.giorni <= 2) {
+                                    badgeColor = "border-rose-500/30 text-rose-450 bg-rose-500/10";
+                                    sign = `🚨 Urgent`;
+                                } else if (item.giorni <= item.cuscinetto) {
+                                    badgeColor = "border-amber-500/30 text-amber-450 bg-amber-500/10";
+                                    sign = `⚠️ ${item.giorni} gg`;
+                                } else {
+                                    badgeColor = "border-emerald-500/30 text-emerald-450 bg-emerald-500/10";
+                                    sign = `✅ ${item.giorni} gg`;
+                                }
+                                return `
+                                            <div class="border p-2 rounded-xl flex flex-col justify-between text-[11px] bg-slate-900 border-slate-850 gap-2 text-left">
+                                                <span class="font-bold text-slate-200 truncate">${item.titolo}</span>
+                                                <span class="font-mono font-bold text-[9px] px-1.5 py-0.5 rounded border text-center ${badgeColor}">${sign}</span>
+                                            </div>
+                                        `;
+                            }).join('');
+                        })()}
+                            </div>
+                        </div>
+                    `;
                 } else {
                     widgetHtml = `
                         <div class="space-y-1">
@@ -1687,14 +2054,56 @@
                             <span>💸 Spese: ${equiStatus.count} (${equiStatus.sum.toFixed(2)} €)</span>
                         </div>
                     `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="space-y-3 text-left w-full">
+                            <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                <span>💸 Bilancio EquiSplit</span>
+                                <span>Totale: <strong class="text-emerald-400 font-mono">${equiStatus.sum.toFixed(2)} €</strong> (${equiStatus.count} spese)</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                                <div class="md:col-span-6 space-y-1">
+                                    <div class="text-[8px] text-slate-505 uppercase tracking-widest font-bold">Liquidazione:</div>
+                                    <div class="bg-slate-950 border border-slate-900 p-2 rounded-xl text-[10px] text-emerald-400 font-bold leading-normal truncate">
+                                        ${equiStatus.text}
+                                    </div>
+                                </div>
+                                <div class="md:col-span-6 space-y-1">
+                                    <div class="text-[8px] text-slate-505 uppercase tracking-widest font-bold">Saldi Netti:</div>
+                                    <div class="grid grid-cols-2 gap-1 max-h-[60px] overflow-y-auto pr-1">
+                                        ${(() => {
+                            const netBalances = {};
+                            stateEqui.members.forEach(m => netBalances[m] = 0);
+                            stateEqui.expenses.forEach(exp => {
+                                if (netBalances[exp.paidBy] !== undefined) netBalances[exp.paidBy] += exp.amount;
+                                const costPerPerson = exp.amount / exp.participants.length;
+                                exp.participants.forEach(p => {
+                                    if (netBalances[p] !== undefined) netBalances[p] -= costPerPerson;
+                                });
+                            });
+                            return Object.entries(netBalances).map(([name, bal]) => {
+                                const balClass = bal >= 0 ? 'text-emerald-400' : 'text-rose-455';
+                                return `
+                                                    <div class="flex justify-between bg-slate-950/40 border border-slate-900 rounded px-1.5 py-0.5 text-[9px] font-mono font-semibold">
+                                                        <span class="text-slate-400 truncate mr-1">${name}</span>
+                                                        <span class="${balClass}">${bal >= 0 ? '+' : ''}${bal.toFixed(1)}€</span>
+                                                    </div>
+                                                `;
+                            }).join('');
+                        })()}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     widgetHtml = `
-                        <div class="space-y-1.5">
+                        <div class="space-y-1.5 text-left">
                             <div class="flex justify-between items-center text-[9px] text-slate-400 font-bold">
                                 <span>Spese: <strong class="text-white">${equiStatus.count}</strong></span>
                                 <span>Totale: <strong class="text-emerald-400 font-mono">${equiStatus.sum.toFixed(2)} €</strong></span>
                             </div>
-                            <div class="bg-slate-950 border border-slate-800/80 p-1.5 rounded-xl text-[10px] text-slate-300 font-semibold truncate">
+                            <div class="bg-slate-950 border border-slate-800/80 p-1.5 rounded-xl text-[10px] text-slate-350 font-semibold truncate text-center">
                                 ${equiStatus.text}
                             </div>
                         </div>
@@ -1717,16 +2126,16 @@
                     widgetHtml = `
                         <div class="text-[11px] font-semibold text-slate-355 flex justify-between items-center py-1">
                             <span>⚡ Snippets:</span>
-                            <span class="font-mono text-amber-400 font-bold">${autocompilerStatus.list.length} salvati</span>
+                            <span class="font-mono text-amber-400 font-bold shrink-0">${autocompilerStatus.list.length} pronti</span>
                         </div>
                     `;
                 } else if (size === 'grande') {
                     widgetHtml = `
                         <div class="space-y-1.5">
-                            <div class="text-[9px] font-bold text-slate-400">⚡ Copia rapida:</div>
+                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider text-left">⚡ Copia rapida:</div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                                 ${autocompilerStatus.list.slice(0, 4).map(item => `
-                                    <button onclick="copiaSnippetDaHub(event, ${item.id})" class="w-full bg-amber-600/10 hover:bg-amber-600/20 active:scale-95 border border-amber-500/20 text-amber-400 text-[10px] font-bold py-1.5 px-2.5 rounded-xl transition-all cursor-pointer flex justify-between items-center">
+                                    <button onclick="copiaSnippetDaHub(event, ${item.id})" class="w-full bg-amber-600/10 hover:bg-amber-600/20 active:scale-95 border border-amber-500/20 text-amber-400 text-[10px] font-bold py-1.5 px-2.5 rounded-xl transition-all cursor-pointer flex justify-between items-center text-left">
                                         <span class="font-mono truncate mr-2">${item.titolo}</span>
                                         <span class="text-[9px] text-slate-500 shrink-0 font-sans">📋</span>
                                     </button>
@@ -1737,12 +2146,12 @@
                 } else {
                     widgetHtml = `
                         <div class="space-y-1.5">
-                            <div class="text-[9px] font-bold text-slate-400">⚡ Copia rapida:</div>
+                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider text-left">⚡ Copia rapida:</div>
                             <div class="flex flex-col gap-1.5">
                                 ${autocompilerStatus.list.map(item => `
-                                    <button onclick="copiaSnippetDaHub(event, ${item.id})" class="w-full bg-amber-600/10 hover:bg-amber-600/20 active:scale-95 border border-amber-500/20 text-amber-400 text-[10px] font-bold py-1.5 px-2.5 rounded-xl transition-all cursor-pointer flex justify-between items-center">
+                                    <button onclick="copiaSnippetDaHub(event, ${item.id})" class="w-full bg-amber-600/10 hover:bg-amber-600/20 active:scale-95 border border-amber-500/20 text-amber-400 text-[10px] font-bold py-1.5 px-2.5 rounded-xl transition-all cursor-pointer flex justify-between items-center text-left">
                                         <span class="font-mono truncate mr-2">${item.titolo}</span>
-                                        <span class="text-[9px] text-slate-500 shrink-0 font-sans">Copia 📋</span>
+                                        <span class="text-[9px] text-slate-550 shrink-0 font-sans">Copia 📋</span>
                                     </button>
                                 `).join('')}
                             </div>
@@ -1771,13 +2180,23 @@
                     `;
                 } else if (size === 'grande') {
                     widgetHtml = `
-                        <div class="flex flex-col items-center justify-center py-2 space-y-2">
-                            <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider px-3 py-1 rounded-full border ${pomodoroStatus.classe} shadow-md ${pomodoroStatus.expired ? '' : 'animate-pulse'}">
-                                ${pomodoroStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
-                                <span>${pomodoroStatus.icona}</span>
-                                <span>${pomodoroStatus.label}</span>
-                            </span>
-                            <span class="font-mono font-black text-3xl text-white tracking-tight drop-shadow-md">${pomodoroStatus.tempo}</span>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+                            <div class="md:col-span-7 flex flex-col items-center justify-center py-1 bg-slate-950/40 rounded-xl p-2 border border-slate-900/60">
+                                <span class="inline-flex items-center gap-1 text-[9px] font-extrabold tracking-wider px-2 py-0.5 rounded-full border ${pomodoroStatus.classe} shadow-md ${pomodoroStatus.expired ? '' : 'animate-pulse'} mb-1">
+                                    ${pomodoroStatus.expired ? '' : '<span class="w-1 h-1 rounded-full bg-current animate-ping"></span>'}
+                                    <span>🍅</span>
+                                    <span>${pomodoroStatus.label}</span>
+                                </span>
+                                <span class="font-mono font-black text-2xl text-white tracking-tight drop-shadow-md">${pomodoroStatus.tempo}</span>
+                            </div>
+                            <div class="md:col-span-5 flex flex-col gap-1 w-full">
+                                <button onclick="togglePomodoroWidget()" class="w-full bg-rose-600/20 hover:bg-rose-600/30 active:scale-95 border border-rose-500/30 text-rose-300 text-[10px] font-bold py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1">
+                                    ${statePomodoro && statePomodoro.isPaused ? '▶ Avvia' : '⏸ Pausa'}
+                                </button>
+                                <button onclick="resetPomodoroWidget()" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-95 border border-slate-800 text-slate-400 text-[10px] font-bold py-1 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1">
+                                    🔄 Reset
+                                </button>
+                            </div>
                         </div>
                     `;
                 } else {
@@ -1785,7 +2204,7 @@
                         <div class="flex items-center justify-between">
                             <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${pomodoroStatus.classe} shadow-sm ${pomodoroStatus.expired ? '' : 'animate-pulse'}">
                                 ${pomodoroStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
-                                <span>${pomodoroStatus.icona}</span>
+                                <span>🍅</span>
                                 <span>${pomodoroStatus.label}</span>
                             </span>
                             <span class="font-mono font-black text-sm text-white">${pomodoroStatus.tempo}</span>
@@ -1815,13 +2234,23 @@
                     `;
                 } else if (size === 'grande') {
                     widgetHtml = `
-                        <div class="flex flex-col items-center justify-center py-2 space-y-2">
-                            <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider px-3 py-1 rounded-full border ${gymStatus.classe} shadow-md ${gymStatus.expired ? '' : 'animate-pulse'}">
-                                ${gymStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
-                                <span>${gymStatus.icona}</span>
-                                <span>${gymStatus.label}</span>
-                            </span>
-                            <span class="font-mono font-black text-3xl text-white tracking-tight drop-shadow-md">${gymStatus.tempo}</span>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+                            <div class="md:col-span-7 flex flex-col items-center justify-center py-1 bg-slate-950/40 rounded-xl p-2 border border-slate-900/60">
+                                <span class="inline-flex items-center gap-1 text-[9px] font-extrabold tracking-wider px-2 py-0.5 rounded-full border ${gymStatus.classe} shadow-md ${gymStatus.expired ? '' : 'animate-pulse'} mb-1">
+                                    ${gymStatus.expired ? '' : '<span class="w-1 h-1 rounded-full bg-current animate-ping"></span>'}
+                                    <span>🏋️‍♂️</span>
+                                    <span>${gymStatus.label}</span>
+                                </span>
+                                <span class="font-mono font-black text-2xl text-white tracking-tight drop-shadow-md">${gymStatus.tempo}</span>
+                            </div>
+                            <div class="md:col-span-5 flex flex-col gap-1 w-full">
+                                <button onclick="toggleGymWidget()" class="w-full bg-amber-600/20 hover:bg-amber-600/30 active:scale-95 border border-amber-500/30 text-amber-300 text-[10px] font-bold py-1 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1">
+                                    ${stateGym && stateGym.isPaused ? '▶ Avvia' : '⏸ Pausa'}
+                                </button>
+                                <button onclick="resetGymWidget()" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-95 border border-slate-800 text-slate-400 text-[10px] font-bold py-1 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1">
+                                    🔄 Reset
+                                </button>
+                            </div>
                         </div>
                     `;
                 } else {
@@ -1829,7 +2258,7 @@
                         <div class="flex items-center justify-between">
                             <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${gymStatus.classe} shadow-sm ${gymStatus.expired ? '' : 'animate-pulse'}">
                                 ${gymStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
-                                <span>${gymStatus.icona}</span>
+                                <span>🏋️‍♂️</span>
                                 <span>${gymStatus.label}</span>
                             </span>
                             <span class="font-mono font-black text-sm text-white">${gymStatus.tempo}</span>
@@ -1859,13 +2288,23 @@
                     `;
                 } else if (size === 'grande') {
                     widgetHtml = `
-                        <div class="flex flex-col items-center justify-center py-2 space-y-2">
-                            <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider px-3 py-1 rounded-full border ${matrixStatus.classe} shadow-md ${matrixStatus.expired ? '' : 'animate-pulse'}">
-                                ${matrixStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
-                                <span>${matrixStatus.icona}</span>
-                                <span>${matrixStatus.label}</span>
-                            </span>
-                            <span class="font-mono font-black text-3xl text-white tracking-tight drop-shadow-md">${matrixStatus.tempo}</span>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center w-full">
+                            <div class="md:col-span-7 flex flex-col items-center justify-center py-1 bg-slate-950/40 rounded-xl p-2 border border-slate-900/60">
+                                <span class="inline-flex items-center gap-1 text-[9px] font-extrabold tracking-wider px-2 py-0.5 rounded-full border ${matrixStatus.classe} shadow-md ${matrixStatus.expired ? '' : 'animate-pulse'} mb-1">
+                                    ${matrixStatus.expired ? '' : '<span class="w-1 h-1 rounded-full bg-current animate-ping"></span>'}
+                                    <span>⚡</span>
+                                    <span>${matrixStatus.label}</span>
+                                </span>
+                                <span class="font-mono font-black text-2xl text-white tracking-tight drop-shadow-md">${matrixStatus.tempo}</span>
+                            </div>
+                            <div class="md:col-span-5 flex flex-col gap-1 w-full">
+                                <button onclick="toggleMatrixWidget()" class="w-full bg-indigo-600/20 hover:bg-indigo-600/30 active:scale-95 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold py-1 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1">
+                                    ${stateMatrix && stateMatrix.isPaused ? '▶ Avvia' : '⏸ Pausa'}
+                                </button>
+                                <button onclick="resetMatrixWidget()" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-95 border border-slate-800 text-slate-400 text-[10px] font-bold py-1 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1">
+                                    🔄 Reset
+                                </button>
+                            </div>
                         </div>
                     `;
                 } else {
@@ -1873,7 +2312,7 @@
                         <div class="flex items-center justify-between">
                             <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${matrixStatus.classe} shadow-sm ${matrixStatus.expired ? '' : 'animate-pulse'}">
                                 ${matrixStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
-                                <span>${matrixStatus.icona}</span>
+                                <span>⚡</span>
                                 <span>${matrixStatus.label}</span>
                             </span>
                             <span class="font-mono font-black text-sm text-white">${matrixStatus.tempo}</span>
@@ -1890,45 +2329,110 @@
                 });
             }
 
-            // Aggiorna il DOM per la sezione Widget Attivi all'inizio dell'Hub
-            const activeWidgetsGrid = document.getElementById('active-widgets-grid');
-            const activeWidgetsSection = document.getElementById('active-widgets-section');
-            if (activeWidgetsGrid && activeWidgetsSection) {
-                if (activeWidgetsData.length > 0) {
-                    activeWidgetsGrid.innerHTML = activeWidgetsData.map(w => {
-                        const expiredClass = w.expired ? 'animate-flash-red border-red-500/50' : 'border-slate-800/80 bg-gradient-to-br from-slate-900/60 to-slate-950/80 hover:border-slate-700/60';
-                        const sizeSpanClass = (w.size === 'grande') ? 'col-span-1 md:col-span-2' : 'col-span-1';
-                        return `
-                            <div onclick="navigaVerso(event, '${w.url}')" class="group relative overflow-hidden rounded-3xl border p-5 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl ${sizeSpanClass} ${expiredClass}">
-                                <!-- Overlay Glow Effect -->
-                                ${w.expired ? '' : '<div class="absolute -inset-px bg-gradient-to-r from-blue-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>'}
+            // Render active widgets grid
+            if (activeWidgetsData.length > 0) {
+                activeWidgetsGrid.innerHTML = activeWidgetsData.map(w => {
+                    const expiredClass = w.expired ? 'animate-flash-red border-red-500/50' : 'border-slate-800/80 bg-gradient-to-br from-slate-900/60 to-slate-955/80 hover:border-slate-700/60';
 
-                                <div class="relative z-10 flex flex-col justify-between h-full space-y-4">
-                                    <!-- Header -->
-                                    <div class="flex justify-between items-start">
-                                        <div class="flex items-center gap-2.5">
-                                            <span class="text-xl">${w.icona}</span>
-                                            <div>
-                                                <h4 class="text-xs font-black text-white tracking-wide uppercase font-mono-custom">${w.titolo}</h4>
-                                            </div>
+                    // Classi di dimensionamento per i Widget Bento
+                    let cardPadding = 'p-5';
+                    let minHeightClass = 'min-h-[170px]';
+                    let sizeSpanClass = 'col-span-1';
+                    let spaceClass = 'space-y-4';
+                    let innerPadding = 'p-3 rounded-2xl';
+                    let headerTitleClass = 'text-xs';
+                    let iconSizeClass = 'text-xl';
+
+                    if (w.size === 'piccolo') {
+                        cardPadding = 'p-3.5';
+                        minHeightClass = 'min-h-[110px]';
+                        sizeSpanClass = 'col-span-1';
+                        spaceClass = 'space-y-2';
+                        innerPadding = 'p-2 rounded-xl';
+                        headerTitleClass = 'text-[10px]';
+                        iconSizeClass = 'text-base';
+                    } else if (w.size === 'grande') {
+                        cardPadding = 'p-6';
+                        minHeightClass = 'min-h-[220px]';
+                        sizeSpanClass = 'col-span-1 md:col-span-2';
+                        spaceClass = 'space-y-5';
+                        innerPadding = 'p-4 rounded-3xl';
+                        headerTitleClass = 'text-sm';
+                        iconSizeClass = 'text-2xl';
+                    }
+
+                    return `
+                        <div onclick="navigaVerso(event, '${w.url}')" class="group relative overflow-hidden rounded-3xl border ${cardPadding} ${minHeightClass} ${sizeSpanClass} ${expiredClass} transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl">
+                            <!-- Overlay Glow Effect -->
+                            ${w.expired ? '' : '<div class="absolute -inset-px bg-gradient-to-r from-blue-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>'}
+
+                            <div class="relative z-10 flex flex-col justify-between h-full ${spaceClass}">
+                                <!-- Header -->
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        <span class="${iconSizeClass}">${w.icona}</span>
+                                        <div>
+                                            <h4 class="${headerTitleClass} font-black text-white tracking-wide uppercase font-mono-custom">${w.titolo}</h4>
                                         </div>
-                                        <span onclick="navigaVerso(event, '${w.url}')" class="text-[9px] font-extrabold px-2 py-0.5 rounded-lg border border-blue-500/30 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-all cursor-pointer">Apri ↗</span>
                                     </div>
+                                    <span onclick="navigaVerso(event, '${w.url}')" class="text-[9px] font-extrabold px-2 py-0.5 rounded-lg border border-blue-500/30 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-all cursor-pointer">Apri ↗</span>
+                                </div>
 
-                                    <!-- Interactive Widget Area -->
-                                    <div onclick="event.stopPropagation()" class="widget-interactive-container bg-slate-950/40 border border-slate-800/40 p-3 rounded-2xl">
-                                        ${w.html}
-                                    </div>
+                                <!-- Interactive Widget Area -->
+                                <div onclick="event.stopPropagation()" class="widget-interactive-container bg-slate-950/40 border border-slate-800/40 ${innerPadding}">
+                                    ${w.html}
                                 </div>
                             </div>
-                        `;
-                    }).join('');
-                    activeWidgetsSection.classList.remove('hidden');
-                } else {
-                    activeWidgetsSection.classList.add('hidden');
-                    activeWidgetsGrid.innerHTML = '';
-                }
+                        </div>
+                    `;
+                }).join('');
+
+                // QR Inline generation hook
+                activeWidgetsData.forEach(w => {
+                    if (w.size === 'grande') {
+                        if (w.titolo === "Wi-Fi QR Code" && wifiStatus) {
+                            const inlineTarget = document.getElementById('wifi-qr-inline-target');
+                            if (inlineTarget) {
+                                inlineTarget.innerHTML = '';
+                                let stringa = `WIFI:S:${wifiStatus.ssid};`;
+                                if (wifiStatus.type !== 'nopass') {
+                                    stringa += `T:${wifiStatus.type};P:${wifiStatus.pass};`;
+                                } else {
+                                    stringa += `T:nopass;P:;`;
+                                }
+                                stringa += ';';
+                                new QRCode(inlineTarget, {
+                                    text: stringa,
+                                    width: 85,
+                                    height: 85,
+                                    colorDark: "#0f172a",
+                                    colorLight: "#ffffff",
+                                    correctLevel: QRCode.CorrectLevel.M
+                                });
+                            }
+                        } else if (w.titolo === "Generatore QR Code" && customQrStatus) {
+                            const inlineTarget = document.getElementById('generico-qr-inline-target');
+                            if (inlineTarget) {
+                                inlineTarget.innerHTML = '';
+                                new QRCode(inlineTarget, {
+                                    text: customQrStatus.contenuto,
+                                    width: 85,
+                                    height: 85,
+                                    colorDark: customQrStatus.fg || "#0f172a",
+                                    colorLight: customQrStatus.bg || "#ffffff",
+                                    correctLevel: QRCode.CorrectLevel.M
+                                });
+                            }
+                        }
+                    }
+                });
+
+                activeWidgetsSection.classList.remove('hidden');
+            } else {
+                activeWidgetsSection.classList.add('hidden');
+                activeWidgetsGrid.innerHTML = '';
             }
+
             const cards = document.querySelectorAll('[data-app-title]');
             cards.forEach(card => {
                 const titolo = card.getAttribute('data-app-title');
@@ -1970,15 +2474,15 @@
                                 <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">🎯 3 Priorità di oggi:</div>
                                 <ul class="space-y-1 text-[11px]">
                                     ${plannerStatus.list.map(task => {
-                                        if (task.testo === '') return '';
-                                        const textStyle = task.check ? 'text-slate-500 line-through' : 'text-slate-300 font-semibold';
-                                        return `
+                            if (task.testo === '') return '';
+                            const textStyle = task.check ? 'text-slate-500 line-through' : 'text-slate-300 font-semibold';
+                            return `
                                             <li class="flex items-center gap-1.5">
                                                 <input type="checkbox" onchange="spuntaPlannerWidget(${task.id}, this.checked)" ${task.check ? 'checked' : ''} class="w-3.5 h-3.5 rounded border-slate-800 accent-blue-500 cursor-pointer">
                                                 <span class="truncate ${textStyle}">${task.testo}</span>
                                             </li>
                                         `;
-                                    }).join('')}
+                        }).join('')}
                                 </ul>
                             </div>
                         `;
@@ -2023,7 +2527,7 @@
                         showWidget = true;
                         const now = new Date();
                         const currentMin = now.getHours() * 60 + now.getMinutes();
-                        
+
                         const tasksConOrario = timeStatus.tasks;
                         let tasksToShow = [];
                         const activeIndex = tasksConOrario.findIndex(t => t.isActive);
@@ -2057,21 +2561,21 @@
                                 </div>
                                 <div class="space-y-1">
                                     ${tasksToShow.map(task => {
-                                        const isPast = currentMin >= task.end;
-                                        let bgBlock = 'bg-slate-900 border-slate-800/80 text-slate-400';
-                                        let badgeBlock = 'bg-slate-950 text-slate-500 border-slate-800';
-                                        let dotHtml = '';
+                            const isPast = currentMin >= task.end;
+                            let bgBlock = 'bg-slate-900 border-slate-800/80 text-slate-400';
+                            let badgeBlock = 'bg-slate-950 text-slate-500 border-slate-800';
+                            let dotHtml = '';
 
-                                        if (task.isActive) {
-                                            bgBlock = 'bg-violet-950/20 border-violet-500/35 text-violet-200 ring-1 ring-violet-500/10';
-                                            badgeBlock = 'bg-violet-500/15 text-violet-300 border-violet-500/20';
-                                            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping mr-1.5 shrink-0"></span>';
-                                        } else if (isPast) {
-                                            bgBlock = 'bg-slate-900/40 border-slate-950 text-slate-500/80 line-through';
-                                            badgeBlock = 'bg-slate-950/20 text-slate-600 border-slate-950';
-                                        }
+                            if (task.isActive) {
+                                bgBlock = 'bg-violet-950/20 border-violet-500/35 text-violet-200 ring-1 ring-violet-500/10';
+                                badgeBlock = 'bg-violet-500/15 text-violet-300 border-violet-500/20';
+                                dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping mr-1.5 shrink-0"></span>';
+                            } else if (isPast) {
+                                bgBlock = 'bg-slate-900/40 border-slate-950 text-slate-500/80 line-through';
+                                badgeBlock = 'bg-slate-950/20 text-slate-600 border-slate-950';
+                            }
 
-                                        return `
+                            return `
                                             <div class="border p-1.5 rounded-xl flex items-center justify-between text-[11px] gap-2 ${bgBlock}">
                                                 <div class="flex items-center min-w-0 flex-1">
                                                     ${dotHtml}
@@ -2080,7 +2584,7 @@
                                                 <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border shrink-0 ${badgeBlock}">${task.labelOrario}</span>
                                             </div>
                                         `;
-                                    }).join('')}
+                        }).join('')}
                                 </div>
                             </div>
                         `;
@@ -2173,6 +2677,9 @@
         renderizzaFiltri();
         renderizzaTutto();
         renderizzaScorciatoie();
+        if (window.aggiornaStatoVisualizzazioneCatalogo) {
+            window.aggiornaStatoVisualizzazioneCatalogo(false);
+        }
 
         // Avvio timer live refresh per Hub
         setInterval(aggiornaWidgetInterattivi, 1000);
@@ -2189,80 +2696,115 @@
     </script>
 
     <!-- Modal overlay per WiFi QR Code -->
-    <div id="wifi-qr-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closeWifiQRModal()">
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-xs w-full text-center relative space-y-4 shadow-2xl" onclick="event.stopPropagation()">
-            <button onclick="closeWifiQRModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+    <div id="wifi-qr-modal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden"
+        onclick="closeWifiQRModal()">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-xs w-full text-center relative space-y-4 shadow-2xl"
+            onclick="event.stopPropagation()">
+            <button onclick="closeWifiQRModal()"
+                class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
             <div class="flex items-center justify-center gap-1.5 text-emerald-400">
                 <span class="text-lg">📶</span>
                 <span class="text-xs font-black uppercase tracking-widest">Wi-Fi Ospiti</span>
             </div>
             <h3 id="wifi-qr-ssid" class="text-sm font-bold text-white truncate w-full">Nome Rete</h3>
-            <div class="bg-white p-3 rounded-xl flex items-center justify-center mx-auto border border-slate-800 shadow-inner" style="width: 174px; height: 174px;">
+            <div class="bg-white p-3 rounded-xl flex items-center justify-center mx-auto border border-slate-800 shadow-inner"
+                style="width: 174px; height: 174px;">
                 <div id="wifi-qr-code-target"></div>
             </div>
-            <p class="text-[9px] text-slate-400 leading-tight">Inquadra il QR Code con la fotocamera per connetterti automaticamente.</p>
+            <p class="text-[9px] text-slate-400 leading-tight">Inquadra il QR Code con la fotocamera per connetterti
+                automaticamente.</p>
         </div>
     </div>
 
     <!-- Modal overlay per Generatore QR Code -->
-    <div id="generico-qr-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closeGenericoQRModal()">
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-xs w-full text-center relative space-y-4 shadow-2xl" onclick="event.stopPropagation()">
-            <button onclick="closeGenericoQRModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+    <div id="generico-qr-modal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden"
+        onclick="closeGenericoQRModal()">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-xs w-full text-center relative space-y-4 shadow-2xl"
+            onclick="event.stopPropagation()">
+            <button onclick="closeGenericoQRModal()"
+                class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
             <div class="flex items-center justify-center gap-1.5 text-blue-400">
                 <span class="text-lg">🔲</span>
                 <span class="text-xs font-black uppercase tracking-widest">QR Code Personalizzato</span>
             </div>
             <h3 id="generico-qr-title" class="text-sm font-bold text-white truncate w-full">Nome QR</h3>
-            <div id="generico-qr-preview-bg" class="bg-white p-3 rounded-xl flex items-center justify-center mx-auto border border-slate-800 shadow-inner" style="width: 174px; height: 174px;">
+            <div id="generico-qr-preview-bg"
+                class="bg-white p-3 rounded-xl flex items-center justify-center mx-auto border border-slate-800 shadow-inner"
+                style="width: 174px; height: 174px;">
                 <div id="generico-qr-code-target"></div>
             </div>
-            <p class="text-[9px] text-slate-400 leading-tight">Scansiona questo codice QR con il tuo telefono per aprirne il contenuto.</p>
+            <p class="text-[9px] text-slate-400 leading-tight">Scansiona questo codice QR con il tuo telefono per
+                aprirne il contenuto.</p>
         </div>
     </div>
 
     <!-- Modal Privacy & Note Legali -->
-    <div id="privacy-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closePrivacyModal()">
-        <div class="bg-slate-900 border border-slate-850 p-6 rounded-2xl max-w-lg w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh]" onclick="event.stopPropagation()">
-            <button onclick="closePrivacyModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+    <div id="privacy-modal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden"
+        onclick="closePrivacyModal()">
+        <div class="bg-slate-900 border border-slate-850 p-6 rounded-2xl max-w-lg w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh]"
+            onclick="event.stopPropagation()">
+            <button onclick="closePrivacyModal()"
+                class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
             <div class="flex items-center gap-2 text-violet-400">
                 <span class="text-xl">⚖️</span>
-                <span class="text-xs font-black uppercase tracking-widest font-mono-custom">Privacy & Condizioni d'Uso</span>
+                <span class="text-xs font-black uppercase tracking-widest font-mono-custom">Privacy & Condizioni
+                    d'Uso</span>
             </div>
             <h3 class="text-base font-bold text-white">Informativa sulla Privacy & GDPR (Suite Offline Locale)</h3>
-            
+
             <div class="text-xs text-slate-350 space-y-3 leading-relaxed text-left">
                 <p>
                     <strong>1. Trattamento dei Dati Locali (100% Client-Side)</strong><br>
-                    Questa applicazione e tutte le sue micro-app collegate sono progettate per essere eseguite <strong>interamente nel browser dell'utente</strong>. Nessun dato inserito (liste della spesa, scadenze, idee personali, transazioni finanziarie, password o dati di configurazione) viene inviato, salvato o trasmesso a server esterni o terze parti.
+                    Questa applicazione e tutte le sue micro-app collegate sono progettate per essere eseguite
+                    <strong>interamente nel browser dell'utente</strong>. Nessun dato inserito (liste della spesa,
+                    scadenze, idee personali, transazioni finanziarie, password o dati di configurazione) viene inviato,
+                    salvato o trasmesso a server esterni o terze parti.
                 </p>
                 <p>
                     <strong>2. Uso del LocalStorage</strong><br>
-                    Tutti i dati vengono memorizzati localmente sul dispositivo dell'utente tramite la tecnologia <code>localStorage</code> del browser. L'utente ha il controllo totale su questi dati e può eliminarli in qualsiasi momento svuotando la cache del browser o utilizzando le impostazioni di ripristino/elimina integrate.
+                    Tutti i dati vengono memorizzati localmente sul dispositivo dell'utente tramite la tecnologia
+                    <code>localStorage</code> del browser. L'utente ha il controllo totale su questi dati e può
+                    eliminarli in qualsiasi momento svuotando la cache del browser o utilizzando le impostazioni di
+                    ripristino/elimina integrate.
                 </p>
                 <p>
                     <strong>3. Notifiche Locali</strong><br>
-                    Le notifiche push/avvisi del timer utilizzano le Web Notification API native del browser dell'utente. Vengono generate localmente sul dispositivo e non richiedono alcuna comunicazione con server remoti. I permessi per le notifiche possono essere revocati in qualsiasi momento tramite le impostazioni del browser.
+                    Le notifiche push/avvisi del timer utilizzano le Web Notification API native del browser
+                    dell'utente. Vengono generate localmente sul dispositivo e non richiedono alcuna comunicazione con
+                    server remoti. I permessi per le notifiche possono essere revocati in qualsiasi momento tramite le
+                    impostazioni del browser.
                 </p>
                 <p>
                     <strong>4. Cookie e Tracciamento</strong><br>
-                    La suite <strong>non utilizza cookie di tracciamento</strong>, codice analitico di terze parti (come Google Analytics o Facebook Pixel), né pubblicità mirata che raccoglie dati personali.
+                    La suite <strong>non utilizza cookie di tracciamento</strong>, codice analitico di terze parti (come
+                    Google Analytics o Facebook Pixel), né pubblicità mirata che raccoglie dati personali.
                 </p>
                 <p>
                     <strong>5. Limitazione di Responsabilità</strong><br>
-                    L'applicazione è fornita "così com'è" senza garanzie di alcun tipo. L'autore non è responsabile per la perdita accidentale di dati causata dalla cancellazione spontanea della memoria del browser o da anomalie del dispositivo.
+                    L'applicazione è fornita "così com'è" senza garanzie di alcun tipo. L'autore non è responsabile per
+                    la perdita accidentale di dati causata dalla cancellazione spontanea della memoria del browser o da
+                    anomalie del dispositivo.
                 </p>
             </div>
-            
-            <button onclick="closePrivacyModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer">
+
+            <button onclick="closePrivacyModal()"
+                class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer">
                 Ho Capito & Chiudi
             </button>
         </div>
     </div>
 
     <!-- Modal Impostazioni Hub -->
-    <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="chiudiSettingsModal()">
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-xl w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh] text-left" onclick="event.stopPropagation()">
-            <button onclick="chiudiSettingsModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+    <div id="settings-modal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden"
+        onclick="chiudiSettingsModal()">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-xl w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh] text-left"
+            onclick="event.stopPropagation()">
+            <button onclick="chiudiSettingsModal()"
+                class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
             <div class="flex items-center gap-2 text-blue-400">
                 <span class="text-xl">⚙️</span>
                 <span class="text-xs font-black uppercase tracking-widest font-mono-custom">Pannello Controllo</span>
@@ -2271,28 +2813,37 @@
 
             <!-- Tabs Nav -->
             <div class="flex border-b border-slate-850 text-xs font-bold gap-2">
-                <button onclick="switchSettingsTab('tab-widgets')" id="btn-tab-widgets" class="px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all">Widget & Notifiche</button>
-                <button onclick="switchSettingsTab('tab-shortcuts')" id="btn-tab-shortcuts" class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all">Scorciatoie App</button>
+                <button onclick="switchSettingsTab('tab-widgets')" id="btn-tab-widgets"
+                    class="px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all">Widget &
+                    Notifiche</button>
+                <button onclick="switchSettingsTab('tab-shortcuts')" id="btn-tab-shortcuts"
+                    class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all">Scorciatoie
+                    App</button>
             </div>
 
             <!-- Tab Content: Widgets & Notifications -->
             <div id="tab-widgets" class="space-y-4 pt-2">
                 <!-- Notifications switch -->
-                <div class="flex items-center justify-between p-3.5 bg-slate-950/40 border border-slate-850 rounded-2xl">
+                <div
+                    class="flex items-center justify-between p-3.5 bg-slate-950/40 border border-slate-850 rounded-2xl">
                     <div>
                         <div class="text-xs font-bold text-white">Notifiche di Sistema</div>
-                        <div class="text-[10px] text-slate-500">Abilita o disabilita globalmente gli avvisi del browser per i timer.</div>
+                        <div class="text-[10px] text-slate-500">Abilita o disabilita globalmente gli avvisi del browser
+                            per i timer.</div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer select-none">
                         <input type="checkbox" id="setting-notify-toggle" class="sr-only peer">
-                        <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-350 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-checked:after:bg-white"></div>
+                        <div
+                            class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-350 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-checked:after:bg-white">
+                        </div>
                     </label>
                 </div>
 
                 <!-- Widgets list scroll container -->
                 <div class="space-y-2">
                     <div class="text-xs font-bold text-slate-300">Personalizza Widget Attivi:</div>
-                    <div class="space-y-2 max-h-[35vh] overflow-y-auto pr-1 border border-slate-800/80 p-3 rounded-2xl bg-slate-950/20" id="settings-widgets-list">
+                    <div class="space-y-2 max-h-[35vh] overflow-y-auto pr-1 border border-slate-800/80 p-3 rounded-2xl bg-slate-950/20"
+                        id="settings-widgets-list">
                         <!-- Injected by JS -->
                     </div>
                 </div>
@@ -2300,22 +2851,27 @@
 
             <!-- Tab Content: Shortcuts -->
             <div id="tab-shortcuts" class="space-y-3 pt-2 hidden">
-                <div class="text-xs font-bold text-slate-300">Seleziona le app da mostrare in Accesso Rapido in alto:</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[42vh] overflow-y-auto pr-1 border border-slate-800/80 p-3 rounded-2xl bg-slate-950/20" id="settings-shortcuts-list">
+                <div class="text-xs font-bold text-slate-300">Seleziona le app da mostrare in Accesso Rapido in alto:
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[42vh] overflow-y-auto pr-1 border border-slate-800/80 p-3 rounded-2xl bg-slate-950/20"
+                    id="settings-shortcuts-list">
                     <!-- Injected by JS -->
                 </div>
             </div>
 
             <!-- Modal Actions -->
             <div class="flex gap-3 pt-4 border-t border-slate-800">
-                <button onclick="chiudiSettingsModal()" class="flex-1 bg-slate-800 hover:bg-slate-750 text-slate-350 font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer">
+                <button onclick="chiudiSettingsModal()"
+                    class="flex-1 bg-slate-800 hover:bg-slate-750 text-slate-350 font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer">
                     Annulla
                 </button>
-                <button onclick="salvaSettingsDaForm()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-blue-500/10">
+                <button onclick="salvaSettingsDaForm()"
+                    class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-blue-500/10">
                     Salva
                 </button>
             </div>
         </div>
     </div>
 </body>
+
 </html>
