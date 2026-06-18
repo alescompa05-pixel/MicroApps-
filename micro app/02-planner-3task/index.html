@@ -169,7 +169,10 @@
                     document.getElementById(`check-${id}`).checked = false;
                     document.getElementById(`text-${id}`).value = '';
                 });
-                localStorage.clear(); // Svuota il local storage
+                taskIds.forEach(id => {
+                    localStorage.removeItem(`task-testo-${id}`);
+                    localStorage.removeItem(`task-check-${id}`);
+                });
                 salvaDati(); // Riassegna i valori vuoti
             }
         });
