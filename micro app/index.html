@@ -2782,10 +2782,15 @@
         let deferredPrompt = null;
         let isInstallPromptSupported = false;
 
-        // Nasconde il tasto dopo 2.5 secondi se siamo su web (http/https) e non viene intercettato il prima possibile beforeinstallprompt
+        // Rilevamento iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                      (navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform)) ||
+                      (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+
+        // Nasconde il tasto dopo 2.5 secondi se siamo su web (http/https), non siamo su iOS e non viene intercettato beforeinstallprompt
         let checkInstallabilityTimeout = null;
 
-        if (window.location.protocol !== 'file:') {
+        if (window.location.protocol !== 'file:' && !isIOS) {
             checkInstallabilityTimeout = setTimeout(() => {
                 if (!deferredPrompt) {
                     document.getElementById('btn-install-pwa')?.classList.add('hidden');
@@ -2806,6 +2811,11 @@
         });
 
         document.getElementById('btn-install-pwa')?.addEventListener('click', async () => {
+            if (isIOS) {
+                alert("📱 COME INSTALLARE SU IPHONE / IPAD:\n\n1. Tocca il pulsante di Condivisione in fondo al browser Safari (l'icona quadrata con la freccia verso l'alto).\n2. Scorri il menu delle opzioni verso il basso.\n3. Seleziona 'Aggiungi alla schermata Home'.\n\nFatto! L'app sarà aggiunta come icona sulla tua Home Screen, pronta da avviare offline.");
+                return;
+            }
+            
             if (!deferredPrompt) {
                 if (window.location.protocol === 'file:') {
                     alert("⚠️ MODALITÀ PREVIEW (FILE LOCALE):\n\nHai cliccato sul pulsante di installazione!\n\nAttualmente stai visualizzando la suite tramite protocollo 'file://' (doppio clic sul file HTML). In questa modalità i browser moderni bloccano l'installazione delle PWA.\n\nQuando caricherai l'Hub online (HTTPS) o lo avvierai da un server locale (http://localhost), questo pulsante avvierà la vera installazione e scomparirà automaticamente una volta completata.");
@@ -2840,6 +2850,8 @@
                 if (statusText) {
                     statusText.innerHTML = `⚠️ Stai eseguendo la suite localmente tramite protocollo <code>file://</code> (doppio clic sul file HTML). I browser moderni disabilitano le funzioni PWA (installazione e offline) in questa modalità per motivi di sicurezza.<br><br>Per abilitarla, avvia un server locale nella cartella del progetto (es. con il comando terminale <code>npx serve</code>, Live Server in VS Code, o analogo) e apri l'indirizzo generato (es. <code>http://localhost:3000</code>).`;
                 }
+            } else if (isIOS) {
+                if (btnInstall) btnInstall.classList.remove('hidden');
             }
         };
 
