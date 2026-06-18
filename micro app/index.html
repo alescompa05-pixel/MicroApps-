@@ -199,17 +199,21 @@
                 </div>
                 <!-- Statistiche veloci dell'Hub -->
                 <div
-                    class="flex gap-4 self-center md:self-end bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-md">
+                    class="flex gap-4 self-center md:self-end bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-md items-center">
                     <div class="text-center px-2">
                         <span id="total-apps-count" class="block text-2xl font-black text-white">0</span>
                         <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Utility
                             Attive</span>
                     </div>
-                    <div class="w-px bg-slate-800"></div>
+                    <div class="w-px bg-slate-800 h-8"></div>
                     <div class="text-center px-2">
                         <span id="favs-count" class="block text-2xl font-black text-amber-400">0</span>
                         <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Preferiti</span>
                     </div>
+                    <div class="w-px bg-slate-800 h-8"></div>
+                    <button onclick="mostraSettingsModal()" class="text-slate-400 hover:text-white text-lg p-1.5 hover:bg-slate-800/60 rounded-xl transition-all cursor-pointer shadow-sm select-none" title="Impostazioni Hub">
+                        <i class="fa-solid fa-cog animate-[spin_8s_linear_infinite] hover:animate-[spin_2s_linear_infinite]"></i>
+                    </button>
                 </div>
             </div>
         </header>
@@ -230,6 +234,17 @@
                 <div class="flex gap-2 w-full md:w-auto justify-start md:justify-end overflow-x-auto pb-1 snap-x snap-mandatory" id="filters-container" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;">
                     <!-- Generato Dinamicamente da JS -->
                 </div>
+            </div>
+        </section>
+
+        <!-- Sezione Scorciatoie Rapide Launchpad -->
+        <section id="shortcuts-section" class="mb-8 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 md:p-6 backdrop-blur-md hidden animate-fade-in">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-blue-500 text-sm"><i class="fa-solid fa-rocket animate-pulse"></i></span>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 font-mono-custom">Accesso Rapido</h3>
+            </div>
+            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-3.5" id="shortcuts-grid">
+                <!-- Injected Dynamically by JS -->
             </div>
         </section>
 
@@ -522,6 +537,162 @@
         let preferiti = JSON.parse(localStorage.getItem('microapps_preferiti')) || [];
         let categoriaAttiva = 'All';
         let queryRicerca = '';
+
+        // ─── GESTIONE IMPOSTAZIONI HUB ─────────────────────
+        const DEFAULT_SETTINGS = {
+            notifications_enabled: true,
+            widgets: {
+                "Micro-Planner 3-Task": { visible: true, size: "medio" },
+                "Idratatore Custom": { visible: true, size: "medio" },
+                "Wi-Fi QR Code": { visible: true, size: "medio" },
+                "Generatore QR Code": { visible: true, size: "medio" },
+                "Time-Blocking": { visible: true, size: "medio" },
+                "SmartShopping": { visible: true, size: "medio" },
+                "Radar Scadenze": { visible: true, size: "medio" },
+                "EquiSplit": { visible: true, size: "medio" },
+                "AutoCompiler": { visible: true, size: "medio" },
+                "Timer Pomodoro": { visible: true, size: "medio" },
+                "Bento Gym Timer": { visible: true, size: "medio" },
+                "Matrix del Tempo": { visible: true, size: "medio" }
+            },
+            shortcuts: elencoApps.map(app => app.titolo)
+        };
+
+        let hubSettings = JSON.parse(localStorage.getItem('hub_settings')) || DEFAULT_SETTINGS;
+
+        // Assicura retro-compatibilità con chiavi mancanti
+        if (!hubSettings.widgets) hubSettings.widgets = DEFAULT_SETTINGS.widgets;
+        if (!hubSettings.shortcuts) hubSettings.shortcuts = DEFAULT_SETTINGS.shortcuts;
+        if (hubSettings.notifications_enabled === undefined) hubSettings.notifications_enabled = DEFAULT_SETTINGS.notifications_enabled;
+
+        function salvaImpostazioni() {
+            localStorage.setItem('hub_settings', JSON.stringify(hubSettings));
+            localStorage.setItem('hub_notifications_enabled', hubSettings.notifications_enabled ? 'true' : 'false');
+        }
+        
+        salvaImpostazioni();
+
+        function renderizzaScorciatoie() {
+            const grid = document.getElementById('shortcuts-grid');
+            const section = document.getElementById('shortcuts-section');
+            if (!grid || !section) return;
+
+            grid.innerHTML = '';
+            const visibleApps = elencoApps.filter(app => hubSettings.shortcuts.includes(app.titolo));
+
+            if (visibleApps.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            visibleApps.forEach(app => {
+                const item = document.createElement('div');
+                item.className = 'group flex flex-col items-center text-center cursor-pointer select-none';
+                item.onclick = (e) => navigaVerso(e, app.url);
+
+                item.innerHTML = `
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800/80 flex items-center justify-center text-xl sm:text-2xl relative shadow-md group-hover:scale-110 group-hover:border-blue-500/40 transition-all duration-300 active:scale-95 duration-200">
+                        <div class="absolute inset-0 bg-blue-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                        <span>${app.icona}</span>
+                    </div>
+                    <span class="text-[9px] sm:text-[10px] font-semibold text-slate-400 group-hover:text-white mt-1.5 truncate max-w-[65px] sm:max-w-[75px] transition-colors">${app.titolo}</span>
+                `;
+                grid.appendChild(item);
+            });
+        }
+
+        window.mostraSettingsModal = function() {
+            document.getElementById('setting-notify-toggle').checked = hubSettings.notifications_enabled;
+
+            const widgetsList = document.getElementById('settings-widgets-list');
+            widgetsList.innerHTML = '';
+            for (const name in hubSettings.widgets) {
+                const wConf = hubSettings.widgets[name];
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between p-2 hover:bg-slate-850/30 rounded-xl border border-slate-850/50 transition-colors text-xs gap-4';
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 min-w-0">
+                        <input type="checkbox" id="widget-visible-${name}" ${wConf.visible ? 'checked' : ''} class="w-3.5 h-3.5 rounded border-slate-850 accent-blue-500 cursor-pointer shrink-0">
+                        <span class="font-semibold text-slate-200 truncate">${name}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span class="text-[10px] text-slate-500 font-mono">Dimensione:</span>
+                        <select id="widget-size-${name}" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] font-bold text-slate-350 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
+                            <option value="piccolo" ${wConf.size === 'piccolo' ? 'selected' : ''}>Piccolo</option>
+                            <option value="medio" ${wConf.size === 'medio' ? 'selected' : ''}>Medio</option>
+                            <option value="grande" ${wConf.size === 'grande' ? 'selected' : ''}>Grande</option>
+                        </select>
+                    </div>
+                `;
+                widgetsList.appendChild(row);
+            }
+
+            const shortcutsList = document.getElementById('settings-shortcuts-list');
+            shortcutsList.innerHTML = '';
+            elencoApps.forEach(app => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-2.5 p-2 hover:bg-slate-850/30 rounded-xl border border-slate-850/30 cursor-pointer transition-colors text-xs select-none min-w-0';
+                const checked = hubSettings.shortcuts.includes(app.titolo) ? 'checked' : '';
+                label.innerHTML = `
+                    <input type="checkbox" value="${app.titolo}" class="shortcut-checkbox w-3.5 h-3.5 rounded border-slate-800 accent-blue-500 cursor-pointer shrink-0" ${checked}>
+                    <span class="text-base shrink-0">${app.icona}</span>
+                    <span class="font-semibold text-slate-300 truncate">${app.titolo}</span>
+                `;
+                shortcutsList.appendChild(label);
+            });
+
+            switchSettingsTab('tab-widgets');
+            document.getElementById('settings-modal').classList.remove('hidden');
+        };
+
+        window.chiudiSettingsModal = function() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        };
+
+        window.switchSettingsTab = function(tabId) {
+            document.getElementById('tab-widgets').classList.add('hidden');
+            document.getElementById('tab-shortcuts').classList.add('hidden');
+            document.getElementById(tabId).classList.remove('hidden');
+
+            const btnWidgets = document.getElementById('btn-tab-widgets');
+            const btnShortcuts = document.getElementById('btn-tab-shortcuts');
+
+            if (tabId === 'tab-widgets') {
+                btnWidgets.className = "px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all";
+                btnShortcuts.className = "px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all";
+            } else {
+                btnWidgets.className = "px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all";
+                btnShortcuts.className = "px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all";
+            }
+        };
+
+        window.salvaSettingsDaForm = function() {
+            hubSettings.notifications_enabled = document.getElementById('setting-notify-toggle').checked;
+
+            for (const name in hubSettings.widgets) {
+                const visCheck = document.getElementById(`widget-visible-${name}`);
+                const sizeSel = document.getElementById(`widget-size-${name}`);
+                if (visCheck && sizeSel) {
+                    hubSettings.widgets[name].visible = visCheck.checked;
+                    hubSettings.widgets[name].size = sizeSel.value;
+                }
+            }
+
+            const shortcutChecks = document.querySelectorAll('.shortcut-checkbox');
+            const newShortcuts = [];
+            shortcutChecks.forEach(chk => {
+                if (chk.checked) {
+                    newShortcuts.push(chk.value);
+                }
+            });
+            hubSettings.shortcuts = newShortcuts;
+
+            salvaImpostazioni();
+            renderizzaScorciatoie();
+            aggiornaWidgetInterattivi();
+            chiudiSettingsModal();
+        };
 
         // Riferimenti DOM
         const container = document.getElementById('apps-container');
@@ -1115,12 +1286,38 @@
             const activeWidgetsData = [];
 
             // 0. Micro-Planner 3-Task
-            if (plannerStatus) {
-                activeWidgetsData.push({
-                    titolo: "Micro-Planner 3-Task",
-                    icona: "🎯",
-                    url: "./02-planner-3task/index.html",
-                    html: `
+            if (plannerStatus && hubSettings.widgets["Micro-Planner 3-Task"].visible) {
+                const size = hubSettings.widgets["Micro-Planner 3-Task"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    const completate = plannerStatus.list.filter(t => t.check).length;
+                    const totali = plannerStatus.list.filter(t => t.testo !== '').length;
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span>🎯 Priorità:</span>
+                            <span class="font-mono text-blue-400 font-bold">${completate}/${totali} completate</span>
+                        </div>
+                    `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="space-y-2">
+                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">🎯 3 Priorità di oggi:</div>
+                            <ul class="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
+                                ${plannerStatus.list.map(task => {
+                                    if (task.testo === '') return '';
+                                    const textStyle = task.check ? 'text-slate-500 line-through' : 'text-slate-300 font-semibold';
+                                    return `
+                                        <li class="flex items-center gap-1.5 p-2 bg-slate-950/50 border border-slate-900 rounded-xl">
+                                            <input type="checkbox" onchange="spuntaPlannerWidget(${task.id}, this.checked)" ${task.check ? 'checked' : ''} class="w-3.5 h-3.5 rounded border-slate-850 accent-blue-500 cursor-pointer shrink-0">
+                                            <span class="truncate ${textStyle}">${task.testo}</span>
+                                        </li>
+                                    `;
+                                }).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="space-y-1.5">
                             <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">🎯 3 Priorità di oggi:</div>
                             <ul class="space-y-1 text-[11px]">
@@ -1136,17 +1333,48 @@
                                 }).join('')}
                             </ul>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "Micro-Planner 3-Task",
+                    icona: "🎯",
+                    url: "./02-planner-3task/index.html",
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 1. Idratatore Custom
-            if (acquaStatus && acquaStatus.quantita > 0) {
-                activeWidgetsData.push({
-                    titolo: "Idratatore Custom",
-                    icona: "💧",
-                    url: "./05-idratatore/index.html",
-                    html: `
+            if (acquaStatus && acquaStatus.quantita > 0 && hubSettings.widgets["Idratatore Custom"].visible) {
+                const size = hubSettings.widgets["Idratatore Custom"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-355 flex justify-between items-center py-1">
+                            <span>💧 Idratazione:</span>
+                            <span class="font-mono text-blue-400 font-bold">${acquaStatus.quantita}/${acquaStatus.obiettivo} ml (${acquaStatus.pct}%)</span>
+                        </div>
+                    `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                            <div class="md:col-span-7 space-y-1.5">
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="font-bold text-slate-300">💧 Idratazione</span>
+                                    <span class="font-mono font-bold text-blue-400">${acquaStatus.quantita} / ${acquaStatus.obiettivo} ml (${acquaStatus.pct}%)</span>
+                                </div>
+                                <div class="w-full bg-slate-905 rounded-full h-1 border border-slate-900 overflow-hidden">
+                                    <div class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: ${acquaStatus.pct}%"></div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-5 flex gap-2">
+                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c1})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1.5 rounded transition-all cursor-pointer">🥛 +${acquaStatus.c1}ml</button>
+                                <button onclick="aggiungiAcquaWidget(${acquaStatus.c2})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1.5 rounded transition-all cursor-pointer">☕ +${acquaStatus.c2}ml</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="space-y-2">
                             <div class="flex justify-between items-center text-[10px]">
                                 <span class="font-bold text-slate-300">💧 Idratazione</span>
@@ -1160,46 +1388,80 @@
                                 <button onclick="aggiungiAcquaWidget(${acquaStatus.c2})" class="flex-1 bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer">☕ +${acquaStatus.c2}ml</button>
                             </div>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "Idratatore Custom",
+                    icona: "💧",
+                    url: "./05-idratatore/index.html",
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 2. Wi-Fi QR Code
-            if (wifiStatus) {
-                activeWidgetsData.push({
-                    titolo: "Wi-Fi QR Code",
-                    icona: "🔑",
-                    url: "./04-wifi-qrcode/index.html",
-                    html: `
+            if (wifiStatus && hubSettings.widgets["Wi-Fi QR Code"].visible) {
+                const size = hubSettings.widgets["Wi-Fi QR Code"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span class="truncate mr-2">SSID: ${wifiStatus.ssid}</span>
+                            <button onclick="mostraWifiQRModal('${wifiStatus.ssid.replace(/'/g, "\\'")}', '${wifiStatus.pass.replace(/'/g, "\\'")}', '${wifiStatus.type}')" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all cursor-pointer shrink-0">QR 🔑</button>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="space-y-1.5">
                             <div class="text-[10px] font-bold text-slate-400 truncate">Rete: <span class="text-emerald-400 font-mono">${wifiStatus.ssid}</span></div>
                             <button onclick="mostraWifiQRModal('${wifiStatus.ssid.replace(/'/g, "\\'")}', '${wifiStatus.pass.replace(/'/g, "\\'")}', '${wifiStatus.type}')" class="w-full bg-emerald-600/10 hover:bg-emerald-600/20 active:scale-95 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer flex items-center justify-center gap-1">
                                 🔑 Mostra QR Ospiti
                             </button>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "Wi-Fi QR Code",
+                    icona: "🔑",
+                    url: "./04-wifi-qrcode/index.html",
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 2b. Generatore QR Code Predefinito
-            if (customQrStatus) {
-                activeWidgetsData.push({
-                    titolo: "Generatore QR Code",
-                    icona: "🔲",
-                    url: "./24-generatore-qrcode/index.html",
-                    html: `
+            if (customQrStatus && hubSettings.widgets["Generatore QR Code"].visible) {
+                const size = hubSettings.widgets["Generatore QR Code"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span class="truncate mr-2">QR: ${customQrStatus.nome}</span>
+                            <button onclick="mostraGenericoQRModal('${customQrStatus.nome.replace(/'/g, "\\'")}', '${customQrStatus.contenuto.replace(/'/g, "\\'")}', '${customQrStatus.fg}', '${customQrStatus.bg}')" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded border border-blue-500/30 text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all cursor-pointer shrink-0">QR 🔲</button>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="space-y-1.5">
                             <div class="text-[10px] font-bold text-slate-400 truncate">QR: <span class="text-blue-400 font-mono">${customQrStatus.nome}</span></div>
                             <button onclick="mostraGenericoQRModal('${customQrStatus.nome.replace(/'/g, "\\'")}', '${customQrStatus.contenuto.replace(/'/g, "\\'")}', '${customQrStatus.fg}', '${customQrStatus.bg}')" class="w-full bg-blue-600/10 hover:bg-blue-600/20 active:scale-95 border border-blue-500/20 text-blue-400 text-[9px] font-bold py-1 rounded transition-all cursor-pointer flex items-center justify-center gap-1">
                                 🔲 Mostra QR Code
                             </button>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "Generatore QR Code",
+                    icona: "🔲",
+                    url: "./24-generatore-qrcode/index.html",
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 3. Time-Blocking
-            if (timeStatus && timeStatus.totale > 0) {
+            if (timeStatus && timeStatus.totale > 0 && hubSettings.widgets["Time-Blocking"].visible) {
+                const size = hubSettings.widgets["Time-Blocking"].size;
                 const now = new Date();
                 const currentMin = now.getHours() * 60 + now.getMinutes();
                 const tasksConOrario = timeStatus.tasks;
@@ -1209,15 +1471,21 @@
 
                 if (activeIndex !== -1) {
                     tasksToShow.push(tasksConOrario[activeIndex]);
-                    if (activeIndex + 1 < tasksConOrario.length) {
-                        tasksToShow.push(tasksConOrario[activeIndex + 1]);
+                    if (size === 'grande') {
+                        if (activeIndex + 1 < tasksConOrario.length) tasksToShow.push(tasksConOrario[activeIndex + 1]);
+                        if (activeIndex + 2 < tasksConOrario.length) tasksToShow.push(tasksConOrario[activeIndex + 2]);
+                    } else if (size !== 'piccolo') {
+                        if (activeIndex + 1 < tasksConOrario.length) tasksToShow.push(tasksConOrario[activeIndex + 1]);
                     }
                 } else {
                     const nextIndex = tasksConOrario.findIndex(t => currentMin < t.start);
                     if (nextIndex !== -1) {
                         tasksToShow.push(tasksConOrario[nextIndex]);
-                        if (nextIndex + 1 < tasksConOrario.length) {
-                            tasksToShow.push(tasksConOrario[nextIndex + 1]);
+                        if (size === 'grande') {
+                            if (nextIndex + 1 < tasksConOrario.length) tasksToShow.push(tasksConOrario[nextIndex + 1]);
+                            if (nextIndex + 2 < tasksConOrario.length) tasksToShow.push(tasksConOrario[nextIndex + 2]);
+                        } else if (size !== 'piccolo') {
+                            if (nextIndex + 1 < tasksConOrario.length) tasksToShow.push(tasksConOrario[nextIndex + 1]);
                         }
                     } else {
                         isGiornataFinita = true;
@@ -1227,11 +1495,53 @@
                     }
                 }
 
-                activeWidgetsData.push({
-                    titolo: "Time-Blocking",
-                    icona: "📅",
-                    url: "./11-timeblocking/index.html",
-                    html: `
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    const activeBlock = tasksConOrario.find(t => t.isActive);
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span class="truncate mr-2">📅 Ora: ${activeBlock ? activeBlock.nome : 'Pausa'}</span>
+                            <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border border-slate-800 bg-slate-900/60 text-slate-400 shrink-0">${activeBlock ? activeBlock.labelOrario : '--:--'}</span>
+                        </div>
+                    `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">
+                                <span>Timeline:</span>
+                                ${isGiornataFinita ? '<span class="text-emerald-500 font-bold">Giornata conclusa 🎉</span>' : ''}
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                ${tasksToShow.map(task => {
+                                    const isPast = currentMin >= task.end;
+                                    let bgBlock = 'bg-slate-900 border-slate-800/80 text-slate-400';
+                                    let badgeBlock = 'bg-slate-950 text-slate-500 border-slate-800';
+                                    let dotHtml = '';
+
+                                    if (task.isActive) {
+                                        bgBlock = 'bg-violet-950/20 border-violet-500/35 text-violet-200 ring-1 ring-violet-500/10';
+                                        badgeBlock = 'bg-violet-500/15 text-violet-300 border-violet-500/20';
+                                        dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping mr-1.5 shrink-0"></span>';
+                                    } else if (isPast) {
+                                        bgBlock = 'bg-slate-900/40 border-slate-950 text-slate-500/80 line-through';
+                                        badgeBlock = 'bg-slate-950/20 text-slate-600 border-slate-950';
+                                    }
+
+                                    return `
+                                        <div class="border p-2 rounded-xl flex flex-col justify-between text-[11px] gap-2 ${bgBlock}">
+                                            <div class="flex items-center min-w-0">
+                                                ${dotHtml}
+                                                <span class="truncate font-semibold text-left">${task.nome}</span>
+                                            </div>
+                                            <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border text-center ${badgeBlock}">${task.labelOrario}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="space-y-1.5">
                             <div class="flex justify-between items-center text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">
                                 <span>Pianificatore:</span>
@@ -1265,21 +1575,37 @@
                                 }).join('')}
                             </div>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "Time-Blocking",
+                    icona: "📅",
+                    url: "./11-timeblocking/index.html",
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 4. SmartShopping
-            if (shoppingStatus && shoppingStatus.total > 0) {
-                let shopInnerHtml = '';
-                if (shoppingStatus.count > 0) {
-                    shopInnerHtml = `
+            if (shoppingStatus && shoppingStatus.total > 0 && hubSettings.widgets["SmartShopping"].visible) {
+                const size = hubSettings.widgets["SmartShopping"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span>🛒 Lista:</span>
+                            <span class="font-mono text-lime-400 font-bold">${shoppingStatus.count} rimanenti</span>
+                        </div>
+                    `;
+                } else if (size === 'grande') {
+                    const items = stateShopping.filter(item => !item.spuntato);
+                    widgetHtml = `
                         <div class="space-y-1.5">
                             <div class="text-[9px] font-bold text-slate-400">🛒 Da acquistare (${shoppingStatus.count}):</div>
-                            <ul class="space-y-1 text-[11px]">
-                                ${shoppingStatus.list.map(item => `
-                                    <li class="flex items-center gap-1.5">
-                                        <input type="checkbox" onchange="spuntaProdottoWidget(${item.id})" class="w-3.5 h-3.5 rounded border-slate-800 accent-lime-500 cursor-pointer">
+                            <ul class="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
+                                ${items.slice(0, 6).map(item => `
+                                    <li class="flex items-center gap-1.5 p-1.5 bg-slate-950/40 border border-slate-900 rounded-xl">
+                                        <input type="checkbox" onchange="spuntaProdottoWidget(${item.id})" class="w-3.5 h-3.5 rounded border-slate-850 accent-lime-500 cursor-pointer shrink-0">
                                         <span class="truncate text-slate-300 font-semibold">${item.nome}</span>
                                     </li>
                                 `).join('')}
@@ -1287,27 +1613,52 @@
                         </div>
                     `;
                 } else {
-                    shopInnerHtml = `
-                        <div class="text-[10px] text-lime-400 font-bold flex items-center gap-1 py-1">
-                            <span>✅</span> Spesa completata!
-                        </div>
-                    `;
+                    let shopInnerHtml = '';
+                    if (shoppingStatus.count > 0) {
+                        shopInnerHtml = `
+                            <div class="space-y-1.5">
+                                <div class="text-[9px] font-bold text-slate-400">🛒 Da acquistare (${shoppingStatus.count}):</div>
+                                <ul class="space-y-1 text-[11px]">
+                                    ${shoppingStatus.list.map(item => `
+                                        <li class="flex items-center gap-1.5">
+                                            <input type="checkbox" onchange="spuntaProdottoWidget(${item.id})" class="w-3.5 h-3.5 rounded border-slate-800 accent-lime-500 cursor-pointer">
+                                            <span class="truncate text-slate-300 font-semibold">${item.nome}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    } else {
+                        shopInnerHtml = `
+                            <div class="text-[10px] text-lime-400 font-bold flex items-center gap-1 py-1">
+                                <span>✅</span> Spesa completata!
+                            </div>
+                        `;
+                    }
+                    widgetHtml = shopInnerHtml;
                 }
                 activeWidgetsData.push({
                     titolo: "SmartShopping",
                     icona: "🛒",
                     url: "./13-smartshopping/index.html",
-                    html: shopInnerHtml
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 5. Radar Scadenze
-            if (radarStatus) {
-                activeWidgetsData.push({
-                    titolo: "Radar Scadenze",
-                    icona: "📅",
-                    url: "./16-radar-scadenze/index.html",
-                    html: `
+            if (radarStatus && hubSettings.widgets["Radar Scadenze"].visible) {
+                const size = hubSettings.widgets["Radar Scadenze"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span class="truncate mr-2">⏰ Scadenza: ${radarStatus.titolo}</span>
+                            <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border ${radarStatus.classColor} shrink-0">${radarStatus.sign}</span>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="space-y-1">
                             <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Imminente:</div>
                             <div class="border p-2 rounded-xl flex items-center justify-between text-[11px] ${radarStatus.classColor}">
@@ -1315,17 +1666,29 @@
                                 <span class="font-mono font-bold text-[9px] shrink-0">${radarStatus.sign}</span>
                             </div>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "Radar Scadenze",
+                    icona: "📅",
+                    url: "./16-radar-scadenze/index.html",
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 6. EquiSplit
-            if (equiStatus) {
-                activeWidgetsData.push({
-                    titolo: "EquiSplit",
-                    icona: "💸",
-                    url: "./22-divisore-spese/index.html",
-                    html: `
+            if (equiStatus && hubSettings.widgets["EquiSplit"].visible) {
+                const size = hubSettings.widgets["EquiSplit"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span>💸 Spese: ${equiStatus.count} (${equiStatus.sum.toFixed(2)} €)</span>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="space-y-1.5">
                             <div class="flex justify-between items-center text-[9px] text-slate-400 font-bold">
                                 <span>Spese: <strong class="text-white">${equiStatus.count}</strong></span>
@@ -1335,17 +1698,44 @@
                                 ${equiStatus.text}
                             </div>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "EquiSplit",
+                    icona: "💸",
+                    url: "./22-divisore-spese/index.html",
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 7. AutoCompiler
-            if (autocompilerStatus && autocompilerStatus.list.length > 0) {
-                activeWidgetsData.push({
-                    titolo: "AutoCompiler",
-                    icona: "⚡",
-                    url: "./10-autocompiler/index.html",
-                    html: `
+            if (autocompilerStatus && autocompilerStatus.list.length > 0 && hubSettings.widgets["AutoCompiler"].visible) {
+                const size = hubSettings.widgets["AutoCompiler"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-355 flex justify-between items-center py-1">
+                            <span>⚡ Snippets:</span>
+                            <span class="font-mono text-amber-400 font-bold">${autocompilerStatus.list.length} salvati</span>
+                        </div>
+                    `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="space-y-1.5">
+                            <div class="text-[9px] font-bold text-slate-400">⚡ Copia rapida:</div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                                ${autocompilerStatus.list.slice(0, 4).map(item => `
+                                    <button onclick="copiaSnippetDaHub(event, ${item.id})" class="w-full bg-amber-600/10 hover:bg-amber-600/20 active:scale-95 border border-amber-500/20 text-amber-400 text-[10px] font-bold py-1.5 px-2.5 rounded-xl transition-all cursor-pointer flex justify-between items-center">
+                                        <span class="font-mono truncate mr-2">${item.titolo}</span>
+                                        <span class="text-[9px] text-slate-500 shrink-0 font-sans">📋</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="space-y-1.5">
                             <div class="text-[9px] font-bold text-slate-400">⚡ Copia rapida:</div>
                             <div class="flex flex-col gap-1.5">
@@ -1357,18 +1747,41 @@
                                 `).join('')}
                             </div>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "AutoCompiler",
+                    icona: "⚡",
+                    url: "./10-autocompiler/index.html",
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 8. Pomodoro Timer
-            if (pomodoroStatus) {
-                activeWidgetsData.push({
-                    titolo: "Timer Pomodoro",
-                    icona: "⏱️",
-                    url: "./06-pomodoro/index.html",
-                    expired: pomodoroStatus.expired,
-                    html: `
+            if (pomodoroStatus && hubSettings.widgets["Timer Pomodoro"].visible) {
+                const size = hubSettings.widgets["Timer Pomodoro"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span class="truncate mr-2">${pomodoroStatus.expired ? '🚨 SCADUTO' : '🍅 ' + pomodoroStatus.label}</span>
+                            <span class="font-mono text-white font-bold shrink-0">${pomodoroStatus.tempo}</span>
+                        </div>
+                    `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="flex flex-col items-center justify-center py-2 space-y-2">
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider px-3 py-1 rounded-full border ${pomodoroStatus.classe} shadow-md ${pomodoroStatus.expired ? '' : 'animate-pulse'}">
+                                ${pomodoroStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
+                                <span>${pomodoroStatus.icona}</span>
+                                <span>${pomodoroStatus.label}</span>
+                            </span>
+                            <span class="font-mono font-black text-3xl text-white tracking-tight drop-shadow-md">${pomodoroStatus.tempo}</span>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="flex items-center justify-between">
                             <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${pomodoroStatus.classe} shadow-sm ${pomodoroStatus.expired ? '' : 'animate-pulse'}">
                                 ${pomodoroStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
@@ -1377,18 +1790,42 @@
                             </span>
                             <span class="font-mono font-black text-sm text-white">${pomodoroStatus.tempo}</span>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "Timer Pomodoro",
+                    icona: "⏱️",
+                    url: "./06-pomodoro/index.html",
+                    expired: pomodoroStatus.expired,
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 9. Bento Gym Timer
-            if (gymStatus) {
-                activeWidgetsData.push({
-                    titolo: "Bento Gym Timer",
-                    icona: "🏋️‍♂️",
-                    url: "./08-gym-timer/index.html",
-                    expired: gymStatus.expired,
-                    html: `
+            if (gymStatus && hubSettings.widgets["Bento Gym Timer"].visible) {
+                const size = hubSettings.widgets["Bento Gym Timer"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span class="truncate mr-2">${gymStatus.expired ? '🚨 SCADUTO' : '🏋️‍♂️ ' + gymStatus.label}</span>
+                            <span class="font-mono text-white font-bold shrink-0">${gymStatus.tempo}</span>
+                        </div>
+                    `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="flex flex-col items-center justify-center py-2 space-y-2">
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider px-3 py-1 rounded-full border ${gymStatus.classe} shadow-md ${gymStatus.expired ? '' : 'animate-pulse'}">
+                                ${gymStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
+                                <span>${gymStatus.icona}</span>
+                                <span>${gymStatus.label}</span>
+                            </span>
+                            <span class="font-mono font-black text-3xl text-white tracking-tight drop-shadow-md">${gymStatus.tempo}</span>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="flex items-center justify-between">
                             <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${gymStatus.classe} shadow-sm ${gymStatus.expired ? '' : 'animate-pulse'}">
                                 ${gymStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
@@ -1397,18 +1834,42 @@
                             </span>
                             <span class="font-mono font-black text-sm text-white">${gymStatus.tempo}</span>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "Bento Gym Timer",
+                    icona: "🏋️‍♂️",
+                    url: "./08-gym-timer/index.html",
+                    expired: gymStatus.expired,
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
             // 10. Matrix del Tempo Adaptive Timer
-            if (matrixStatus) {
-                activeWidgetsData.push({
-                    titolo: "Matrix del Tempo",
-                    icona: "⚡",
-                    url: "./18-matrix-tempo/index.html",
-                    expired: matrixStatus.expired,
-                    html: `
+            if (matrixStatus && hubSettings.widgets["Matrix del Tempo"].visible) {
+                const size = hubSettings.widgets["Matrix del Tempo"].size;
+                let widgetHtml = '';
+                if (size === 'piccolo') {
+                    widgetHtml = `
+                        <div class="text-[11px] font-semibold text-slate-350 flex justify-between items-center py-1">
+                            <span class="truncate mr-2">${matrixStatus.expired ? '🚨 SCADUTO' : '⚡ ' + matrixStatus.label}</span>
+                            <span class="font-mono text-white font-bold shrink-0">${matrixStatus.tempo}</span>
+                        </div>
+                    `;
+                } else if (size === 'grande') {
+                    widgetHtml = `
+                        <div class="flex flex-col items-center justify-center py-2 space-y-2">
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wider px-3 py-1 rounded-full border ${matrixStatus.classe} shadow-md ${matrixStatus.expired ? '' : 'animate-pulse'}">
+                                ${matrixStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
+                                <span>${matrixStatus.icona}</span>
+                                <span>${matrixStatus.label}</span>
+                            </span>
+                            <span class="font-mono font-black text-3xl text-white tracking-tight drop-shadow-md">${matrixStatus.tempo}</span>
+                        </div>
+                    `;
+                } else {
+                    widgetHtml = `
                         <div class="flex items-center justify-between">
                             <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${matrixStatus.classe} shadow-sm ${matrixStatus.expired ? '' : 'animate-pulse'}">
                                 ${matrixStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
@@ -1417,7 +1878,15 @@
                             </span>
                             <span class="font-mono font-black text-sm text-white">${matrixStatus.tempo}</span>
                         </div>
-                    `
+                    `;
+                }
+                activeWidgetsData.push({
+                    titolo: "Matrix del Tempo",
+                    icona: "⚡",
+                    url: "./18-matrix-tempo/index.html",
+                    expired: matrixStatus.expired,
+                    size: size,
+                    html: widgetHtml
                 });
             }
 
@@ -1428,8 +1897,9 @@
                 if (activeWidgetsData.length > 0) {
                     activeWidgetsGrid.innerHTML = activeWidgetsData.map(w => {
                         const expiredClass = w.expired ? 'animate-flash-red border-red-500/50' : 'border-slate-800/80 bg-gradient-to-br from-slate-900/60 to-slate-950/80 hover:border-slate-700/60';
+                        const sizeSpanClass = (w.size === 'grande') ? 'col-span-1 md:col-span-2' : 'col-span-1';
                         return `
-                            <div onclick="navigaVerso(event, '${w.url}')" class="group relative overflow-hidden rounded-3xl border p-5 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl ${expiredClass}">
+                            <div onclick="navigaVerso(event, '${w.url}')" class="group relative overflow-hidden rounded-3xl border p-5 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl ${sizeSpanClass} ${expiredClass}">
                                 <!-- Overlay Glow Effect -->
                                 ${w.expired ? '' : '<div class="absolute -inset-px bg-gradient-to-r from-blue-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>'}
 
@@ -1459,10 +1929,6 @@
                     activeWidgetsGrid.innerHTML = '';
                 }
             }
-
-            // ----------------------------------------------------
-            // 3. APPLICAZIONE DEI BADGE E DEI WIDGET NEL DOM
-            // ----------------------------------------------------
             const cards = document.querySelectorAll('[data-app-title]');
             cards.forEach(card => {
                 const titolo = card.getAttribute('data-app-title');
@@ -1706,6 +2172,7 @@
         // Inizializzazione al caricamento
         renderizzaFiltri();
         renderizzaTutto();
+        renderizzaScorciatoie();
 
         // Avvio timer live refresh per Hub
         setInterval(aggiornaWidgetInterattivi, 1000);
@@ -1791,6 +2258,64 @@
             </button>
         </div>
     </div>
-</body>
 
+    <!-- Modal Impostazioni Hub -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="chiudiSettingsModal()">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-xl w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh] text-left" onclick="event.stopPropagation()">
+            <button onclick="chiudiSettingsModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+            <div class="flex items-center gap-2 text-blue-400">
+                <span class="text-xl">⚙️</span>
+                <span class="text-xs font-black uppercase tracking-widest font-mono-custom">Pannello Controllo</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Impostazioni Hub & Personalizzazione</h3>
+
+            <!-- Tabs Nav -->
+            <div class="flex border-b border-slate-850 text-xs font-bold gap-2">
+                <button onclick="switchSettingsTab('tab-widgets')" id="btn-tab-widgets" class="px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all">Widget & Notifiche</button>
+                <button onclick="switchSettingsTab('tab-shortcuts')" id="btn-tab-shortcuts" class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all">Scorciatoie App</button>
+            </div>
+
+            <!-- Tab Content: Widgets & Notifications -->
+            <div id="tab-widgets" class="space-y-4 pt-2">
+                <!-- Notifications switch -->
+                <div class="flex items-center justify-between p-3.5 bg-slate-950/40 border border-slate-850 rounded-2xl">
+                    <div>
+                        <div class="text-xs font-bold text-white">Notifiche di Sistema</div>
+                        <div class="text-[10px] text-slate-500">Abilita o disabilita globalmente gli avvisi del browser per i timer.</div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer select-none">
+                        <input type="checkbox" id="setting-notify-toggle" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-350 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-checked:after:bg-white"></div>
+                    </label>
+                </div>
+
+                <!-- Widgets list scroll container -->
+                <div class="space-y-2">
+                    <div class="text-xs font-bold text-slate-300">Personalizza Widget Attivi:</div>
+                    <div class="space-y-2 max-h-[35vh] overflow-y-auto pr-1 border border-slate-800/80 p-3 rounded-2xl bg-slate-950/20" id="settings-widgets-list">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Shortcuts -->
+            <div id="tab-shortcuts" class="space-y-3 pt-2 hidden">
+                <div class="text-xs font-bold text-slate-300">Seleziona le app da mostrare in Accesso Rapido in alto:</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[42vh] overflow-y-auto pr-1 border border-slate-800/80 p-3 rounded-2xl bg-slate-950/20" id="settings-shortcuts-list">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- Modal Actions -->
+            <div class="flex gap-3 pt-4 border-t border-slate-800">
+                <button onclick="chiudiSettingsModal()" class="flex-1 bg-slate-800 hover:bg-slate-750 text-slate-350 font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer">
+                    Annulla
+                </button>
+                <button onclick="salvaSettingsDaForm()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-blue-500/10">
+                    Salva
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
 </html>

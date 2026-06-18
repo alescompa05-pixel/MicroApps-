@@ -394,6 +394,9 @@
         }
 
         function inviaNotifica(titolo, corpo) {
+            if (localStorage.getItem('hub_notifications_enabled') === 'false') {
+                return;
+            }
             if ("Notification" in window && Notification.permission === "granted") {
                 try {
                     new Notification(titolo, {

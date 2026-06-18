@@ -91,6 +91,13 @@
                     class="bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-500/20 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer transition-colors flex items-center gap-1 shrink-0">
                     <i class="fa-solid fa-trash"></i> Elimina
                 </button>
+
+                <!-- Condividi gruppo -->
+                <button id="btn-share-group" onclick="condividiGruppo()"
+                    class="bg-blue-955/40 hover:bg-blue-900/60 text-blue-400 border border-blue-500/20 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer transition-colors flex items-center gap-1 shrink-0"
+                    title="Condividi questo gruppo tramite link">
+                    <i class="fa-solid fa-share-nodes"></i> Condividi
+                </button>
             </div>
 
             <!-- Inline form nuovo gruppo -->
@@ -596,9 +603,69 @@
             });
         }
 
+        window.condividiGruppo = function() {
+            const gruppo = getGruppoAttivo(db);
+            if (!gruppo) return;
+            
+            try {
+                // Serializza il gruppo attivo
+                const payload = {
+                    nome: gruppo.nome,
+                    members: gruppo.members,
+                    expenses: gruppo.expenses
+                };
+                const jsonStr = JSON.stringify(payload);
+                // Utilizza un encoding sicuro UTF-8 + Base64
+                const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+                
+                // Crea il link di condivisione
+                const shareLink = `${window.location.origin}${window.location.pathname}?import=${base64}`;
+                
+                // Copia nella clipboard
+                navigator.clipboard.writeText(shareLink).then(() => {
+                    const btn = document.getElementById('btn-share-group');
+                    const origHtml = btn.innerHTML;
+                    btn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Copiato!`;
+                    btn.classList.add('border-emerald-500/40', 'text-emerald-400');
+                    setTimeout(() => {
+                        btn.innerHTML = origHtml;
+                        btn.classList.remove('border-emerald-500/40', 'text-emerald-400');
+                    }, 2000);
+                });
+            } catch (e) {
+                console.error("Errore durante la generazione del link di condivisione:", e);
+                alert("Impossibile generare il link di condivisione.");
+            }
+        };
+
+        // Rilevamento importazione all'avvio
+        function controllaImportazioneLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('import')) {
+                try {
+                    const base64 = urlParams.get('import');
+                    const decodedStr = decodeURIComponent(escape(atob(base64)));
+                    const importedGroup = JSON.parse(decodedStr);
+                    
+                    if (importedGroup.nome && Array.isArray(importedGroup.members) && Array.isArray(importedGroup.expenses)) {
+                        // Pulisce la query string dell'URL per evitare import multipli su refresh
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        
+                        // Mostra il modal di conferma per importare
+                        setTimeout(() => {
+                            window.mostraImportModal(importedGroup);
+                        }, 300);
+                    }
+                } catch (e) {
+                    console.error("Errore durante l'importazione del gruppo dal link:", e);
+                }
+            }
+        }
+
         // ─── Avvio ─────────────────────────────────────────────────────────
         renderGroupSelect();
         renderTutto();
+        controllaImportazioneLink();
     </script>
 
         <!-- Footer Privacy -->
@@ -645,12 +712,79 @@
         </div>
     </div>
 
+    <!-- Modal Importa Gruppo Condiviso -->
+    <div id="import-group-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="chiudiImportModal()">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-md w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh] text-left" onclick="event.stopPropagation()">
+            <button onclick="chiudiImportModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+            <div class="flex items-center gap-2 text-emerald-400">
+                <span class="text-xl">📥</span>
+                <span class="text-xs font-black uppercase tracking-widest font-mono-custom">Importa Gruppo</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Importa Gruppo Condiviso</h3>
+            
+            <div class="text-xs text-slate-300 space-y-3 leading-relaxed">
+                <p>È stato condiviso con te un gruppo di spesa:</p>
+                <div class="bg-slate-950/40 border border-slate-800 p-3.5 rounded-xl space-y-1">
+                    <div class="text-sm font-extrabold text-white" id="import-group-name">Nome Gruppo</div>
+                    <div class="text-slate-400 font-semibold" id="import-group-details">0 membri • 0 spese</div>
+                </div>
+                <p class="text-slate-450 text-[10px]">Importando questo gruppo, potrai visualizzare le spese registrate, calcolare i pareggi e aggiungere nuove spese. Il gruppo verrà salvato nella memoria locale del tuo browser.</p>
+            </div>
+            
+            <div class="flex gap-3 pt-2">
+                <button onclick="chiudiImportModal()" class="flex-1 bg-slate-800 hover:bg-slate-750 text-slate-350 font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer">
+                    Annulla
+                </button>
+                <button onclick="confermaImportaGruppo()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-emerald-500/10">
+                    Importa Gruppo
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.mostraPrivacyModal = function() {
             document.getElementById('privacy-modal').classList.remove('hidden');
         };
         window.closePrivacyModal = function() {
             document.getElementById('privacy-modal').classList.add('hidden');
+        };
+
+        // Gestione Modal Importazione Gruppo
+        let pendingImportGroup = null;
+
+        window.chiudiImportModal = function() {
+            document.getElementById('import-group-modal').classList.add('hidden');
+            pendingImportGroup = null;
+        };
+
+        window.mostraImportModal = function(groupData) {
+            pendingImportGroup = groupData;
+            document.getElementById('import-group-name').innerText = groupData.nome;
+            document.getElementById('import-group-details').innerText = `${groupData.members.length} membri • ${groupData.expenses.length} spese`;
+            document.getElementById('import-group-modal').classList.remove('hidden');
+        };
+
+        window.confermaImportaGruppo = function() {
+            if (!pendingImportGroup) return;
+            
+            // Crea un ID univoco
+            const newId = 'grp_' + Date.now();
+            
+            // Aggiungi al DB
+            const nuovoGruppo = {
+                id: newId,
+                nome: pendingImportGroup.nome,
+                members: pendingImportGroup.members,
+                expenses: pendingImportGroup.expenses
+            };
+            
+            db.groups.push(nuovoGruppo);
+            db.activeGroupId = newId;
+            
+            salvaDB(db);
+            renderTutto();
+            chiudiImportModal();
         };
     </script>
 </body>
