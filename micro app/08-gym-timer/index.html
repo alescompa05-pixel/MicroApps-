@@ -252,6 +252,7 @@
 
         // Gestisce l'avanzamento dei secondi
         function avviaCicloTimer() {
+            localStorage.setItem('gym_timer_expired', 'false');
             if (timerId) clearInterval(timerId);
 
             isPaused = false;
@@ -266,6 +267,7 @@
                     aggiornaDisplay();
                 } else {
                     // TIMER SCADUTO
+                    localStorage.setItem('gym_timer_expired', 'true');
                     clearInterval(timerId);
                     timerId = null;
                     isPaused = true;
@@ -340,6 +342,7 @@
 
         // Resetta il timer manualmente
         btnResetTimer.addEventListener('click', () => {
+            localStorage.setItem('gym_timer_expired', 'false');
             if (timerId) clearInterval(timerId);
             timerId = null;
             tempoTotale = 0;

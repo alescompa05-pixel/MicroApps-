@@ -296,6 +296,7 @@
         // Logica di switch automatico allo scadere dello zero
         function timerScaduto() {
             suona();
+            localStorage.setItem('pomodoro_timer_expired', 'true');
 
             if (modalitaCorrente === 'focus') {
                 inviaNotifica("Focus Completato! 🍅", "Ottimo lavoro! È ora di fare una pausa.");
@@ -314,6 +315,7 @@
         }
 
         function avviaTimer() {
+            localStorage.setItem('pomodoro_timer_expired', 'false');
             if (timerId) clearInterval(timerId);
             isPaused = false;
             btnStart.innerText = "Pausa";
@@ -354,13 +356,23 @@
 
         // Pulsante di Reset
         btnReset.addEventListener('click', () => {
+            localStorage.setItem('pomodoro_timer_expired', 'false');
             impostaModalita(modalitaCorrente);
         });
 
         // Pulsanti selettori manuali
-        btnModeFocus.addEventListener('click', () => impostaModalita('focus'));
-        btnModeShort.addEventListener('click', () => impostaModalita('short'));
-        btnModeLong.addEventListener('click', () => impostaModalita('long'));
+        btnModeFocus.addEventListener('click', () => {
+            localStorage.setItem('pomodoro_timer_expired', 'false');
+            impostaModalita('focus');
+        });
+        btnModeShort.addEventListener('click', () => {
+            localStorage.setItem('pomodoro_timer_expired', 'false');
+            impostaModalita('short');
+        });
+        btnModeLong.addEventListener('click', () => {
+            localStorage.setItem('pomodoro_timer_expired', 'false');
+            impostaModalita('long');
+        });
 
         // Reset dei cicli storici
         btnClearStreak.addEventListener('click', () => {

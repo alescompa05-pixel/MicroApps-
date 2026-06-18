@@ -206,6 +206,7 @@
         }
 
         function avviaSessione() {
+            localStorage.setItem('matrix_timer_expired', 'false');
             richiediNotifichePermesso();
             const task = document.getElementById('task-type').value;
             let minutiFocus = 25;
@@ -273,6 +274,7 @@
                 clearInterval(timerId);
                 document.title = `⏰ Scaduto! | ${TITOLO_BASE}`;
                 riproduciSuono();
+                localStorage.setItem('matrix_timer_expired', 'true');
 
                 if (scudettoStato.modalita === 'focus') {
                     inviaNotifica("Focus Completato! ⚡", "Blocco di lavoro terminato. Scegli la tua pausa.");
@@ -299,6 +301,7 @@
         }
 
         function scegliPausa(minuti) {
+            localStorage.setItem('matrix_timer_expired', 'false');
             richiediNotifichePermesso();
             scudettoStato.scadenzaTimestamp = Date.now() + (minuti * 60 * 1000);
             scudettoStato.modalita = 'pausa';
@@ -367,6 +370,7 @@
         }
 
         function resetTimer() {
+            localStorage.setItem('matrix_timer_expired', 'false');
             clearInterval(timerId);
             localStorage.removeItem('matrix_timer_state');
             document.title = `⏱️ ${TITOLO_BASE} | MicroApps Suite`;

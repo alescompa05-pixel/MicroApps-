@@ -93,6 +93,22 @@
             transform: scale(0.985);
         }
 
+        @keyframes flash-red {
+            0%, 100% {
+                background-color: rgba(220, 38, 38, 0.15) !important;
+                border-color: rgba(239, 68, 68, 0.3) !important;
+                box-shadow: 0 0 0px rgba(239, 68, 68, 0);
+            }
+            50% {
+                background-color: rgba(220, 38, 38, 0.45) !important;
+                border-color: rgba(239, 68, 68, 0.8) !important;
+                box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            }
+        }
+        .animate-flash-red {
+            animation: flash-red 1.2s infinite ease-in-out !important;
+        }
+
         /* Griglia 2 colonne da 480px */
         @media (min-width: 480px) and (max-width: 639px) {
             #apps-container, #favs-grid, #active-widgets-grid {
@@ -859,8 +875,11 @@
             
             // Pomodoro State
             const statePomodoro = JSON.parse(localStorage.getItem('pomodoro_timer_state'));
+            const pomodoroExpired = localStorage.getItem('pomodoro_timer_expired') === 'true';
             let pomodoroStatus = null;
-            if (statePomodoro && !statePomodoro.isPaused) {
+            if (pomodoroExpired) {
+                pomodoroStatus = { tempo: "00:00", label: "SCADUTO", icona: "🍅", classe: "bg-red-500/20 text-red-400 border-red-500/30", expired: true };
+            } else if (statePomodoro && !statePomodoro.isPaused) {
                 let secMancanti = Math.ceil((statePomodoro.scadenzaTimestamp - Date.now()) / 1000);
                 if (secMancanti > 0) {
                     const min = Math.floor(secMancanti / 60);
@@ -868,14 +887,17 @@
                     const tempoFormattato = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
                     const labelStato = statePomodoro.modalitaCorrente === 'focus' ? 'FOCUS' : 'PAUSA';
                     const coloreClasse = statePomodoro.modalitaCorrente === 'focus' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-                    pomodoroStatus = { tempo: tempoFormattato, label: labelStato, icona: '⏱️', classe: coloreClasse };
+                    pomodoroStatus = { tempo: tempoFormattato, label: labelStato, icona: '⏱️', classe: coloreClasse, expired: false };
                 }
             }
 
             // Gym Timer State
             const stateGym = JSON.parse(localStorage.getItem('gym_timer_state'));
+            const gymExpired = localStorage.getItem('gym_timer_expired') === 'true';
             let gymStatus = null;
-            if (stateGym) {
+            if (gymExpired) {
+                gymStatus = { tempo: "00:00", label: "SCADUTO", icona: "🏋️‍♂️", classe: "bg-red-500/20 text-red-400 border-red-500/30", expired: true };
+            } else if (stateGym) {
                 const isPaused = stateGym.isPaused;
                 let secMancanti = stateGym.tempoTotale;
                 if (!isPaused) {
@@ -887,14 +909,19 @@
                     const tempoFormattato = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
                     const labelStato = isPaused ? 'PAUSA' : 'RECUPERO';
                     const coloreClasse = isPaused ? 'bg-slate-500/20 text-slate-400 border-slate-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-                    gymStatus = { tempo: tempoFormattato, label: labelStato, icona: '🏋️‍♂️', classe: coloreClasse };
+                    gymStatus = { tempo: tempoFormattato, label: labelStato, icona: '🏋️‍♂️', classe: coloreClasse, expired: false };
+                } else if (secMancanti <= 0 && !isPaused) {
+                    gymStatus = { tempo: "00:00", label: "SCADUTO", icona: "🏋️‍♂️", classe: "bg-red-500/20 text-red-400 border-red-500/30", expired: true };
                 }
             }
 
             // Matrix del Tempo State
             const stateMatrix = JSON.parse(localStorage.getItem('matrix_timer_state'));
+            const matrixExpired = localStorage.getItem('matrix_timer_expired') === 'true';
             let matrixStatus = null;
-            if (stateMatrix) {
+            if (matrixExpired) {
+                matrixStatus = { tempo: "00:00", label: "SCADUTO", icona: "⚡", classe: "bg-red-500/20 text-red-400 border-red-500/30", expired: true };
+            } else if (stateMatrix) {
                 const isPaused = stateMatrix.isPaused;
                 let secMancanti = stateMatrix.secondiRimanentiSePausa;
                 if (!isPaused) {
@@ -906,7 +933,9 @@
                     const tempoFormattato = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
                     const labelStato = stateMatrix.modalita === 'focus' ? 'DEEP WORK' : 'PAUSA';
                     const coloreClasse = stateMatrix.modalita === 'focus' ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-                    matrixStatus = { tempo: tempoFormattato, label: labelStato, icona: '⚡', classe: coloreClasse };
+                    matrixStatus = { tempo: tempoFormattato, label: labelStato, icona: '⚡', classe: coloreClasse, expired: false };
+                } else if (secMancanti <= 0 && !isPaused) {
+                    matrixStatus = { tempo: "00:00", label: "SCADUTO", icona: "⚡", classe: "bg-red-500/20 text-red-400 border-red-500/30", expired: true };
                 }
             }
 
@@ -1338,10 +1367,11 @@
                     titolo: "Timer Pomodoro",
                     icona: "⏱️",
                     url: "./06-pomodoro/index.html",
+                    expired: pomodoroStatus.expired,
                     html: `
                         <div class="flex items-center justify-between">
-                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${pomodoroStatus.classe} shadow-sm animate-pulse">
-                                <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
+                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${pomodoroStatus.classe} shadow-sm ${pomodoroStatus.expired ? '' : 'animate-pulse'}">
+                                ${pomodoroStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
                                 <span>${pomodoroStatus.icona}</span>
                                 <span>${pomodoroStatus.label}</span>
                             </span>
@@ -1357,10 +1387,11 @@
                     titolo: "Bento Gym Timer",
                     icona: "🏋️‍♂️",
                     url: "./08-gym-timer/index.html",
+                    expired: gymStatus.expired,
                     html: `
                         <div class="flex items-center justify-between">
-                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${gymStatus.classe} shadow-sm animate-pulse">
-                                <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
+                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${gymStatus.classe} shadow-sm ${gymStatus.expired ? '' : 'animate-pulse'}">
+                                ${gymStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
                                 <span>${gymStatus.icona}</span>
                                 <span>${gymStatus.label}</span>
                             </span>
@@ -1376,10 +1407,11 @@
                     titolo: "Matrix del Tempo",
                     icona: "⚡",
                     url: "./18-matrix-tempo/index.html",
+                    expired: matrixStatus.expired,
                     html: `
                         <div class="flex items-center justify-between">
-                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${matrixStatus.classe} shadow-sm animate-pulse">
-                                <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
+                            <span class="inline-flex items-center gap-1.5 text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-lg border ${matrixStatus.classe} shadow-sm ${matrixStatus.expired ? '' : 'animate-pulse'}">
+                                ${matrixStatus.expired ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>'}
                                 <span>${matrixStatus.icona}</span>
                                 <span>${matrixStatus.label}</span>
                             </span>
@@ -1394,30 +1426,33 @@
             const activeWidgetsSection = document.getElementById('active-widgets-section');
             if (activeWidgetsGrid && activeWidgetsSection) {
                 if (activeWidgetsData.length > 0) {
-                    activeWidgetsGrid.innerHTML = activeWidgetsData.map(w => `
-                        <div onclick="navigaVerso(event, '${w.url}')" class="group relative overflow-hidden rounded-3xl border border-slate-800/80 bg-gradient-to-br from-slate-900/60 to-slate-950/80 p-5 hover:border-slate-700/60 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl">
-                            <!-- Overlay Glow Effect -->
-                            <div class="absolute -inset-px bg-gradient-to-r from-blue-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+                    activeWidgetsGrid.innerHTML = activeWidgetsData.map(w => {
+                        const expiredClass = w.expired ? 'animate-flash-red border-red-500/50' : 'border-slate-800/80 bg-gradient-to-br from-slate-900/60 to-slate-950/80 hover:border-slate-700/60';
+                        return `
+                            <div onclick="navigaVerso(event, '${w.url}')" class="group relative overflow-hidden rounded-3xl border p-5 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl ${expiredClass}">
+                                <!-- Overlay Glow Effect -->
+                                ${w.expired ? '' : '<div class="absolute -inset-px bg-gradient-to-r from-blue-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>'}
 
-                            <div class="relative z-10 flex flex-col justify-between h-full space-y-4">
-                                <!-- Header -->
-                                <div class="flex justify-between items-start">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="text-xl">${w.icona}</span>
-                                        <div>
-                                            <h4 class="text-xs font-black text-white tracking-wide uppercase font-mono-custom">${w.titolo}</h4>
+                                <div class="relative z-10 flex flex-col justify-between h-full space-y-4">
+                                    <!-- Header -->
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="text-xl">${w.icona}</span>
+                                            <div>
+                                                <h4 class="text-xs font-black text-white tracking-wide uppercase font-mono-custom">${w.titolo}</h4>
+                                            </div>
                                         </div>
+                                        <span onclick="navigaVerso(event, '${w.url}')" class="text-[9px] font-extrabold px-2 py-0.5 rounded-lg border border-blue-500/30 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-all cursor-pointer">Apri ↗</span>
                                     </div>
-                                    <span onclick="navigaVerso(event, '${w.url}')" class="text-[9px] font-extrabold px-2 py-0.5 rounded-lg border border-blue-500/30 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-all cursor-pointer">Apri ↗</span>
-                                </div>
 
-                                <!-- Interactive Widget Area -->
-                                <div onclick="event.stopPropagation()" class="widget-interactive-container bg-slate-950/40 border border-slate-800/40 p-3 rounded-2xl">
-                                    ${w.html}
+                                    <!-- Interactive Widget Area -->
+                                    <div onclick="event.stopPropagation()" class="widget-interactive-container bg-slate-950/40 border border-slate-800/40 p-3 rounded-2xl">
+                                        ${w.html}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `).join('');
+                        `;
+                    }).join('');
                     activeWidgetsSection.classList.remove('hidden');
                 } else {
                     activeWidgetsSection.classList.add('hidden');
