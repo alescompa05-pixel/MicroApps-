@@ -232,6 +232,11 @@
                         <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Preferiti</span>
                     </div>
                     <div class="w-px bg-slate-800 h-8"></div>
+                    <button id="btn-install-pwa"
+                        class="text-emerald-400 hover:text-white text-lg p-1.5 hover:bg-slate-800/60 rounded-xl transition-all cursor-pointer shadow-sm select-none hidden"
+                        title="Installa Suite sul dispositivo">
+                        <i class="fa-solid fa-download animate-bounce"></i>
+                    </button>
                     <button onclick="mostraSettingsModal()"
                         class="text-slate-400 hover:text-white text-lg p-1.5 hover:bg-slate-800/60 rounded-xl transition-all cursor-pointer shadow-sm select-none"
                         title="Impostazioni Hub">
@@ -716,17 +721,23 @@
         window.switchSettingsTab = function (tabId) {
             document.getElementById('tab-widgets').classList.add('hidden');
             document.getElementById('tab-shortcuts').classList.add('hidden');
+            document.getElementById('tab-backup').classList.add('hidden');
             document.getElementById(tabId).classList.remove('hidden');
 
             const btnWidgets = document.getElementById('btn-tab-widgets');
             const btnShortcuts = document.getElementById('btn-tab-shortcuts');
+            const btnBackup = document.getElementById('btn-tab-backup');
+
+            btnWidgets.className = "px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all";
+            btnShortcuts.className = "px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all";
+            btnBackup.className = "px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all";
 
             if (tabId === 'tab-widgets') {
                 btnWidgets.className = "px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all";
-                btnShortcuts.className = "px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all";
-            } else {
-                btnWidgets.className = "px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all";
+            } else if (tabId === 'tab-shortcuts') {
                 btnShortcuts.className = "px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all";
+            } else if (tabId === 'tab-backup') {
+                btnBackup.className = "px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all";
             }
         };
 
@@ -2700,6 +2711,98 @@
                     .catch(err => console.error('Errore registrazione Service Worker (Hub):', err));
             });
         }
+
+        // ─── GESTIONE BACKUP JSON ──────────────────────────────────
+        window.esportaDatiJSON = function() {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                data[key] = localStorage.getItem(key);
+            }
+            const jsonString = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `microapps_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        window.importaDatiJSON = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm("Sei sicuro di voler importare questo backup? Tutti i dati correnti verranno sovrascritti.")) {
+                        localStorage.clear();
+                        for (const key in data) {
+                            localStorage.setItem(key, data[key]);
+                        }
+                        alert("Dati importati con successo! La pagina verrà ricaricata.");
+                        window.location.reload();
+                    }
+                } catch (err) {
+                    alert("Errore nel caricamento del file JSON. Assicurati che sia un file di backup valido.");
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        // ─── SINCRONIZZAZIONE STORAGE EVENT LISTENER ───────────────
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'microapps_preferiti') {
+                preferiti = JSON.parse(localStorage.getItem('microapps_preferiti')) || [];
+                renderizzaTutto();
+            } else if (e.key === 'hub_settings') {
+                hubSettings = JSON.parse(localStorage.getItem('hub_settings')) || {};
+                renderizzaScorciatoie();
+                aggiornaWidgetInterattivi();
+            }
+            if (e.key && (
+                e.key.startsWith('task-') || 
+                e.key.startsWith('idratazione_custom') || 
+                e.key === 'smartshopping_lista' || 
+                e.key.includes('timer_state') || 
+                e.key === 'microapps_radar' || 
+                e.key === 'microapps_equisplit_data' || 
+                e.key === 'autocompiler_snippets' || 
+                e.key.startsWith('wifi_') || 
+                e.key.startsWith('generatore_qrcode_default_')
+            )) {
+                aggiornaWidgetInterattivi();
+            }
+        });
+
+        // ─── LOGICA INSTALLAZIONE PWA (PROMPT) ──────────────────────
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btnInstall = document.getElementById('btn-install-pwa');
+            if (btnInstall) {
+                btnInstall.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('btn-install-pwa')?.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Risposta installazione: ${outcome}`);
+            deferredPrompt = null;
+            document.getElementById('btn-install-pwa')?.classList.add('hidden');
+        });
+
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('MicroApps Suite installata con successo!');
+            document.getElementById('btn-install-pwa')?.classList.add('hidden');
+        });
+
     </script>
 
     <!-- Modal overlay per WiFi QR Code -->
@@ -2821,11 +2924,11 @@
             <!-- Tabs Nav -->
             <div class="flex border-b border-slate-850 text-xs font-bold gap-2">
                 <button onclick="switchSettingsTab('tab-widgets')" id="btn-tab-widgets"
-                    class="px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all">Widget &
-                    Notifiche</button>
+                    class="px-4 py-2 border-b-2 border-blue-500 text-white cursor-pointer transition-all">Widget & Notifiche</button>
                 <button onclick="switchSettingsTab('tab-shortcuts')" id="btn-tab-shortcuts"
-                    class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all">Scorciatoie
-                    App</button>
+                    class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all">Scorciatoie App</button>
+                <button onclick="switchSettingsTab('tab-backup')" id="btn-tab-backup"
+                    class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-white cursor-pointer transition-all">Backup & Sistema</button>
             </div>
 
             <!-- Tab Content: Widgets & Notifications -->
@@ -2863,6 +2966,32 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[42vh] overflow-y-auto pr-1 border border-slate-800/80 p-3 rounded-2xl bg-slate-950/20"
                     id="settings-shortcuts-list">
                     <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- Tab Content: Backup & Sistema -->
+            <div id="tab-backup" class="space-y-4 pt-2 hidden">
+                <div class="text-xs font-bold text-slate-300">Gestione dei Dati Locali (Suite):</div>
+                
+                <div class="p-3.5 bg-slate-950/40 border border-slate-850 rounded-2xl space-y-3">
+                    <div>
+                        <div class="text-xs font-bold text-white">Esporta Backup Dati</div>
+                        <div class="text-[10px] text-slate-500">Salva tutte le tue liste, scadenze, note e preferiti in un file JSON locale per conservarli o trasferirli.</div>
+                    </div>
+                    <button onclick="esportaDatiJSON()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-export"></i> Esporta JSON
+                    </button>
+                </div>
+                
+                <div class="p-3.5 bg-slate-950/40 border border-slate-850 rounded-2xl space-y-3">
+                    <div>
+                        <div class="text-xs font-bold text-white">Ripristina Backup Dati</div>
+                        <div class="text-[10px] text-slate-500">Ripristina tutti i dati della suite da un file JSON precedentemente esportato. <span class="text-rose-400 font-semibold">Attenzione: l'importazione sovrascriverà tutti i dati correnti!</span></div>
+                    </div>
+                    <label class="w-full bg-slate-800 hover:bg-slate-750 text-slate-200 font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-slate-700/50">
+                        <i class="fa-solid fa-file-import"></i> Carica file JSON
+                        <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importaDatiJSON(event)">
+                    </label>
                 </div>
             </div>
 

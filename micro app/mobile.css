@@ -142,11 +142,6 @@ a:active {
 
 /* ─── MICRO APP — ELEMENTI COMUNI ───────────────────────────────────────── */
 @media (max-width: 768px) {
-    /* Margine top per il pulsante "torna all'hub" fisso */
-    body > .max-w-6xl,
-    body > div.max-w-6xl {
-        padding-top: 60px !important;
-    }
 
     /* Form fields più alti su mobile */
     select, input[type="text"], input[type="number"],
@@ -185,6 +180,27 @@ a[href="./index.html"].fixed {
     border-radius: 12px;
     font-size: 12px;
     gap: 6px;
+    transition: all 0.2s ease;
+}
+
+@media (max-width: 1024px) {
+    a[href="../index.html"].fixed,
+    a[href="./index.html"].fixed {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        margin: 12px 0 20px 0 !important;
+        align-self: flex-start !important;
+        display: inline-flex !important;
+        z-index: 50;
+        box-shadow: none !important;
+    }
+    
+    /* Allinea il corpo verso l'alto su schermi piccoli per accogliere il pulsante in cima */
+    body {
+        justify-content: flex-start !important;
+        padding-top: 12px !important;
+    }
 }
 
 /* ─── SEZIONE WIDGET HUB — LAYOUT MOBILE ───────────────────────────────── */
