@@ -233,7 +233,7 @@
                     </div>
                     <div class="w-px bg-slate-800 h-8"></div>
                     <button id="btn-install-pwa"
-                        class="text-emerald-400 hover:text-white text-lg p-1.5 hover:bg-slate-800/60 rounded-xl transition-all cursor-pointer shadow-sm select-none hidden"
+                        class="text-emerald-400 hover:text-white text-lg p-1.5 hover:bg-slate-800/60 rounded-xl transition-all cursor-pointer shadow-sm select-none"
                         title="Installa Suite sul dispositivo">
                         <i class="fa-solid fa-download animate-bounce"></i>
                     </button>
@@ -2780,9 +2780,25 @@
 
         // ─── LOGICA INSTALLAZIONE PWA (PROMPT) ──────────────────────
         let deferredPrompt = null;
+        let isInstallPromptSupported = false;
+
+        // Nasconde il tasto dopo 2.5 secondi se siamo su web (http/https) e non viene intercettato il prima possibile beforeinstallprompt
+        let checkInstallabilityTimeout = null;
+
+        if (window.location.protocol !== 'file:') {
+            checkInstallabilityTimeout = setTimeout(() => {
+                if (!deferredPrompt) {
+                    document.getElementById('btn-install-pwa')?.classList.add('hidden');
+                }
+            }, 2500);
+        }
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+            isInstallPromptSupported = true;
+            if (checkInstallabilityTimeout) clearTimeout(checkInstallabilityTimeout);
+            
             const btnInstall = document.getElementById('btn-install-pwa');
             if (btnInstall) {
                 btnInstall.classList.remove('hidden');
@@ -2793,6 +2809,8 @@
             if (!deferredPrompt) {
                 if (window.location.protocol === 'file:') {
                     alert("⚠️ MODALITÀ PREVIEW (FILE LOCALE):\n\nHai cliccato sul pulsante di installazione!\n\nAttualmente stai visualizzando la suite tramite protocollo 'file://' (doppio clic sul file HTML). In questa modalità i browser moderni bloccano l'installazione delle PWA.\n\nQuando caricherai l'Hub online (HTTPS) o lo avvierai da un server locale (http://localhost), questo pulsante avvierà la vera installazione e scomparirà automaticamente una volta completata.");
+                } else {
+                    alert("ℹ️ L'applicazione potrebbe essere già installata o il tuo browser non supporta l'installazione diretta da questo pulsante. Controlla i menu o la barra degli indirizzi del browser.");
                 }
                 return;
             }
@@ -2808,20 +2826,28 @@
             document.getElementById('btn-install-pwa')?.classList.add('hidden');
         });
 
-        // Controlla il protocollo locale e aggiorna le informazioni PWA
-        window.addEventListener('load', () => {
-            const statusText = document.getElementById('pwa-status-text');
-            if (window.location.protocol === 'file:') {
+        // Controlla il protocollo locale e lo stato di visualizzazione standalone (già installata ed eseguita come app)
+        const initPwaStatus = () => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+            const btnInstall = document.getElementById('btn-install-pwa');
+            
+            if (isStandalone) {
+                if (btnInstall) btnInstall.classList.add('hidden');
+            } else if (window.location.protocol === 'file:') {
+                if (btnInstall) btnInstall.classList.remove('hidden');
+                
+                const statusText = document.getElementById('pwa-status-text');
                 if (statusText) {
                     statusText.innerHTML = `⚠️ Stai eseguendo la suite localmente tramite protocollo <code>file://</code> (doppio clic sul file HTML). I browser moderni disabilitano le funzioni PWA (installazione e offline) in questa modalità per motivi di sicurezza.<br><br>Per abilitarla, avvia un server locale nella cartella del progetto (es. con il comando terminale <code>npx serve</code>, Live Server in VS Code, o analogo) e apri l'indirizzo generato (es. <code>http://localhost:3000</code>).`;
                 }
-                // Mostra il pulsante di installazione in modalità preview per farlo vedere all'utente
-                const btnInstall = document.getElementById('btn-install-pwa');
-                if (btnInstall) {
-                    btnInstall.classList.remove('hidden');
-                }
             }
-        });
+        };
+
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', initPwaStatus);
+        } else {
+            initPwaStatus();
+        }
 
     </script>
 
