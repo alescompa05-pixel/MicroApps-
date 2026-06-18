@@ -2803,6 +2803,14 @@
             document.getElementById('btn-install-pwa')?.classList.add('hidden');
         });
 
+        // Controlla il protocollo locale e aggiorna le informazioni PWA
+        window.addEventListener('load', () => {
+            const statusText = document.getElementById('pwa-status-text');
+            if (window.location.protocol === 'file:' && statusText) {
+                statusText.innerHTML = `⚠️ Stai eseguendo la suite localmente tramite protocollo <code>file://</code> (doppio clic sul file HTML). I browser moderni disabilitano le funzioni PWA (installazione e offline) in questa modalità per motivi di sicurezza.<br><br>Per abilitarla, avvia un server locale nella cartella del progetto (es. con il comando terminale <code>npx serve</code>, Live Server in VS Code, o analogo) e apri l'indirizzo generato (es. <code>http://localhost:3000</code>).`;
+            }
+        });
+
     </script>
 
     <!-- Modal overlay per WiFi QR Code -->
@@ -2992,6 +3000,14 @@
                         <i class="fa-solid fa-file-import"></i> Carica file JSON
                         <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importaDatiJSON(event)">
                     </label>
+                </div>
+
+                <!-- Nota PWA / Protocollo Locale -->
+                <div class="p-3.5 bg-slate-950/20 border border-slate-800/80 rounded-2xl text-[10px] text-slate-400 space-y-1.5 leading-relaxed">
+                    <div class="font-bold text-slate-350 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-info text-blue-400"></i> Info Installazione PWA
+                    </div>
+                    <p id="pwa-status-text">L'applicazione è installabile sul tuo dispositivo (Desktop/Mobile) come app nativa se servita tramite server locale (es. localhost) o HTTPS.</p>
                 </div>
             </div>
 
