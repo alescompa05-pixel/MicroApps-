@@ -58,7 +58,7 @@
     </div>
 
     <!-- Container -->
-    <div class="max-w-6xl w-full bg-slate-900/80 border border-slate-800/80 rounded-3xl shadow-2xl p-6 md:p-8 space-y-6 backdrop-blur-md relative">
+    <div class="max-w-6xl w-full bg-slate-900/80 border border-slate-800/80 rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 space-y-6 backdrop-blur-md relative">
 
         <!-- Header -->
         <div class="border-b border-slate-800 pb-4">
@@ -72,46 +72,59 @@
 
         <!-- ─── GESTIONE GRUPPI ─────────────────────────────────── -->
         <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4">
-            <div class="flex flex-wrap items-center gap-3">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0">📁 Gruppo Attivo:</label>
-
-                <!-- Select gruppo -->
-                <select id="group-select"
-                    class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-emerald-500 cursor-pointer">
-                </select>
-
-                <!-- Nuovo gruppo -->
-                <button id="btn-new-group"
-                    class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-black px-3 py-2 rounded-xl cursor-pointer transition-colors flex items-center gap-1 shrink-0">
-                    <i class="fa-solid fa-plus"></i> Nuovo Gruppo
-                </button>
-
-                <!-- Elimina gruppo -->
-                <button id="btn-delete-group"
-                    class="bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-500/20 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer transition-colors flex items-center gap-1 shrink-0">
-                    <i class="fa-solid fa-trash"></i> Elimina
-                </button>
-
-                <!-- Condividi gruppo -->
-                <button id="btn-share-group" onclick="condividiGruppo()"
-                    class="bg-blue-955/40 hover:bg-blue-900/60 text-blue-400 border border-blue-500/20 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer transition-colors flex items-center gap-1 shrink-0"
-                    title="Condividi questo gruppo tramite link">
-                    <i class="fa-solid fa-share-nodes"></i> Condividi
-                </button>
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0">📁 Gruppo:</label>
+                    <!-- Select gruppo -->
+                    <select id="group-select"
+                        class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-emerald-500 cursor-pointer">
+                    </select>
+                </div>
+ 
+                <!-- Azioni Gruppo -->
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full lg:w-auto">
+                    <!-- Nuovo gruppo -->
+                    <button id="btn-new-group"
+                        class="bg-emerald-700 hover:bg-emerald-600 text-white text-[10px] sm:text-xs font-black px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-plus text-[9px] sm:text-[10px]"></i> Nuovo Gruppo
+                    </button>
+ 
+                    <!-- Elimina gruppo -->
+                    <button id="btn-delete-group"
+                        class="bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-500/20 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-trash text-[9px] sm:text-[10px]"></i> Elimina
+                    </button>
+ 
+                    <!-- Condividi gruppo -->
+                    <button id="btn-share-group" onclick="condividiGruppo()"
+                        class="bg-blue-955/40 hover:bg-blue-900/60 text-blue-400 border border-blue-500/20 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1"
+                        title="Condividi questo gruppo tramite link">
+                        <i class="fa-solid fa-share-nodes text-[9px] sm:text-[10px]"></i> Condividi
+                    </button>
+ 
+                    <!-- Importa da link -->
+                    <button id="btn-import-paste" onclick="mostraPasteLinkModal()"
+                        class="bg-teal-955/40 hover:bg-teal-900/60 text-teal-450 border border-teal-500/20 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1"
+                        title="Importa un gruppo incollando il link">
+                        <i class="fa-solid fa-file-import text-[9px] sm:text-[10px]"></i> Importa Link
+                    </button>
+                </div>
             </div>
 
             <!-- Inline form nuovo gruppo -->
-            <div id="new-group-form" class="hidden mt-3 flex gap-2">
-                <input type="text" id="new-group-name" placeholder="Nome gruppo (es. Vacanza Giugno, Cena Roma...)"
-                    class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                <button id="btn-confirm-new-group"
-                    class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 rounded-xl cursor-pointer transition-colors shrink-0">
-                    Crea
-                </button>
-                <button id="btn-cancel-new-group"
-                    class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 rounded-xl cursor-pointer transition-colors shrink-0">
-                    Annulla
-                </button>
+            <div id="new-group-form" class="hidden mt-3 flex flex-col sm:flex-row gap-2">
+                <input type="text" id="new-group-name" placeholder="Nome gruppo (es. Vacanza)..."
+                    class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button id="btn-confirm-new-group"
+                        class="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-colors flex items-center justify-center">
+                        Crea
+                    </button>
+                    <button id="btn-cancel-new-group"
+                        class="flex-1 sm:flex-initial bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-2.5 rounded-xl cursor-pointer transition-colors flex items-center justify-center">
+                        Annulla
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -122,24 +135,24 @@
             <div class="lg:col-span-5 space-y-6">
 
                 <!-- SEZIONE MEMBRI -->
-                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-4">
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 sm:p-5 space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                         <i class="fa-solid fa-users text-emerald-400"></i>
                         1. Gestione Partecipanti
                     </h3>
-                    <form onsubmit="aggiungiMembro(event)" class="flex gap-2">
+                    <form onsubmit="aggiungiMembro(event)" class="flex flex-col sm:flex-row gap-2">
                         <input type="text" id="new-member-name" placeholder="Nome (es. Marco)" required
-                            class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                            class="w-full sm:flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors">
                         <button type="submit"
-                            class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 rounded-xl cursor-pointer transition-colors flex items-center gap-1 shrink-0">
+                            class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1 shrink-0">
                             Aggiungi
                         </button>
                     </form>
                     <div id="members-list" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto pr-1"></div>
                 </div>
-
+ 
                 <!-- SEZIONE AGGIUNGI SPESA -->
-                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-4">
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 sm:p-5 space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                         <i class="fa-solid fa-file-invoice-dollar text-emerald-400"></i>
                         2. Registra Nuova Spesa
@@ -150,7 +163,7 @@
                             <input type="text" id="expense-desc" placeholder="es. Spesa supermercato, Benzina..." required
                                 class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors">
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="space-y-1">
                                 <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Importo (€)</label>
                                 <input type="number" id="expense-amount" placeholder="0.00" min="0.01" step="0.01" required
@@ -172,7 +185,7 @@
                                     <button type="button" onclick="selezionaTuttiPartecipanti(false)" class="text-[9px] text-slate-500 hover:underline cursor-pointer">Nessuno</button>
                                 </div>
                             </div>
-                            <div id="expense-participants" class="grid grid-cols-2 gap-2 bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 max-h-32 overflow-y-auto"></div>
+                            <div id="expense-participants" class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 max-h-32 overflow-y-auto"></div>
                         </div>
                         <button type="submit"
                             class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider py-3.5 rounded-xl shadow-lg transition-all transform active:scale-[0.98] cursor-pointer">
@@ -186,7 +199,7 @@
             <div class="lg:col-span-7 flex flex-col gap-6">
 
                 <!-- LISTA SPESE -->
-                <div class="bg-slate-950/40 border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between min-h-[200px]">
+                <div class="bg-slate-950/40 border border-slate-800/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[200px]">
                     <div class="space-y-3">
                         <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
@@ -207,14 +220,14 @@
 
                 <!-- BILANCI & PAREGGI -->
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 flex-1">
-                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 md:col-span-5 flex flex-col">
+                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 sm:p-5 md:col-span-5 flex flex-col">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
                             <i class="fa-solid fa-scale-balanced text-emerald-400"></i>
                             Stato Saldi
                         </h3>
                         <div id="balances-container" class="space-y-2.5 overflow-y-auto flex-1 max-h-[220px] pr-1"></div>
                     </div>
-                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 md:col-span-7 flex flex-col justify-between">
+                    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 sm:p-5 md:col-span-7 flex flex-col justify-between">
                         <div>
                             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
                                 <i class="fa-solid fa-right-left text-emerald-400"></i>
@@ -224,9 +237,9 @@
                         </div>
                         <div class="pt-4">
                             <button id="btn-copy-summary" onclick="copiaResoconto()"
-                                class="w-full bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 hidden">
+                                class="w-full bg-slate-900 hover:bg-slate-855 text-slate-300 border border-slate-800 font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 hidden">
                                 <i class="fa-regular fa-clipboard"></i>
-                                Copia Riepilogo per WhatsApp/Telegram
+                                <span>Copia Riepilogo</span><span class="hidden sm:inline"> per WhatsApp/Telegram</span>
                             </button>
                         </div>
                     </div>
@@ -494,7 +507,7 @@
                     </div>
                     <div class="flex items-center gap-3 shrink-0">
                         <span class="text-xs font-black text-emerald-400 font-mono-custom">${exp.amount.toFixed(2)} €</span>
-                        <button onclick="rimuoviSpesa('${exp.id}')" class="text-rose-400/50 hover:text-rose-400 font-bold px-1 text-xs cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                        <button onclick="rimuoviSpesa('${exp.id}')" class="text-rose-400/60 hover:text-rose-450 font-bold px-1 text-xs cursor-pointer opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">×</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -674,7 +687,7 @@
     </div>
 
     <!-- Modal Privacy & Note Legali -->
-    <div id="privacy-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closePrivacyModal()">
+    <div id="privacy-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" onclick="closePrivacyModal()">
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-lg w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh] text-left" onclick="event.stopPropagation()">
             <button onclick="closePrivacyModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
             <div class="flex items-center gap-2 text-violet-400">
@@ -712,8 +725,35 @@
         </div>
     </div>
 
+    <!-- Modal Incolla Link per Importazione -->
+    <div id="paste-link-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" onclick="chiudiPasteLinkModal()">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-md w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh] text-left" onclick="event.stopPropagation()">
+            <button onclick="chiudiPasteLinkModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
+            <div class="flex items-center gap-2 text-teal-400">
+                <span class="text-xl">🔗</span>
+                <span class="text-xs font-black uppercase tracking-widest font-mono-custom">Importa da Link</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Importa con Link di Condivisione</h3>
+            
+            <div class="space-y-3">
+                <p class="text-xs text-slate-300">Incolla qui sotto il link di condivisione del gruppo che hai ricevuto:</p>
+                <textarea id="paste-link-input" placeholder="Incolla il link qui... (es. http://.../index.html?import=...)"
+                    class="w-full h-24 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-teal-500 transition-colors font-mono-custom resize-none"></textarea>
+            </div>
+            
+            <div class="flex gap-3 pt-2">
+                <button onclick="chiudiPasteLinkModal()" class="flex-1 bg-slate-800 hover:bg-slate-750 text-slate-350 font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer">
+                    Annulla
+                </button>
+                <button onclick="analizzaEImportaLink()" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-teal-500/10">
+                    Importa
+                </button>
+            </div>
+        </div>
+    </div>
+ 
     <!-- Modal Importa Gruppo Condiviso -->
-    <div id="import-group-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="chiudiImportModal()">
+    <div id="import-group-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" onclick="chiudiImportModal()">
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-md w-full relative space-y-4 shadow-2xl overflow-y-auto max-h-[85vh] text-left" onclick="event.stopPropagation()">
             <button onclick="chiudiImportModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-lg font-bold cursor-pointer">×</button>
             <div class="flex items-center gap-2 text-emerald-400">
@@ -748,6 +788,61 @@
         };
         window.closePrivacyModal = function() {
             document.getElementById('privacy-modal').classList.add('hidden');
+        };
+
+        // Gestione Modal Incolla Link
+        window.mostraPasteLinkModal = function() {
+            document.getElementById('paste-link-input').value = '';
+            document.getElementById('paste-link-modal').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('paste-link-input').focus();
+            }, 100);
+        };
+
+        window.chiudiPasteLinkModal = function() {
+            document.getElementById('paste-link-modal').classList.add('hidden');
+        };
+
+        window.analizzaEImportaLink = function() {
+            const val = document.getElementById('paste-link-input').value.trim();
+            if (!val) {
+                alert("Per favore, inserisci un link valido.");
+                return;
+            }
+
+            let base64 = "";
+            try {
+                if (val.includes("?import=")) {
+                    // È un link completo
+                    const url = new URL(val);
+                    base64 = url.searchParams.get("import") || "";
+                } else if (val.includes("import=")) {
+                    const parts = val.split("import=");
+                    base64 = parts[1].split("&")[0];
+                } else {
+                    // Assumi che sia solo il payload Base64
+                    base64 = val;
+                }
+
+                if (!base64) {
+                    throw new Error("Parametro 'import' non trovato nel link.");
+                }
+
+                const decodedStr = decodeURIComponent(escape(atob(base64)));
+                const importedGroup = JSON.parse(decodedStr);
+
+                if (importedGroup.nome && Array.isArray(importedGroup.members) && Array.isArray(importedGroup.expenses)) {
+                    chiudiPasteLinkModal();
+                    setTimeout(() => {
+                        window.mostraImportModal(importedGroup);
+                    }, 200);
+                } else {
+                    throw new Error("La struttura del gruppo non è valida.");
+                }
+            } catch (e) {
+                console.error("Errore durante l'analisi del link:", e);
+                alert("Il link inserito non è valido o è corrotto. Riprova con un altro link.");
+            }
         };
 
         // Gestione Modal Importazione Gruppo

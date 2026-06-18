@@ -143,9 +143,9 @@ a:active {
 /* ─── MICRO APP — ELEMENTI COMUNI ───────────────────────────────────────── */
 @media (max-width: 768px) {
     /* Margine top per il pulsante "torna all'hub" fisso */
-    body > .max-w-6xl:first-of-type,
-    body > div.max-w-6xl:first-of-type {
-        padding-top: 60px;
+    body > .max-w-6xl,
+    body > div.max-w-6xl {
+        padding-top: 60px !important;
     }
 
     /* Form fields più alti su mobile */
@@ -156,7 +156,7 @@ a:active {
     }
 
     /* Pulsanti principali di azione più alti */
-    .btn-primary, button[type="submit"] {
+    .btn-primary, button[type="submit"]:not(.btn-inline) {
         min-height: 52px;
         font-size: 15px;
         border-radius: 14px;
