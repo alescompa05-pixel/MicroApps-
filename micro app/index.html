@@ -2790,7 +2790,12 @@
         });
 
         document.getElementById('btn-install-pwa')?.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
+            if (!deferredPrompt) {
+                if (window.location.protocol === 'file:') {
+                    alert("⚠️ MODALITÀ PREVIEW (FILE LOCALE):\n\nHai cliccato sul pulsante di installazione!\n\nAttualmente stai visualizzando la suite tramite protocollo 'file://' (doppio clic sul file HTML). In questa modalità i browser moderni bloccano l'installazione delle PWA.\n\nQuando caricherai l'Hub online (HTTPS) o lo avvierai da un server locale (http://localhost), questo pulsante avvierà la vera installazione e scomparirà automaticamente una volta completata.");
+                }
+                return;
+            }
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
             console.log(`Risposta installazione: ${outcome}`);
@@ -2806,8 +2811,15 @@
         // Controlla il protocollo locale e aggiorna le informazioni PWA
         window.addEventListener('load', () => {
             const statusText = document.getElementById('pwa-status-text');
-            if (window.location.protocol === 'file:' && statusText) {
-                statusText.innerHTML = `⚠️ Stai eseguendo la suite localmente tramite protocollo <code>file://</code> (doppio clic sul file HTML). I browser moderni disabilitano le funzioni PWA (installazione e offline) in questa modalità per motivi di sicurezza.<br><br>Per abilitarla, avvia un server locale nella cartella del progetto (es. con il comando terminale <code>npx serve</code>, Live Server in VS Code, o analogo) e apri l'indirizzo generato (es. <code>http://localhost:3000</code>).`;
+            if (window.location.protocol === 'file:') {
+                if (statusText) {
+                    statusText.innerHTML = `⚠️ Stai eseguendo la suite localmente tramite protocollo <code>file://</code> (doppio clic sul file HTML). I browser moderni disabilitano le funzioni PWA (installazione e offline) in questa modalità per motivi di sicurezza.<br><br>Per abilitarla, avvia un server locale nella cartella del progetto (es. con il comando terminale <code>npx serve</code>, Live Server in VS Code, o analogo) e apri l'indirizzo generato (es. <code>http://localhost:3000</code>).`;
+                }
+                // Mostra il pulsante di installazione in modalità preview per farlo vedere all'utente
+                const btnInstall = document.getElementById('btn-install-pwa');
+                if (btnInstall) {
+                    btnInstall.classList.remove('hidden');
+                }
             }
         });
 
